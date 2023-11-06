@@ -1,9 +1,7 @@
+#+title: Lean DELPH-IN
+#+author: Alexandre Rademaker
 
-AMR Parser
-
-http://mnlp-demo.sl.cloud9.ibm.com:60011/-app/index.html
-
-FOL Tools
-
-https://mamo.dev/first-order-logic-tool
+The Lean implementation of DELPH-IN
+(https://github.com/delph-in/docs/wiki) utilities. This aims to start
+a port to Lean of http://pydelphin.readthedocs.io.
 
