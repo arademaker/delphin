@@ -1,0 +1,9 @@
+
+AMR Parser
+
+http://mnlp-demo.sl.cloud9.ibm.com:60011/-app/index.html
+
+FOL Tools
+
+https://mamo.dev/first-order-logic-tool
+
