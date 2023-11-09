@@ -4,8 +4,6 @@ import Std
 open Std
 open IO.Process
 
-#eval IO.Process.run {cmd := "ls", args := #["-l", "Fracas.lean"], cwd := "."}
-
 /-- Pipe input into stdin of the spawned process, then return output upon completion. -/
 def cmd_with_stdin (args : SpawnArgs) (input : String) : IO Output := do
   let child <- spawn { args with stdin := .piped, stdout := .piped, stderr := .piped }
@@ -23,3 +21,13 @@ def run_ace (sentence : String) : IO Unit := do
   IO.println res.stdout
 
 #eval run_ace "no cat is happy."
+
+
+def test := do
+ let txt ← (IO.FS.readFile "/Users/ar/work/cpdoc/dhbb-nlp/udp/996.conllu")
+ let f := List.filter (fun (l : String) => ¬ l.startsWith "#")
+ let g := fun (s : String) => s.splitOn "\n"
+ let h := List.map (fun s : String => s.splitOn "\t")
+ return (List.map (h ∘ f) (List.map g $ txt.splitOn "\n\n"))
+
+#eval test
