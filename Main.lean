@@ -17,7 +17,7 @@ def cmd_with_stdin (args : SpawnArgs) (input : String) : IO Output := do
   return { exitCode, stdout, stderr }
 
 def run_ace (sentence : String) : IO Unit := do
-  let res <- cmd_with_stdin {cmd := "ace", args := #["-g","/Users/ar/hpsg/mrs-logic/erg.dat","-Tf","-n 1"], cwd := "."} sentence
+  let res <- cmd_with_stdin {cmd := "ace", args := #["-g","/Users/ar/hpsg/mrs-logic/erg.dat","-Tf","-n 5"], cwd := "."} sentence
   IO.println res.stdout
 
 #eval run_ace "no cat is happy."
