@@ -12,10 +12,6 @@ structure Var where
  props : Array (String × String)
 deriving Repr
 
-structure Handle where
- name : String
-deriving Repr
-
 structure Constraint where
   lhs : Var
   rhs : Var
@@ -23,14 +19,14 @@ deriving Repr
 
 structure EP where
   predicate : String
-  label : Handle
+  label : Var
   link  : Option (Int × Int)
   rargs : List (String × Var)
   carg  : Option String
 deriving Repr
 
 structure MRS where
-  top : Handle
+  top : Var
   index : Var
   preds : List EP
   icons : List Constraint
@@ -83,18 +79,9 @@ def parseToken : Parsec String := do
   return p.asString
 
 def parseTypePred : Parsec String := do
- let aux : Char → Bool := fun c => (¬ c.isWhitespace ∧ c ≠ '_')
- let p ← attempt (pstring "_" <|> pure "")
- let l ← many1 $ satisfy aux
- let s ← many (do
-   let s ← pchar '_'
-   let a ← many1 $ satisfy aux
-   return s.toString ++ a.asString)
- let f ← attempt (pstring "_rel"  <|> pure "")
- return (p ++ l.asString ++ String.join s.toList ++ f)
-
-#eval parseTypePred "_<cat>/NN_u_unknown".mkIterator
-#eval parseTypePred "world's+fair_n_1<1,2>".mkIterator
+ let aux : Char → Bool := fun c => ("[]<>:\"".data.notElem c ∧ ¬ c.isWhitespace)
+ let p ← many1 $ satisfy aux
+ return p.asString
 
 def parseQuotedString : Parsec String := do
   let a1 ← pchar '"'
@@ -150,12 +137,25 @@ def parseLnk : Parsec (Int × Int) := do
   let _ ← pchar '>'
   return (a, b)
 
+def parseRArgs : Parsec (Array (String × Var)) := do
+  let pairs ← many (do
+    let p ← parseToken
+    let _ ← pstring ":" *> parseSpace
+    let v ← parseVar <* parseSpace
+    return (p, v))
+  return pairs
+
 def parseEP : Parsec EP := do
   let _   ← pstring "[" <* parseSpace
   let p   ← parseTypePred <|> parseQuotedString
-  let lnk ← parseLnk
-  let _   ← pstring "]" <* parseSpace
-  return EP.mk
+  let lnk ← parseLnk <* parseSpace
+  let lbl ← pstring "LBL:" *> parseSpace *> parseHandle
+  let ras  ← parseSpace *> parseRArgs
+  let _   ← parseSpace *> pstring "]"
+  return EP.mk p lbl (some lnk) ras.toList none
+
+def pTest := "[_car_n_1<1:2> LBL: h8 ARG0: x3 [ x PERS: 3 NUM: SG IND: + ] ARG1: x9 [ x PERS: 3 NUM: SG IND: ind ] ]"
+#eval parseEP pTest.mkIterator
 
 def parseTop : Parsec Var :=
   pstring "LTOP: " *> parseHandle

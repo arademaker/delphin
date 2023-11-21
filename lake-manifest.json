@@ -2,20 +2,28 @@
  "packagesDir": "lake-packages",
  "packages":
  [{"git":
-   {"url": "https://github.com/leanprover/std4/",
-    "subDir?": null,
-    "rev": "68517fcd34adbd7b0953a1de3b73080e57e60ba4",
-    "opts": {},
-    "name": "std",
-    "inputRev?": null,
-    "inherited": false}},
-  {"git":
    {"url": "https://github.com/lurk-lab/Megaparsec.lean",
     "subDir?": null,
     "rev": "8fe9efef4d0ab1f18838aa71f1d2df9906f5212a",
     "opts": {},
     "name": "megaparsec",
     "inputRev?": null,
+    "inherited": false}},
+  {"git":
+   {"url": "https://github.com/leanprover/std4/",
+    "subDir?": null,
+    "rev": "409a644492aaff846b6b2963e221c7f1ceaf30cc",
+    "opts": {},
+    "name": "std",
+    "inputRev?": "v4.2.0",
+    "inherited": false}},
+  {"git":
+   {"url": "https://github.com/lurk-lab/Megaparsec.lean",
+    "subDir?": null,
+    "rev": "8fe9efef4d0ab1f18838aa71f1d2df9906f5212a",
+    "opts": {},
+    "name": "Megaparsec",
+    "inputRev?": "main",
     "inherited": false}},
   {"git":
    {"url": "https://github.com/lurk-lab/YatimaStdLib.lean",

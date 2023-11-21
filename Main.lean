@@ -22,7 +22,6 @@ def run_ace (sentence : String) : IO Unit := do
 
 #eval run_ace "no cat is happy."
 
-
 def test := do
  let txt ← (IO.FS.readFile "/Users/ar/work/cpdoc/dhbb-nlp/udp/996.conllu")
  let f := List.filter (fun (l : String) => ¬ l.startsWith "#")

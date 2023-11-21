@@ -1,4 +1,3 @@
-/build
-/lean_packages
-*.olean
-/lake-packages
+build/
+lake-packages/
+**/*.olean
