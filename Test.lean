@@ -1,11 +1,8 @@
-
 import Megaparsec
 
 open Megaparsec Parsec Common
 
 abbrev P := Parsec Char String Unit
-
-#check P
 
 /-
 https://ncatlab.org/nlab/show/dependent+type+theoretic+methods+in+natural+language+semantics

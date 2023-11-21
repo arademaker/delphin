@@ -9,7 +9,7 @@ open Lean Parsec
 structure Var where
  name  : String
  sort  : Option String
- props : List (String × String)
+ props : Array (String × String)
 deriving Repr
 
 structure Handle where
@@ -45,30 +45,6 @@ deriving Repr
 def Array.asString (a : Array Char) : String :=
   Array.foldl (λ s c => s ++ c.toString) "" a
 
-def pVariable : Parsec String := do
-  let p ← asciiLetter
-  let n ← many (satisfy $ fun c => c.isAlpha)
-  let s ← many1 digit
-  return (#[p] ++ n ++ s).asString
-
-def VarSort : Parsec String := do
-  let p ← asciiLetter
-  let s ← many asciiLetter
-  return (#[p] ++ s).asString
-
-
-def integer : Parsec Int := do
- let a ← (pchar '-' >>= (fun a => manyCore digit #[a])) <|> (many digit)
- return a.asString.toInt!
-
-def Lnk : Parsec (Int × Int) := do
-  let _ ← pchar '<'
-  let a ← integer
-  let _ ← pchar ':'
-  let b ← integer
-  let _ ← pchar '>'
-  return (a, b)
-
 def Label : Parsec Var := do
   let _ ← pstring "LBL: "
   let v ← pVariable
@@ -86,6 +62,10 @@ def identifier : Parsec Var := do
 
 -- new version
 
+def parseSpace : Parsec String := do
+  let a ← many (satisfy $ fun c => c.isWhitespace)
+  return a.asString
+
 def parseVarName : Parsec String := do
   let p ← asciiLetter
   let n ← many (satisfy $ fun c => c.isAlpha)
@@ -102,6 +82,20 @@ def parseToken : Parsec String := do
     "\\:]>".data.notElem c ∧ ¬ c.isWhitespace
   return p.asString
 
+def parseTypePred : Parsec String := do
+ let aux : Char → Bool := fun c => (¬ c.isWhitespace ∧ c ≠ '_')
+ let p ← attempt (pstring "_" <|> pure "")
+ let l ← many1 $ satisfy aux
+ let s ← many (do
+   let s ← pchar '_'
+   let a ← many1 $ satisfy aux
+   return s.toString ++ a.asString)
+ let f ← attempt (pstring "_rel"  <|> pure "")
+ return (p ++ l.asString ++ String.join s.toList ++ f)
+
+#eval parseTypePred "_<cat>/NN_u_unknown".mkIterator
+#eval parseTypePred "world's+fair_n_1<1,2>".mkIterator
+
 def parseQuotedString : Parsec String := do
   let a1 ← pchar '"'
   let a2 ← many $ satisfy $ fun c => ['"', '\\'].notElem c
@@ -115,26 +109,53 @@ def parseQuotedString : Parsec String := do
     (Array.foldl (λ s c => s ++ c) "" a3) ++ a4.toString)
 
 def parseVarProps : Parsec (String × Array (String × String)) := do
-  let _ ← pchar '['
+  let _ ← pstring "[" *> parseSpace
   let varSort ← (do
      let p ← asciiLetter
      let n ← many (satisfy $ fun c => c.isAlpha)
+     let _ ← parseSpace
      return (#[p] ++ n).asString)
   let extraPairs ← many (do
     let p ← parsePath
+    let _ ← pstring ":" *> parseSpace
     let v ← parseToken <|> parseQuotedString
+    let _ ← parseSpace
     return (p, v))
-  let _ ← pchar ']'
+  let _ ← parseSpace *> pstring "]"
   return (varSort, extraPairs)
 
-def parseVar : Parsec Var := do
-  let nm ← parseVarName
-  let varProps ← parseVarProps <|> pure none
-  pure $ Var.mk nm (some varProps.1) varProps.2
+def parseVar1 : Parsec Var := do
+  let nm ← parseVarName <* parseSpace
+  let ps ← parseVarProps <* parseSpace
+  return { name := nm, sort := ps.1, props := ps.2 : Var }
+
+def parseVar : Parsec  Var := do
+  attempt parseVar1 <|> (do
+   let nm ← parseVarName
+   return { name := nm , sort := none, props := #[]})
 
 def parseHandle : Parsec Var := do
   let p ← parseVarName
-  return { name := p, sort := some "h", props := [] : Var }
+  return { name := p, sort := some "h", props := #[] : Var }
+
+def pinteger : Parsec Int := do
+ let a ← (pchar '-' >>= (fun a => manyCore digit #[a])) <|> (many digit)
+ return a.asString.toInt!
+
+def parseLnk : Parsec (Int × Int) := do
+  let _ ← pchar '<'
+  let a ← pinteger
+  let _ ← pchar ':'
+  let b ← pinteger
+  let _ ← pchar '>'
+  return (a, b)
+
+def parseEP : Parsec EP := do
+  let _   ← pstring "[" <* parseSpace
+  let p   ← parseTypePred <|> parseQuotedString
+  let lnk ← parseLnk
+  let _   ← pstring "]" <* parseSpace
+  return EP.mk
 
 def parseTop : Parsec Var :=
   pstring "LTOP: " *> parseHandle
