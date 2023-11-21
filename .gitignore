@@ -1,3 +1,4 @@
+.lake/
 build/
 lake-packages/
 **/*.olean
