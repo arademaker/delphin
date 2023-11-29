@@ -21,8 +21,8 @@ deriving Repr
 
 structure EP where
   predicate : String
-  label : Var
   link  : Option (Int × Int)
+  label : Var
   rargs : List (String × Var)
   carg  : Option String
 deriving Repr
@@ -128,31 +128,26 @@ def parseArg : Parsec (String × Sum Var String) := do
  let v ← (Sum.inl <$> parseVar) <|> (Sum.inr <$> parseQuotedString)
  return (p, v)
 
-
-def fromSumInl? (e : Sum Var String) : Option Var :=  do
-  match e with
-  | Sum.inl a => a
-  | _         => none
-
-def fromSumInr? (e : Sum Var String) : Option String :=  do
-  match e with
-  | Sum.inr a => a
-  | _         => none
-
 def procArgs (acc : List $ String × Sum Var String)
-             (p : String) (lnk : Option (Int × Int))
+             (p : String) (lnk : Option $ Int × Int)
              (lbl : Option Var) (carg : Option String)
              (ras : List $ String × Var) : Option EP :=
   match acc with
   | []  => match lbl with
-           | some a => EP.mk p a lnk ras carg
+           | some a => EP.mk p lnk a ras carg
            | none   => none
   | a :: as => if a.1 == "LBL"
-               then procArgs as p lnk (fromSumInl? a.2) carg ras
+               then match a.2 with
+                    | .inl b => procArgs as p lnk b carg ras
+                    |      _ => none
                else
                 if a.1 == "CARG"
-                then procArgs as p lnk lbl (fromSumInr? a.2) ras
-                else procArgs as p lnk lbl carg ((a.1, (fromSumInl? a.2)) :: ras)
+                then match a.2 with
+                     | .inr b => procArgs as p lnk lbl b ras
+                     |      _ => none
+                else match a.2 with
+                     | .inl b => procArgs as p lnk lbl carg ((a.1, b) :: ras)
+                     | _      => none
 
 def parseEP : Parsec EP := do
   let _   ← pstring "[" <* parseSpace
@@ -160,18 +155,10 @@ def parseEP : Parsec EP := do
   let lnk ← parseLnk <* parseSpace
   let ras ← many (parseArg <* parseSpace)
   let _   ← parseSpace *> pstring "]"
-  let m := Std.HashMap.ofList ras.toList
-  return { predicate := p,
-           link  := lnk,
-           rargs := ((m.erase "LBL").erase "CARG").toList
-           label := match m.find! "LBL" with
-                    | Sum.inl a => a
-                    | _         => fail
-           carg  := match m.find? "CARG" with
-                    | some a  => match a with
-                                 | Sum.inr a => a
-                                 | _         => none
-                    | none    => none }
+  let res := procArgs ras.toList p (some lnk) none none []
+  match res with
+  | none => fail "invalid EP"
+  | some e => return e
 
 def pTest := "[_car_n_1<1:2> LBL: h8 ARG0: x3 [ x PERS: 3 NUM: PL IND: + ]
                              CARG: \"are\" ARG1: x9 [ x PERS: 3 NUM: SG IND: ind ] ]"
@@ -192,11 +179,3 @@ def parseMRS : Parsec MRS := do
     let hcons ← parseHcons
     let _ ← pchar ']'
     pure $ MRS.mk top index rels hcons
-
-
-inductive Value where
- | v : Var → Value
- | c : String → Value
-
-#check Value.c "teste"
-#check Value.v $ Var.mk "h" none #[]
