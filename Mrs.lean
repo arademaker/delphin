@@ -1,5 +1,7 @@
 
 import Lean.Data.Parsec
+import Std.Data.hashMap
+
 open Lean Parsec
 
 /- the data structure
@@ -40,23 +42,6 @@ deriving Repr
 
 def Array.asString (a : Array Char) : String :=
   Array.foldl (λ s c => s ++ c.toString) "" a
-
-def Label : Parsec Var := do
-  let _ ← pstring "LBL: "
-  let v ← pVariable
-  return (Var.mk v)
-
-def letter : Parsec Char := satisfy fun c =>
-  0x41 ≤ c.val ∧ c.val ≤ 0x5A ∨
-  0x61 ≤ c.val ∧ c.val ≤ 0x7A
-
-def identifier : Parsec Var := do
-  let p ← letter
-  let a ← many $ letter <|> pchar '-'
-  let b ← many digit
-  return (Var.mk (Array.asString $ #[p] ++ a) (b.asString).toNat!)
-
--- new version
 
 def parseSpace : Parsec String := do
   let a ← many (satisfy $ fun c => c.isWhitespace)
@@ -113,10 +98,10 @@ def parseVarProps : Parsec (String × Array (String × String)) := do
 
 def parseVar1 : Parsec Var := do
   let nm ← parseVarName <* parseSpace
-  let ps ← parseVarProps <* parseSpace
+  let ps ← parseVarProps
   return { name := nm, sort := ps.1, props := ps.2 : Var }
 
-def parseVar : Parsec  Var := do
+def parseVar : Parsec Var := do
   attempt parseVar1 <|> (do
    let nm ← parseVarName
    return { name := nm , sort := none, props := #[]})
@@ -137,24 +122,59 @@ def parseLnk : Parsec (Int × Int) := do
   let _ ← pchar '>'
   return (a, b)
 
-def parseRArgs : Parsec (Array (String × Var)) := do
-  let pairs ← many (do
-    let p ← parseToken
-    let _ ← pstring ":" *> parseSpace
-    let v ← parseVar <* parseSpace
-    return (p, v))
-  return pairs
+def parseArg : Parsec (String × Sum Var String) := do
+ let p ← parseToken
+ let _ ← pstring ":" *> parseSpace
+ let v ← (Sum.inl <$> parseVar) <|> (Sum.inr <$> parseQuotedString)
+ return (p, v)
+
+
+def fromSumInl? (e : Sum Var String) : Option Var :=  do
+  match e with
+  | Sum.inl a => a
+  | _         => none
+
+def fromSumInr? (e : Sum Var String) : Option String :=  do
+  match e with
+  | Sum.inr a => a
+  | _         => none
+
+def procArgs (acc : List $ String × Sum Var String)
+             (p : String) (lnk : Option (Int × Int))
+             (lbl : Option Var) (carg : Option String)
+             (ras : List $ String × Var) : Option EP :=
+  match acc with
+  | []  => match lbl with
+           | some a => EP.mk p a lnk ras carg
+           | none   => none
+  | a :: as => if a.1 == "LBL"
+               then procArgs as p lnk (fromSumInl? a.2) carg ras
+               else
+                if a.1 == "CARG"
+                then procArgs as p lnk lbl (fromSumInr? a.2) ras
+                else procArgs as p lnk lbl carg ((a.1, (fromSumInl? a.2)) :: ras)
 
 def parseEP : Parsec EP := do
   let _   ← pstring "[" <* parseSpace
   let p   ← parseTypePred <|> parseQuotedString
   let lnk ← parseLnk <* parseSpace
-  let lbl ← pstring "LBL:" *> parseSpace *> parseHandle
-  let ras  ← parseSpace *> parseRArgs
+  let ras ← many (parseArg <* parseSpace)
   let _   ← parseSpace *> pstring "]"
-  return EP.mk p lbl (some lnk) ras.toList none
+  let m := Std.HashMap.ofList ras.toList
+  return { predicate := p,
+           link  := lnk,
+           rargs := ((m.erase "LBL").erase "CARG").toList
+           label := match m.find! "LBL" with
+                    | Sum.inl a => a
+                    | _         => fail
+           carg  := match m.find? "CARG" with
+                    | some a  => match a with
+                                 | Sum.inr a => a
+                                 | _         => none
+                    | none    => none }
 
-def pTest := "[_car_n_1<1:2> LBL: h8 ARG0: x3 [ x PERS: 3 NUM: SG IND: + ] ARG1: x9 [ x PERS: 3 NUM: SG IND: ind ] ]"
+def pTest := "[_car_n_1<1:2> LBL: h8 ARG0: x3 [ x PERS: 3 NUM: PL IND: + ]
+                             CARG: \"are\" ARG1: x9 [ x PERS: 3 NUM: SG IND: ind ] ]"
 #eval parseEP pTest.mkIterator
 
 def parseTop : Parsec Var :=
@@ -172,3 +192,11 @@ def parseMRS : Parsec MRS := do
     let hcons ← parseHcons
     let _ ← pchar ']'
     pure $ MRS.mk top index rels hcons
+
+
+inductive Value where
+ | v : Var → Value
+ | c : String → Value
+
+#check Value.c "teste"
+#check Value.v $ Var.mk "h" none #[]
