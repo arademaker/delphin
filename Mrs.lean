@@ -1,6 +1,6 @@
 
 import Lean.Data.Parsec
-import Std.Data.hashMap
+
 
 open Lean Parsec
 
@@ -165,17 +165,26 @@ def pTest := "[_car_n_1<1:2> LBL: h8 ARG0: x3 [ x PERS: 3 NUM: PL IND: + ]
 #eval parseEP pTest.mkIterator
 
 def parseTop : Parsec Var :=
-  pstring "LTOP: " *> parseHandle
+  pstring "LTOP: " *> parseVar
 
 def parseIndex : Parsec Var :=
   pstring "INDEX: " *> parseVar
 
+def parseRels : Parsec (Array EP) := do
+  let _  ← pstring "RELS:" <* parseSpace
+  let _  ← pchar '<' <* parseSpace
+  let rs ← many (parseEP <* parseSpace)
+  let _  ← pchar '>' <* parseSpace
+  return rs
+
 def parseMRS : Parsec MRS := do
     let _ ← pchar '['
     let top ← parseTop
-    let index ← parseIndex
-    let rels ← parseRels
+    let idx ← parseIndex
+    let rls ← parseRels
     let icons ← parseIcons
     let hcons ← parseHcons
     let _ ← pchar ']'
-    pure $ MRS.mk top index rels hcons
+    pure $ MRS.mk top idx rls.toList hcons
+
+#eval 12
