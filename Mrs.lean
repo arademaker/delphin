@@ -14,10 +14,30 @@ structure Var where
  props : Array (String × String)
 deriving Repr
 
+instance : ToString Var :=
+  ⟨fun v =>
+   match v with
+   | {name := n, sort := some s, props := #[]} =>
+    s!"{n} [{s}]"
+   | {name := n, sort := some s, props := ps} =>
+    let a := List.foldr (λ (a : String × String) (s : String) => s ++ s!" {a.1} {a.2}") "" ps.toList
+    s!"{n} [{s} {a}]"
+   | {name := n, sort := none, props := #[]} =>
+    s!"{n}"
+   | {name := n, sort := none, props := ps}  =>
+    let a := List.foldr (λ (a : String × String) (s : String) => s ++ s!" {a.1} {a.2}") "" ps.toList
+    s!"{n} [{a}]"⟩
+
 structure Constraint where
+  rel : String
   lhs : Var
   rhs : Var
 deriving Repr
+
+instance : Repr Constraint where
+  reprPrec
+    | {rel := r, lhs := l, rhs := h}, _ =>
+    s!"{l} {r} {h}"
 
 structure EP where
   predicate : String
@@ -160,31 +180,62 @@ def parseEP : Parsec EP := do
   | none => fail "invalid EP"
   | some e => return e
 
-def pTest := "[_car_n_1<1:2> LBL: h8 ARG0: x3 [ x PERS: 3 NUM: PL IND: + ]
-                             CARG: \"are\" ARG1: x9 [ x PERS: 3 NUM: SG IND: ind ] ]"
-#eval parseEP pTest.mkIterator
-
 def parseTop : Parsec Var :=
   pstring "LTOP: " *> parseVar
 
 def parseIndex : Parsec Var :=
   pstring "INDEX: " *> parseVar
 
+
+def parseHcons : Parsec (Array Constraint) := do
+  let _ ← pstring "HCONS:" <* parseSpace
+  let _ ← pchar '<' <* parseSpace
+  let cs ← many (do
+    let a ← parseHandle <* parseSpace
+    let r ← parseToken <* parseSpace
+    let b ← parseHandle <* parseSpace
+    return (Constraint.mk r a b))
+  let _ ← pchar '>'
+  return cs
+
+def parseIcons : Parsec (Array Constraint) := do
+  let _ ← pstring "ICONS:" <* parseSpace
+  let _ ← pchar '<' <* parseSpace
+  let cs ← many (do
+    let a ← parseHandle <* parseSpace
+    let r ← parseToken <* parseSpace
+    let b ← parseHandle <* parseSpace
+    return (Constraint.mk r a b))
+  let _ ← pchar '>'
+  return cs
+
 def parseRels : Parsec (Array EP) := do
   let _  ← pstring "RELS:" <* parseSpace
   let _  ← pchar '<' <* parseSpace
   let rs ← many (parseEP <* parseSpace)
-  let _  ← pchar '>' <* parseSpace
+  let _  ← pchar '>'
   return rs
 
 def parseMRS : Parsec MRS := do
-    let _ ← pchar '['
-    let top ← parseTop
-    let idx ← parseIndex
-    let rls ← parseRels
-    let icons ← parseIcons
-    let hcons ← parseHcons
+    let _ ← pchar '['      <* parseSpace
+    let top ← parseTop     <* parseSpace
+    let idx ← parseIndex   <* parseSpace
+    let rls ← parseRels    <* parseSpace
+    let hcons ← parseHcons <* parseSpace
+    let icons ← (attempt parseIcons <|> pure #[]) <* parseSpace
     let _ ← pchar ']'
-    pure $ MRS.mk top idx rls.toList hcons
+    pure $ MRS.mk top idx rls.toList hcons.toList icons.toList
 
-#eval 12
+
+def test := "[ LTOP: h1
+  INDEX: e2 [ e SF: PROP TENSE: PRES MOOD: INDICATIVE PROG: - PERF: - ]
+  RELS: < [ _the_q_rel<0:3> LBL: h3 ARG0: x5 [ x PERS: 3 NUM: SG IND: + ] RSTR: h6 BODY: h4 ]
+          [ \"_road_n_1_rel\"<4:8> LBL: h7 ARG0: x5 ]
+          [ \"_rise_v_1_rel\"<9:14> LBL: h8 ARG0: e2 ARG1: x5 ]
+          [ _from_p_dir_rel<15:19> LBL: h8 ARG0: e9 [ e SF: PROP TENSE: UNTENSED MOOD: INDICATIVE PROG: - PERF: - ] ARG1: e2 ARG2: x10 [ x PERS: 3 NUM: SG ] ]
+          [ place_n_rel<20:26> LBL: h11 ARG0: x10 ]
+          [ def_implicit_q_rel<20:26> LBL: h12 ARG0: x10 RSTR: h13 BODY: h14 ]
+          [ _there_a_1_rel<20:26> LBL: h11 ARG0: e15 [ e SF: PROP TENSE: UNTENSED MOOD: INDICATIVE PROG: - PERF: - ] ARG1: x10 ] >
+  HCONS: < h6 qeq h7 h13 qeq h11 > ]"
+
+#eval parseMRS test.mkIterator
