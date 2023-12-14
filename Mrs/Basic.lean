@@ -12,20 +12,19 @@ structure Var where
 
 instance : ToFormat Var where
  format
-  | {name := n, sort := some s, props := #[]} =>
-    f!"{n} [{s}]"
+  | {name := n, sort := some _, props := #[]} =>
+    f!"{n}"
   | {name := n, sort := some s, props := ps} =>
     let a := Format.joinSep (ps.toList.map fun p => f!"{p.1} {p.2}") " "
     f!"{n} [{s} {a}]"
   | {name := n, sort := none, props := #[]} =>
     f!"{n}"
   | {name := n, sort := none, props := ps} =>
-    let a := Format.joinSep ps.toList " "
-    f!"{n} [{a}]"
+    let a := Format.joinSep (ps.toList.map fun p => f!"{p.1} {p.2}") " "
+    f!"{n} [? {a}]"
 
 instance : Repr Var where
  reprPrec v _ := f!"{v}"
-
 
 structure Constraint where
   rel : String

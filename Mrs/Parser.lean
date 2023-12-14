@@ -130,7 +130,7 @@ def parseEP : Parsec EP := do
   | some e => return e
 
 def parseTop : Parsec Var :=
-  pstring "LTOP: " *> parseVar
+  pstring "LTOP: " *> parseHandle
 
 def parseIndex : Parsec Var :=
   pstring "INDEX: " *> parseVar
