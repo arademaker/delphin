@@ -1,8 +1,8 @@
 
 import Lean.Data.Parsec
 
-
 open Lean Parsec
+open Std
 
 /- the data structure
    https://github.com/delph-in/docs/wiki/MrsRFC
@@ -12,32 +12,36 @@ structure Var where
  name  : String
  sort  : Option String
  props : Array (String × String)
-deriving Repr
 
-instance : ToString Var :=
-  ⟨fun v =>
-   match v with
-   | {name := n, sort := some s, props := #[]} =>
-    s!"{n} [{s}]"
-   | {name := n, sort := some s, props := ps} =>
-    let a := List.foldr (λ (a : String × String) (s : String) => s ++ s!" {a.1} {a.2}") "" ps.toList
-    s!"{n} [{s} {a}]"
-   | {name := n, sort := none, props := #[]} =>
-    s!"{n}"
-   | {name := n, sort := none, props := ps}  =>
-    let a := List.foldr (λ (a : String × String) (s : String) => s ++ s!" {a.1} {a.2}") "" ps.toList
-    s!"{n} [{a}]"⟩
+instance : ToFormat Var where
+ format
+  | {name := n, sort := some s, props := #[]} =>
+    f!"{n} [{s}]"
+  | {name := n, sort := some s, props := ps} =>
+    let a := Format.joinSep (ps.toList.map fun p => f!"{p.1} {p.2}") " "
+    f!"{n} [{s} {a}]"
+  | {name := n, sort := none, props := #[]} =>
+    f!"{n}"
+  | {name := n, sort := none, props := ps} =>
+    let a := Format.joinSep ps.toList " "
+    f!"{n} [{a}]"
+
+instance : Repr Var where
+ reprPrec v _ := f!"{v}"
+
 
 structure Constraint where
   rel : String
   lhs : Var
   rhs : Var
-deriving Repr
+
+instance : ToFormat Constraint where
+ format
+  | {rel := r, lhs := l, rhs := h} => f!"{l} {r} {h}"
 
 instance : Repr Constraint where
-  reprPrec
-    | {rel := r, lhs := l, rhs := h}, _ =>
-    s!"{l} {r} {h}"
+ reprPrec c _ := f!"{c}"
+
 
 structure EP where
   predicate : String
@@ -47,14 +51,49 @@ structure EP where
   carg  : Option String
 deriving Repr
 
+instance : ToFormat EP where
+ format
+  | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
+    let as := Format.joinSep (rs.map fun a => f!"{a.1}: {a.2}") " "
+    f!"[ {p}<{n},{m}> LBL: {l} {as} CARG: {c} ]"
+  | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := none} =>
+    let as := Format.joinSep (rs.map fun a => f!"{a.1}: {a.2}") " "
+    f!"[ {p}<{n},{m}> LBL: {l} {as} ]"
+  | {predicate := p, link := none, label := l, rargs := rs, carg := some c} =>
+    let as := Format.joinSep (rs.map fun a => f!"{a.1}: {a.2}") " "
+    f!"[ {p} LBL: {l} {as} CARG: {c} ]"
+  | {predicate := p, link := none, label := l, rargs := rs, carg := none} =>
+    let as := Format.joinSep (rs.map fun a => f!"{a.1}: {a.2}") " "
+    f!"[ {p} LBL: {l} {as} ]"
+
+instance : Repr EP where
+ reprPrec e _ := f!"{e}"
+
+
 structure MRS where
   top : Var
   index : Var
   preds : List EP
-  icons : List Constraint
   hcons : List Constraint
+  icons : List Constraint
 deriving Repr
 
+instance : ToFormat MRS where
+ format
+ | {top := t, index := i, preds := ps, icons := [], hcons := hs} =>
+   f!"[ LTOP: {t}
+        INDEX: {i}
+        RELS: < {Format.joinSep (ps.map fun a => format a) " "} >
+        HCONS: < {Format.joinSep (hs.map fun a => format a) " "} > ]"
+ | {top := t, index := i, preds := ps, icons := is, hcons := hs} =>
+   f!"[ LTOP: {t}
+        INDEX: {i}
+        RELS: < {Format.joinSep (ps.map fun a => format a) " "} >
+        HCONS: < {Format.joinSep (hs.map fun a => format a) " "} >
+        ICONS: < {Format.joinSep (is.map fun a => format a) " "} > ]"
+
+instance : Repr MRS where
+ reprPrec m _ := f!"{m}"
 
 /- the parser
    defined from the BNF https://github.com/delph-in/docs/wiki/MrsRFC#simple
@@ -225,7 +264,6 @@ def parseMRS : Parsec MRS := do
     let icons ← (attempt parseIcons <|> pure #[]) <* parseSpace
     let _ ← pchar ']'
     pure $ MRS.mk top idx rls.toList hcons.toList icons.toList
-
 
 def test := "[ LTOP: h1
   INDEX: e2 [ e SF: PROP TENSE: PRES MOOD: INDICATIVE PROG: - PERF: - ]
