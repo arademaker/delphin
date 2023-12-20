@@ -97,3 +97,17 @@ theorem result' : killed agatha agatha := by
        exact nkca h2
 
 #print axioms result'
+
+
+/-
+
+variable (inter : String → (u → Prop))
+#check (inter "_love_v_1") ∧ (inter "bla")
+
+def mrs_to_prop (a : MRS) : Prop := sorry
+
+example (h1 : p "all men are mortal")
+        (h2 : p "socrates is a man")
+        : p "socrates is moral" := do
+
+-/

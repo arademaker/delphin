@@ -7,21 +7,21 @@ open IO.Process
 
 /-- Pipe input into stdin of the spawned process, then return output upon completion. -/
 def cmd_with_stdin (args : SpawnArgs) (input : String) : IO Output := do
-  let child <- spawn { args with stdin := .piped, stdout := .piped, stderr := .piped }
-  let (stdin, child) <- child.takeStdin
+  let child ← spawn { args with stdin := .piped, stdout := .piped, stderr := .piped }
+  let (stdin, child) ← child.takeStdin
   stdin.putStr input
   stdin.flush
-  let stdout <- IO.asTask child.stdout.readToEnd Task.Priority.dedicated
-  let stderr <- child.stderr.readToEnd
-  let exitCode <- child.wait
-  let stdout <- IO.ofExcept stdout.get
+  let stdout ← IO.asTask child.stdout.readToEnd Task.Priority.dedicated
+  let stderr ← child.stderr.readToEnd
+  let exitCode ← child.wait
+  let stdout ← IO.ofExcept stdout.get
   return { exitCode, stdout, stderr }
 
 def run_ace (sentence : String) : IO Unit := do
   let res <- cmd_with_stdin {cmd := "ace", args := #["-g","/Users/ar/r/erg.dat","-T","-n 1"], cwd := "."} sentence
   IO.println res.stdout
 
-#eval run_ace "The cat, I buy."
+#eval run_ace "Adam loves Beth."
 
 
 def test := "[ LTOP: h1
@@ -34,6 +34,5 @@ def test := "[ LTOP: h1
           [ def_implicit_q_rel<20:26> LBL: h12 ARG0: x10 RSTR: h13 BODY: h14 ]
           [ _there_a_1_rel<20:26> LBL: h11 ARG0: e15 [ e SF: PROP TENSE: UNTENSED MOOD: INDICATIVE PROG: - PERF: - ] ARG1: x10 ] >
   HCONS: < h6 qeq h7 h13 qeq h11 > ]"
-
 
 #eval parseMRS test.mkIterator
