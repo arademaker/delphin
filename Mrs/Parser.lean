@@ -33,9 +33,11 @@ def parseToken : Parsec String := do
   return p.asString
 
 def parseTypePred : Parsec String := do
- let aux : Char → Bool := fun c => ("[]<>:\"".data.notElem c ∧ ¬ c.isWhitespace)
+ let aux : Char → Bool := fun c => ("<>\"".data.notElem c ∧ ¬ c.isWhitespace)
  let p ← many1 $ satisfy aux
  return p.asString
+
+-- #eval parseTypePred "_m]achines/NNS_u_unknown".mkIterator
 
 def parseQuotedString : Parsec String := do
   let a1 ← pchar '"'
@@ -151,9 +153,9 @@ def parseIcons : Parsec (Array Constraint) := do
   let _ ← pstring "ICONS:" <* parseSpace
   let _ ← pchar '<' <* parseSpace
   let cs ← many (do
-    let a ← parseHandle <* parseSpace
+    let a ← parseVar <* parseSpace
     let r ← parseToken <* parseSpace
-    let b ← parseHandle <* parseSpace
+    let b ← parseVar <* parseSpace
     return (Constraint.mk r a b))
   let _ ← pchar '>'
   return cs

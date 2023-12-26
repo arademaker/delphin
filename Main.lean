@@ -1,6 +1,7 @@
 import Init.System.IO
 import Std
 import «Mrs»
+import Lean.Data.Parsec
 
 open Std
 open IO.Process
@@ -21,18 +22,18 @@ def run_ace (sentence : String) : IO Unit := do
   let res <- cmd_with_stdin {cmd := "ace", args := #["-g","/Users/ar/r/erg.dat","-T","-n 1"], cwd := "."} sentence
   IO.println res.stdout
 
-#eval run_ace "Adam loves Beth."
+-- #eval run_ace "Adam loves Beth."
+-- def test := "..."
+-- #eval test.drop 2415
+-- #eval parseMRS test.mkIterator
 
+def report (r : String × Except String MRS) :=
+ match r.2 with
+ | Except.ok b => IO.println $ List.length b.preds
+ | Except.error e => IO.println (r.1, e)
 
-def test := "[ LTOP: h1
-  INDEX: e2 [ e SF: PROP TENSE: PRES MOOD: INDICATIVE PROG: - PERF: - ]
-  RELS: < [ _the_q_rel<0:3> LBL: h3 ARG0: x5 [ x PERS: 3 NUM: SG IND: + ] RSTR: h6 BODY: h4 ]
-          [ \"_road_n_1_rel\"<4:8> LBL: h7 ARG0: x5 ]
-          [ _rise_v_1<9:14> LBL: h8 ARG0: e2 ARG1: x5 ]
-          [ _from_p_dir_rel<15:19> LBL: h8 ARG0: e9 [ e SF: PROP TENSE: UNTENSED MOOD: INDICATIVE PROG: - PERF: - ] ARG1: e2 ARG2: x10 [ x PERS: 3 NUM: SG ] ]
-          [ place_n_rel<20:26> LBL: h11 ARG0: x10 ]
-          [ def_implicit_q_rel<20:26> LBL: h12 ARG0: x10 RSTR: h13 BODY: h14 ]
-          [ _there_a_1_rel<20:26> LBL: h11 ARG0: e15 [ e SF: PROP TENSE: UNTENSED MOOD: INDICATIVE PROG: - PERF: - ] ARG1: x10 ] >
-  HCONS: < h6 qeq h7 h13 qeq h11 > ]"
-
-#eval parseMRS test.mkIterator
+def main : IO Unit := do
+  let ls ← IO.FS.lines "/Users/ar/Temp/ws201.txt"
+  let rs := ls.toList.map (λ l => (l, Lean.Parsec.run parseMRS l))
+  let _ ← rs.mapM report
+  return ()
