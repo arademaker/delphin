@@ -19,10 +19,10 @@ def cmd_with_stdin (args : SpawnArgs) (input : String) : IO Output := do
   return { exitCode, stdout, stderr }
 
 def run_ace (sentence : String) : IO Unit := do
-  let res <- cmd_with_stdin {cmd := "ace", args := #["-g","/Users/ar/r/erg.dat","-T","-n 1"], cwd := "."} sentence
+  let res ← cmd_with_stdin {cmd := "ace", args := #["-g","/Users/ar/r/erg.dat","-T","-n 1"], cwd := "."} sentence
   IO.println res.stdout
 
--- #eval run_ace "Adam loves Beth."
+#eval run_ace "Adam loves Beth."
 -- def test := "..."
 -- #eval test.drop 2415
 -- #eval parseMRS test.mkIterator

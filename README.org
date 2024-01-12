@@ -1,7 +1,0 @@
-#+title: Lean DELPH-IN
-#+author: Alexandre Rademaker
-
-The Lean implementation of DELPH-IN
-(https://github.com/delph-in/docs/wiki) utilities. This aims to start
-a port to Lean of http://pydelphin.readthedocs.io.
-
