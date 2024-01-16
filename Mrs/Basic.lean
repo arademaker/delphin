@@ -45,7 +45,6 @@ structure EP where
   label : Var
   rargs : List (String × Var)
   carg  : Option String
-deriving Repr
 
 instance : ToFormat EP where
  format
@@ -72,7 +71,6 @@ structure MRS where
   preds : List EP
   hcons : List Constraint
   icons : List Constraint
-deriving Repr
 
 instance : ToFormat MRS where
  format
