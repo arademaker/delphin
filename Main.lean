@@ -4,7 +4,7 @@ import «Mrs»
 import Lean.Data.Parsec
 import Ace
 
-#eval run_ace "Adam loves Beth."
+#eval run_ace "Adam loves John."
 -- def test := "..."
 -- #eval test.drop 2415
 -- #eval parseMRS test.mkIterator

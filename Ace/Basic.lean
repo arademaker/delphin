@@ -1,6 +1,6 @@
 import Init.System.IO
 import Std
-
+import Mrs.Parser
 open Std
 open IO.Process
 
@@ -16,6 +16,10 @@ def cmd_with_stdin (args : SpawnArgs) (input : String) : IO Output := do
   return { exitCode, stdout, stderr }
 
 
-def run_ace (sentence : String) : IO Unit := do
-  let res ← cmd_with_stdin {cmd := "ace", args := #["-g","/Users/ar/r/erg.dat","-T"], cwd := "."} sentence
-  IO.println res.stdout
+def run_ace (sentence : String) : IO (List MRS) := do
+  let ret ← cmd_with_stdin {cmd := "ace", args := #["-g","/Users/ar/r/erg.dat","-T"], cwd := "."} sentence
+  let res := ret.stdout.split (fun s => s == '\n')
+  let  ms := res.filter (fun s => s.startsWith "[")
+  let   p := Lean.Parsec.run parseMRS
+  let  as ← (ms.map p).mapM IO.ofExcept
+  return as
