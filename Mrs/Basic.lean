@@ -6,22 +6,17 @@
 open Std
 
 structure Var where
- name  : String
- sort  : Option String
+ id    : Nat
+ sort  : Char
  props : Array (String × String)
 
 instance : ToFormat Var where
  format
-  | {name := n, sort := some _, props := #[]} =>
-    f!"{n}"
-  | {name := n, sort := some s, props := ps} =>
+  | {id := n, sort := s, props := #[]} =>
+    f!"{s}{n}"
+  | {id := n, sort := s, props := ps} =>
     let a := Format.joinSep (ps.toList.map fun p => f!"{p.1} {p.2}") " "
-    f!"{n} [{s} {a}]"
-  | {name := n, sort := none, props := #[]} =>
-    f!"{n}"
-  | {name := n, sort := none, props := ps} =>
-    let a := Format.joinSep (ps.toList.map fun p => f!"{p.1} {p.2}") " "
-    f!"{n} [? {a}]"
+    f!"{s}{n} [{s} {a}]"
 
 instance : Repr Var where
  reprPrec v _ := f!"{v}"

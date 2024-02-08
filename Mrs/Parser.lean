@@ -16,12 +16,6 @@ def parseSpace : Parsec String := do
   let a ← many (satisfy $ fun c => c.isWhitespace)
   return a.asString
 
-def parseVarName : Parsec String := do
-  let p ← asciiLetter
-  let n ← many (satisfy $ fun c => c.isAlpha)
-  let s ← many1 digit
-  return (#[p] ++ n ++ s).asString
-
 def parsePath : Parsec String := do
   let p ← asciiLetter
   let s ← many (satisfy $ fun c => c.isAlphanum)
@@ -37,8 +31,6 @@ def parseTypePred : Parsec String := do
  let p ← many1 $ satisfy aux
  return p.asString
 
--- #eval parseTypePred "_m]achines/NNS_u_unknown".mkIterator
-
 def parseQuotedString : Parsec String := do
   let a1 ← pchar '"'
   let a2 ← many $ satisfy $ fun c => ['"', '\\'].notElem c
@@ -51,13 +43,12 @@ def parseQuotedString : Parsec String := do
   return (a1.toString ++ a2.asString ++
     (Array.foldl (λ s c => s ++ c) "" a3) ++ a4.toString)
 
-def parseVarProps : Parsec (String × Array (String × String)) := do
+def parseVarProps : Parsec (Char × Array (String × String)) := do
   let _ ← pstring "[" *> parseSpace
   let varSort ← (do
      let p ← asciiLetter
-     let n ← many (satisfy $ fun c => c.isAlpha)
      let _ ← parseSpace
-     return (#[p] ++ n).asString)
+     return p)
   let extraPairs ← many (do
     let p ← parsePath
     let _ ← pstring ":" *> parseSpace
@@ -67,19 +58,26 @@ def parseVarProps : Parsec (String × Array (String × String)) := do
   let _ ← parseSpace *> pstring "]"
   return (varSort, extraPairs)
 
-def parseVar1 : Parsec Var := do
-  let nm ← parseVarName <* parseSpace
-  let ps ← parseVarProps
-  return { name := nm, sort := ps.1, props := ps.2 : Var }
+def parseVarName : Parsec (Char × Nat) := do
+  let p ← asciiLetter
+  let s ← many1 digit
+  return (p, s.asString.toNat!)
+
+
+/- we would like to check if the type in the props match the type of the
+   variable, `x3 [ x ...]` is valid but `x3 [ e ...]` is not
+
+#eval parseVar "e44 [x rel: t SUB: -]".mkIterator
+-/
 
 def parseVar : Parsec Var := do
-  attempt parseVar1 <|> (do
-   let nm ← parseVarName
-   return { name := nm , sort := none, props := #[]})
+  let nm ← parseVarName <* parseSpace
+  let ps ← attempt parseVarProps <|> pure ('u', #[])
+  return {id := nm.2, sort := nm.1, props := ps.2 : Var}
 
 def parseHandle : Parsec Var := do
   let p ← parseVarName
-  return { name := p, sort := some "h", props := #[] : Var }
+  return { id := p.2 , sort := p.1, props := #[] : Var }
 
 def pinteger : Parsec Int := do
  let a ← (pchar '-' >>= (fun a => manyCore digit #[a])) <|> (many digit)
