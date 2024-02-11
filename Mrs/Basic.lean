@@ -10,12 +10,15 @@ structure Var where
  sort  : Char
  props : Array (String × String)
 
+instance : BEq Var where
+ beq a b := a.id == b.id
+
 instance : ToFormat Var where
  format
   | {id := n, sort := s, props := #[]} =>
     f!"{s}{n}"
   | {id := n, sort := s, props := ps} =>
-    let a := Format.joinSep (ps.toList.map fun p => f!"{p.1} {p.2}") " "
+    let a := Format.joinSep (ps.toList.map fun p => f!"{p.1}: {p.2}") " "
     f!"{s}{n} [{s} {a}]"
 
 instance : Repr Var where
@@ -40,15 +43,16 @@ structure EP where
   label : Var
   rargs : List (String × Var)
   carg  : Option String
+ deriving BEq
 
 instance : ToFormat EP where
  format
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
     let as := Format.joinSep (rs.map fun a => f!"{a.1}: {a.2}") " "
-    f!"[ {p}<{n},{m}> LBL: {l} {as} CARG: {c} ]"
+    f!"[ {p}<{n}:{m}> LBL: {l} {as} CARG: {c} ]"
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := none} =>
     let as := Format.joinSep (rs.map fun a => f!"{a.1}: {a.2}") " "
-    f!"[ {p}<{n},{m}> LBL: {l} {as} ]"
+    f!"[ {p}<{n}:{m}> LBL: {l} {as} ]"
   | {predicate := p, link := none, label := l, rargs := rs, carg := some c} =>
     let as := Format.joinSep (rs.map fun a => f!"{a.1}: {a.2}") " "
     f!"[ {p} LBL: {l} {as} CARG: {c} ]"

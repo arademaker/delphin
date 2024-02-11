@@ -9,7 +9,7 @@ def Array.asString (a : Array Char) : String :=
   Array.foldl (λ s c => s ++ c.toString) "" a
 
 /- the parser
-   defined from the BNF https://github.com/delph-in/docs/wiki/MrsRFC#simple
+   defined from the BNF https://github.com/delph-in/docs/wiki/MrsRFC
 -/
 
 def parseSpace : Parsec String := do
@@ -134,7 +134,6 @@ def parseTop : Parsec Var :=
 
 def parseIndex : Parsec Var :=
   pstring "INDEX: " *> parseVar
-
 
 def parseHcons : Parsec (Array Constraint) := do
   let _ ← pstring "HCONS:" <* parseSpace
