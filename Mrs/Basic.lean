@@ -29,6 +29,9 @@ structure Constraint where
   lhs : Var
   rhs : Var
 
+instance : BEq Constraint where
+  beq a b := a.lhs == b.lhs && a.rhs == b.rhs
+
 instance : ToFormat Constraint where
  format
   | {rel := r, lhs := l, rhs := h} => f!"{l} {r} {h}"
