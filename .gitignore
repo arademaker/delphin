@@ -2,3 +2,5 @@
 build/
 lake-packages/
 **/*.olean
+.DS_Store
+utool-3.4.jar
