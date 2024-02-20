@@ -1,6 +1,5 @@
 
 import Mrs.Basic
-import Mrs.Parser
 import Ace
 
 open Std
@@ -91,11 +90,48 @@ def construct_initial_bindings (m : MRS) : List (Nat × List Nat) :=
   let rs := labels ++ holes
   rs.eraseDups.map (λ n => (n , [n]))
 
--- def qeq_outscopes (m : MRS) := sorry
+def equated_list (m : MRS) : List Nat :=
+  let labels := m.preds.map (λ p => p.label.id)
+  let g (e : EP) : List Nat :=
+    get_handel_args e |>.foldl (λ rs v =>
+      if labels.elem v.id then v.id :: rs else rs) []
+  let rec f : List EP -> List Nat -> List Nat
+   | [], rs => rs
+   | (e :: es), rs => f es $ rs.append (g e)
+  f m.preds []
+
+
+partial def outscoped_labels (m : MRS) (lhp : AssocList Nat (List Nat))
+  (eql : List Nat) (hole : Nat) : List Nat :=
+  let f := outscoped_labels m lhp eql
+  let g (rs : List Nat) (l : Nat) :=
+    if l == hole then rs else rs ++ (f l)
+
+  let a :=
+   if (eql.elem hole) then
+    match lhp.find? hole with
+    | none => []
+    | some ls => ls.foldl g []
+   else []
+
+  let b := m.hcons.foldl
+    (λ rs h =>
+     if h.lhs.id == hole then
+      match lhp.find? h.rhs.id with
+      | none => rs ++ [h.rhs.id]
+      | some ls => rs ++ (h.rhs.id :: (ls.foldl g []))
+     else rs) []
+  a ++ b
+
+def define_qeq_chains (m : MRS) : List (Nat × List Nat) :=
+  let lhps := (label_hole_pairs m).toAssocList
+  let eqs := equated_list m
+  let f := outscoped_labels m lhps eqs
+  holes m |>.map (λ h => (h, f h))
 
 def test1 := do
-  let as ← run_ace "Every boy loves a girl."
-  let rs := as.map check_all_qeqs
+  let as ← run_ace "Every boy loves a woman."
+  let rs := as.map define_qeq_chains
   return rs
 
 #eval test1
