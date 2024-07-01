@@ -32,40 +32,11 @@ variable (p10'' : ¬ ∃ x, ∀ y, hates x y)
 
 variable (p11 : agatha ≠ butler)
 
-theorem result : killed agatha agatha := by
-  have ⟨n,h1,h2⟩ := p1
-  have h3 := p3 n h1
-  have nkca : ¬killed charles agatha := by
-    have haa : hates agatha agatha := p7 agatha p11
-    have nhca : ¬hates charles agatha := p6 agatha haa
-    intro kca
-    exact nhca (p4 charles agatha kca)
-
-  cases h3 with
-  | inl h => rw [h] at h2; exact h2
-  | inr h => cases h with
-    | inl h =>
-        rw [h] at h1 h2; clear h
-        cases (p3 butler) h1 with
-        | inl h => rw [h] at h2; exact h2
-        | inr h => cases h with
-          | inl h => rw [h]; exact p8 butler (p5 butler agatha h2)
-          | inr h => rw [h]
-                     apply p9 charles
-                     apply p7 charles
-                     intro H
-                     rw [←H] at h2
-                     exact nkca h2
-    | inr h =>
-       rw [h] at h2
-       apply False.elim
-       exact nkca h2
 
 /- In other words, assuming the [butler killed Agatha] would involve
    that the [butler hates everyone], which is impossible. -/
 
-
-theorem result' : killed agatha agatha := by
+theorem result : killed agatha agatha := by
   have ⟨n,h1,h2⟩ := p1
   have h3 := p3 n h1
   have nkca : ¬killed charles agatha := by
@@ -96,11 +67,11 @@ theorem result' : killed agatha agatha := by
        apply False.elim
        exact nkca h2
 
-#print axioms result'
+#print result
+
 
 
 /-
-
 variable (inter : String → (u → Prop))
 #check (inter "_love_v_1") ∧ (inter "bla")
 
@@ -109,5 +80,21 @@ def mrs_to_prop (a : MRS) : Prop := sorry
 example (h1 : p "all men are mortal")
         (h2 : p "socrates is a man")
         : p "socrates is moral" := do
+
+variable (x : Type) (e : Type)
+
+variable (inter : String → Prop)
+variable (inter_ex : String → (e → x → Prop))
+variable (inter_xx : String → (x → x → Prop))
+variable (inter_ee : String → (e → e → Prop))
+
+def ep2prop (e : EP) : Prop :=
+ inter e.predicate
+
+def mrs2prop (m : MRS) : Prop :=
+ MRS.preds
+
+def b :=
+ ep2prop inter (EP.mk "mortal" none (Var.mk "h0" none #[]) [("ARG1", Var.mk "x3" none #[])] none)
 
 -/
