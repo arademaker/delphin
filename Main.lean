@@ -4,10 +4,16 @@ import Mrs
 import Lean.Data.Parsec
 import Ace
 
-#eval run_ace "Socrates is mortal."
--- def test := "..."
--- #eval test.drop 2415
--- #eval parseMRS test.mkIterator
+def test1 := do
+  let as ← run_ace "Every happy dog barks."
+  return as.head?
+
+-- set_option pp.oneline true
+-- set_option pp.proofs true
+-- set_option trace.profiler true in
+
+#eval test1
+
 
 def report (r : String × Except String MRS) :=
  match r.2 with
@@ -21,6 +27,24 @@ def main : IO Unit := do
   return ()
 
 -- #eval main
+
+
+/-
+https://ncatlab.org/nlab/show/dependent+type+theoretic+methods+in+natural+language+semantics
+-/
+
+section MTT
+
+  variable (_farmer_n_1 : Type α)
+  variable (_donkey_n_1 : Type α)
+  variable (_own_v_1 : _farmer_n_1 → _donkey_n_1 → Type α)
+  variable (_beat_v_to : _farmer_n_1 → _donkey_n_1 → Type α)
+
+  #check ∀ z : (Σ x : _farmer_n_1, Σ y : _donkey_n_1, _own_v_1 x y), _beat_v_to z.1 z.2.1
+  #check fun z : (Σ x : _farmer_n_1, Σ y : _donkey_n_1, _own_v_1 x y) => _beat_v_to z.1 z.2.1
+
+end MTT
+
 
 /-
 
@@ -45,9 +69,3 @@ def b :=
  ep2prop inter (EP.mk "mortal" none (Var.mk "h0" none #[]) [("ARG1", Var.mk "x3" none #[])] none)
 
 -/
-
-def test1 := do
-  let as ← run_ace "The cat is blue."
-  return as
-
-#eval test1

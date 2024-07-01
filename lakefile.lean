@@ -12,7 +12,7 @@ lean_lib «Ace» where
   -- add library configuration options here
 
 require std from git
-  "https://github.com/leanprover/std4/"@"v4.4.0"
+  "https://github.com/leanprover/std4/"@"v4.5.0"
 
 @[default_target]
 lean_exe «delphin» where

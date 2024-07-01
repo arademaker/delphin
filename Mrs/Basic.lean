@@ -24,6 +24,9 @@ instance : ToFormat Var where
 instance : Repr Var where
  reprPrec v _ := f!"{v}"
 
+-- set_option trace.Meta.synthInstance true in
+-- #synth Repr Var
+
 structure Constraint where
   rel : String
   lhs : Var

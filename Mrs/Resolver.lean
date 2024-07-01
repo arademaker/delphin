@@ -1,4 +1,3 @@
-
 import Mrs.Basic
 import Ace
 
@@ -128,10 +127,3 @@ def define_qeq_chains (m : MRS) : List (Nat × List Nat) :=
   let eqs := equated_list m
   let f := outscoped_labels m lhps eqs
   holes m |>.map (λ h => (h, f h))
-
-def test1 := do
-  let as ← run_ace "Every boy loves a woman."
-  let rs := as.map define_qeq_chains
-  return rs
-
-#eval test1
