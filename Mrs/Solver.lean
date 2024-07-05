@@ -8,9 +8,6 @@ def valid_assignments( m : MRS) : List (Var × Var) :=
  sorry
 
 
-
-
-
 /-
 
 inductive Tree where

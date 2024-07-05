@@ -2,6 +2,7 @@
 https://dmcommunity.org/challenge/challenge-nov-2014/
 https://ece.uwaterloo.ca/~agurfink/stqam.w20/assets/pdf/W07-FOL.pdf
 https://arxiv.org/pdf/1204.6615.pdf
+https://tptp.org/cgi-bin/SeeTPTP?Category=Problems&Domain=PUZ&File=PUZ001+1.p
 -/
 
 import Std.Logic

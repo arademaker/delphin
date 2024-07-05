@@ -1,7 +1,7 @@
-import Init.System.IO
-import Std
+-- import Init.System.IO
+-- import Std
 import Mrs.Parser
-open Std
+-- open Std
 open IO.Process
 
 /- util for low-level acess to Ace process -/

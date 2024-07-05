@@ -1,7 +1,9 @@
+import Lean
 import Mrs.Basic
 import Ace
 
-open Std
+-- open Std
+open Lean
 
 def is_quantifier (rel : EP) : Bool :=
  match rel.rargs.find? (λ fv => fv.1 == "BODY") with
@@ -65,7 +67,7 @@ def map_quantifiers_preds (m : MRS) : AssocList EP (List EP) :=
   let   q_map := (q_rels.foldl (λ rs p =>
    match get_arg_value "ARG0" p with
     | none => rs
-    | some v => (v, p) :: rs) []).toAssocList
+    | some v => rs.insert v p) AssocList.nil)
   let rec f (p : EP) (tb : γ) : List Var → γ
    | [] => tb
    | (v :: vs) => match q_map.find? v with
@@ -123,7 +125,7 @@ partial def outscoped_labels (m : MRS) (lhp : AssocList Nat (List Nat))
   a ++ b
 
 def define_qeq_chains (m : MRS) : List (Nat × List Nat) :=
-  let lhps := (label_hole_pairs m).toAssocList
+  let lhps := (label_hole_pairs m).toAssocList'
   let eqs := equated_list m
   let f := outscoped_labels m lhps eqs
   holes m |>.map (λ h => (h, f h))
