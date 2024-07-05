@@ -3,7 +3,7 @@ import Lean.Data.Parsec
 import Mrs.Basic
 
 open Lean Parsec
-open Std
+open Lean
 
 def Array.asString (a : Array Char) : String :=
   Array.foldl (λ s c => s ++ c.toString) "" a

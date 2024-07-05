@@ -16,7 +16,8 @@ def report0 (r : String × Except String MRS) :=
 
 def report1 (r : String × Except String MRS) :=
  match r.2 with
- | Except.ok b => IO.println $ (b.preds.map (λ p : EP => p.predicate)).filter (λ s : String => s.endsWith "q")
+ | Except.ok b => IO.println $
+   (b.preds.map (λ p : EP => p.predicate)).filter (λ s : String => s.endsWith "q")
  | Except.error e => IO.println e
 
 def main : IO Unit := do

@@ -1,9 +1,10 @@
+import Lean
 
 /- the data structure
    https://github.com/delph-in/docs/wiki/MrsRFC
 -/
 
-open Std
+open Lean
 
 structure Var where
  id    : Nat
