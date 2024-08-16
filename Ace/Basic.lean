@@ -3,7 +3,7 @@
 import Mrs.Parser
 -- open Std
 open IO.Process
-
+open MRS
 /- util for low-level acess to Ace process -/
 
 def cmd_with_stdin (args : SpawnArgs) (input : String) : IO Output := do

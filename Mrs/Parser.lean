@@ -2,11 +2,13 @@
 import Lean.Data.Parsec
 import Mrs.Basic
 
-open Lean Parsec
-open Lean
+namespace MRS
 
-def Array.asString (a : Array Char) : String :=
-  Array.foldl (λ s c => s ++ c.toString) "" a
+open Array
+open Lean Parsec
+
+def _root_.Array.asString (a : Array Char) : String :=
+  a.foldl (λ s c => s ++ c.toString) ""
 
 /- the parser
    defined from the BNF https://github.com/delph-in/docs/wiki/MrsRFC
@@ -23,21 +25,22 @@ def parsePath : Parsec String := do
 
 def parseToken : Parsec String := do
   let p ← many1 $ satisfy $ fun c =>
-    "\\:]>".data.notElem c ∧ ¬ c.isWhitespace
+    ¬ "\\:]>".data.elem c ∧ ¬ c.isWhitespace
   return p.asString
 
 def parseTypePred : Parsec String := do
- let aux : Char → Bool := fun c => ("<>\"".data.notElem c ∧ ¬ c.isWhitespace)
+ let aux : Char → Bool := fun c => (¬ "<>\"".data.elem c ∧ ¬ c.isWhitespace)
  let p ← many1 $ satisfy aux
  return p.asString
 
+
 def parseQuotedString : Parsec String := do
   let a1 ← pchar '"'
-  let a2 ← many $ satisfy $ fun c => ['"', '\\'].notElem c
+  let a2 ← many $ satisfy $ fun c => ¬ ['"', '\\'].elem c
   let a3 ← many (do
     let a ← pchar '\\'
     let b ← (satisfy $ fun c => c ≠ '\n')
-    let c ← many $ satisfy $ fun c => ['"', '\\'].notElem c
+    let c ← many $ satisfy $ fun c => ¬ ['"', '\\'].elem c
     return (#[a,b] ++ c).asString)
   let a4 ← pchar '"'
   return (a1.toString ++ a2.asString ++
@@ -173,3 +176,5 @@ def parseMRS : Parsec MRS := do
     let icons ← (attempt parseIcons <|> pure #[]) <* parseSpace
     let _ ← pchar ']'
     pure $ MRS.mk top idx rls.toList hcons.toList icons.toList
+
+end MRS

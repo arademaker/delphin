@@ -6,6 +6,8 @@ import Lean
 
 open Lean
 
+namespace MRS
+
 structure Var where
  id    : Nat
  sort  : Char
@@ -94,3 +96,5 @@ instance : ToFormat MRS where
 
 instance : Repr MRS where
  reprPrec m _ := f!"{m}"
+
+end MRS

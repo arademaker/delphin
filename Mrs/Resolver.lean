@@ -1,19 +1,10 @@
-import Lean
-import Mrs.Basic
+import Mrs.Solver
 import Ace
+import Lean
 
 -- open Std
 open Lean
 
-def is_quantifier (rel : EP) : Bool :=
- match rel.rargs.find? (λ fv => fv.1 == "BODY") with
- | none => false
- | some _ => true
-
-def get_arg_value (nm : String) (rel : EP) : Option Var :=
- match rel.rargs.find? (λ fv => fv.1 == nm) with
- | none => none
- | some (_, v) => some v
 
 def get_handel_args_with_features (p : EP) : List (String × Var) :=
  p.rargs.filter (λ fvp => fvp.2.sort == 'h')
@@ -23,9 +14,6 @@ def get_handel_args (p : EP) : List Var :=
 
 def nonquantified_var (v : Var) : Bool :=
   v.sort ≠ 'x'
-
-def collect_vars (rel : EP) : List Var :=
-  (rel.rargs.map (λ fv => fv.2))
 
 def has_duplicated_handle_argument (m : MRS) : Bool :=
   let hs := m.preds.map get_handel_args
@@ -51,15 +39,6 @@ def check_all_qeqs (m : MRS) : Bool :=
    | (h' :: hs) => (h.lhs.id ≠ h'.lhs.id) ∧ (h.rhs.id ≠ h'.rhs.id) ∧ f h hs
   let c₄ := (fst_and_rest m.hcons).all (λ h => f h.1 h.2)
   c₄ ∧ m.hcons.all (λ h => c₁ h ∧ c₂ h ∧ c₃ h)
-
-def find_unbound_vars (m : MRS) : List Var :=
-  let q_rels := m.preds.filter is_quantifier
-  let q_vars := q_rels.map (get_arg_value "ARG0")
-  let as := m.preds.foldl (λ vs e => vs.append $ collect_vars e) []
-  let is_q (v₁ : Var) : Option Var → Bool
-  | none => false
-  | some v₂ => v₁ == v₂
-  as.filter (λ v => not $ q_vars.any (is_q v))
 
 def map_quantifiers_preds (m : MRS) : AssocList EP (List EP) :=
   let  γ : Type := AssocList EP (List EP)

@@ -1,9 +1,14 @@
 import Mrs
 import Ace
 
+open MRS
+
 def test1 := do
-  let as ← run_ace "Every happy dog barks."
-  return as.head?
+  let as ← run_ace "Every boy loves a book."
+  return as
+
+#eval test1
+
 
 -- set_option pp.oneline true
 -- set_option pp.proofs true
@@ -25,5 +30,6 @@ def main : IO Unit := do
   let rs := ls.toList.map (λ l => (l, Lean.Parsec.run parseMRS l))
   let _ ← rs.mapM report1
   return ()
+
 
 -- #eval main
