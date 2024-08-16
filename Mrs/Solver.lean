@@ -34,15 +34,11 @@ def parseSolution : Parsec (Array Plug) := do
   let _ ← pchar ']'
   return ps
 
-def parseSolutions : Parsec (Array (Array Plug)) := do
-  let _ ← pchar '['
-  let ps ← many $ (parseSolution <* parseSpace)
-  let _ ← pchar ']'
-  return ps
-
 def parseOutput : Parsec (Array (Array Plug)) := do
   let _ ← pchar '%' *> many (satisfy $ fun c => c ≠ '\n')
-  let ps ← parseSpace *> parseSolutions
+  let _ ← parseSpace *> pchar '['
+  let ps ← many $ (parseSolution <* parseSpace)
+  let _ ← pchar ']'
   return ps
 
 def run_utool (txt : String) := do
