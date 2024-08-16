@@ -6,12 +6,14 @@ namespace Utool
 /- In this namespace we have the code to parse the Utool output
    and produce the Utool Input from a MRS -/
 
-open Lean Parsec
-open MRS
+
+open Lean (Parsec)
+open Lean.Parsec (pchar pstring satisfy many1 asciiLetter digit many)
+open MRS (Var parseSpace)
 
 structure Plug where
-  lo : MRS.Var
-  hi : MRS.Var
+  hol : Var
+  lbl : Var
  deriving Repr
 
 def parseVarName : Parsec (Char × Nat) := do
@@ -26,7 +28,7 @@ def parsePlug : Parsec Plug := do
   let _ ← pchar ')'
   let vlo := {id := lo.2, sort := lo.1, props := #[] : Var}
   let vhi := {id := hi.2, sort := hi.1, props := #[] : Var}
-  return { lo := vlo, hi := vhi}
+  return {hol := vlo, lbl := vhi}
 
 def parseSolution : Parsec (Array Plug) := do
   let _ ← pchar '['
