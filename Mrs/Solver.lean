@@ -3,8 +3,8 @@ import Ace
 
 namespace Utool
 
-/- In this namespace we have the code to parse the Utool output and produce
-   the Utool Input from a MRS -/
+/- In this namespace we have the code to parse the Utool output
+   and produce the Utool Input from a MRS -/
 
 open Lean Parsec
 open MRS
@@ -27,8 +27,6 @@ def parsePlug : Parsec Plug := do
   let vlo := {id := lo.2, sort := lo.1, props := #[] : Var}
   let vhi := {id := hi.2, sort := hi.1, props := #[] : Var}
   return { lo := vlo, hi := vhi}
-
--- #eval parsePlug "plug(h1 h3)".mkIterator
 
 def parseSolution : Parsec (Array Plug) := do
   let _ ← pchar '['
@@ -89,9 +87,6 @@ def solve_mrs (m : MRS) : MRS := sorry
 
 
 end Utool
-
-
-
 
 
 /- TODO
