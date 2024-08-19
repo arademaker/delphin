@@ -5,7 +5,7 @@ open MRS
 
 def test1 := do
   let as ← run_ace "Every boy loves a book."
-  return as
+  return as.head?
 
 #eval test1
 

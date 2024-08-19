@@ -43,7 +43,7 @@ def parseOutput : Parsec (Array (Array Plug)) := do
   let _ ← pchar ']'
   return ps
 
-def run_utool (txt : String) := do
+def run_utool (txt : String) : IO (Except String $ Array $ Array Plug) := do
   let ret ← cmd_with_stdin {cmd := "java", args := #["-jar","utool-3.4.jar", "solve", "-I", "mrs-prolog", "-O", "plugging-oz", "-"], cwd := "."} txt
   let  p := Parsec.run parseOutput ret.stdout
   return p
