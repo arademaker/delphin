@@ -16,6 +16,56 @@ structure Plug where
   lbl : Var
  deriving Repr
 
+instance : ToString Plug where
+  toString p := s!"Plug(hol : {p.hol.id}, lbl: {p.lbl.id})"
+
+def joinSep (l : List String) (sep : String) : String := l.foldr (fun s r => (if r == "" then s else r ++ sep ++ s)) ""
+
+def Var.format (var : Var) : String :=
+  match var with
+  | {id := n, sort := s, props := #[]} =>
+       s!"{s}{n}"
+  | {id := n, sort := s, props := ps} =>
+     -- let a := Format.join $ ps.toList.map fun p => s!"{p.1}: {p.2}"
+     s!"{s}{n}"
+     -- s!"{s}{n} [{s} {a}]" -- drop the properties
+
+def EP.format (ep : MRS.EP) : String :=
+  match ep with
+  | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
+    let pairs := joinSep (rs.map fun a => "attrval('" ++ a.1 ++ "'," ++ (Var.format a.2) ++ ")")  ","
+    "rel(" ++ "'" ++ p ++ "'" ++ "," ++ Var.format l ++ ",[" ++ pairs ++ "," ++ "attrval('CARG','" ++ s!"{c}" ++ "')])"
+  | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := none} =>
+    let pairs := joinSep (rs.map fun a => "attrval('" ++ a.1 ++ "'," ++ (Var.format a.2) ++ ")") ","
+    "rel(" ++ "'" ++ p ++ "'" ++ "," ++ Var.format l ++ ",[" ++ pairs ++ "])"
+  | {predicate := p, link := none, label := l, rargs := rs, carg := some c} =>
+    let pairs := joinSep (rs.map fun a => "attrval('" ++ a.1 ++ "'," ++ (Var.format a.2) ++ ")") ","
+    "rel(" ++ "'" ++ p ++ "'" ++ "," ++ Var.format l ++ ",[" ++ pairs ++ "," ++ "attrval('CARG','" ++ s!"{c}" ++ "')])"
+  | {predicate := p, link := none, label := l, rargs := rs, carg := none} =>
+    let pairs := joinSep (rs.map fun a => "attrval('" ++ a.1 ++ "\"," ++ (Var.format a.2) ++ ")") ","
+    "rel(" ++ "'" ++ p ++ "'" ++ "," ++ Var.format l ++ ",[" ++ pairs ++ "])"
+
+def Constraint.format (cons : MRS.Constraint) : String :=
+  match cons with
+  | {rel := r, lhs := l, rhs := h} => r ++ "(" ++ Var.format l ++ "," ++ Var.format h ++ ")"
+
+def MRS.format (mrs : MRS.MRS) : String :=
+ match mrs with
+ | {top := t, index := i, preds := ps, icons := [], hcons := hs} =>
+   let rl : List String := List.map (fun p => EP.format p) ps
+   let relStr : String := joinSep rl ","
+   let hl : List String := List.map (fun h => Constraint.format h) hs
+   let hStr : String := joinSep hl ","
+   "psoa(" ++ (Var.format t) ++ "," ++ (Var.format i) ++ "," ++ "[" ++ relStr ++ "],hcons([" ++ hStr ++ "]))"
+ | {top := t, index := i, preds := ps, icons := is, hcons := hs} =>
+   let rl := List.map (fun p => EP.format p) ps
+   let relStr : String := joinSep rl ","
+   let hl : List String := List.map (fun p => Constraint.format p) hs
+   let hStr : String := joinSep hl ","
+   let il : List String := List.map (fun i => Constraint.format i) is
+   let iStr : String := joinSep il ","
+   "psoa(" ++ (Var.format t) ++ "," ++ (Var.format i) ++ "," ++ "[" ++ relStr ++ "],hcons([" ++ hStr ++ "],icons([" ++ iStr ++ "]))"
+
 def parseVarName : Parsec (Char × Nat) := do
   let p ← asciiLetter
   let s ← many1 digit
@@ -47,8 +97,6 @@ def run_utool (txt : String) : IO (Except String $ Array $ Array Plug) := do
   let ret ← cmd_with_stdin {cmd := "java", args := #["-jar","utool-3.4.jar", "solve", "-I", "mrs-prolog", "-O", "plugging-oz", "-"], cwd := "."} txt
   let  p := Parsec.run parseOutput ret.stdout
   return p
-
-
 def prolog_example : String := "psoa(h0,e2,
   [rel('unknown',h1,
        [attrval('ARG',x4),
@@ -75,14 +123,32 @@ def prolog_example : String := "psoa(h0,e2,
   hcons([qeq(h0,h1),qeq(h6,h8),qeq(h12,h9),qeq(h15,h16)]))"
 
 
-#eval run_utool prolog_example
+-- #eval run_utool prolog_example
 
+def subst (var : Var) (plugs : Array Plug) : Var := 
+  let result := plugs.find? (fun plug => var.id == plug.hol.id)
+  match result with
+  | some value => value.lbl
+  | none => var
 
-def mrs_to_prolog (m : MRS) : String := sorry
+def rewrite (plugs : Array Plug) (a : String × Var) : (String × Var) :=
+  (a.1,subst a.2 plugs)
 
+def updateEP (plugs : Array Plug) (ep : MRS.EP) : MRS.EP :=
+  match ep with 
+  | {predicate := p, link := lnk, label := l, rargs := rs, carg := c} => MRS.EP.mk p lnk l (rs.map (rewrite plugs)) c
 
-def solve_mrs (m : MRS) : MRS := sorry
+def updateEPs (mrs : MRS.MRS) (plugs : Array Plug) : List MRS.EP :=
+  mrs.preds.map (updateEP plugs)
 
+def expandPlugs (mrs : MRS.MRS) (plugsSet : Array (Array Plug)) : Array (List MRS.EP) :=
+  plugsSet.map (fun plugs => (updateEPs mrs plugs))
+
+def solveIt (mrs : MRS.MRS) : IO (Except String (Array (List MRS.EP))) := do
+  let ret ← run_utool $ MRS.format mrs
+  match ret with
+  | Except.ok plugsSet => return (Except.ok (expandPlugs mrs plugsSet))
+  | Except.error e => return (Except.error e)
 
 end Utool
 
