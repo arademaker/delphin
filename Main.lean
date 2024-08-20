@@ -3,13 +3,6 @@ import Ace
 
 open MRS
 
-def test1 := do
-  let as ← run_ace "Every boy loves a book."
-  return as.head?
-
-#eval test1
-
-
 -- set_option pp.oneline true
 -- set_option pp.proofs true
 -- set_option trace.profiler true in
@@ -26,10 +19,9 @@ def report1 (r : String × Except String MRS) :=
  | Except.error e => IO.println e
 
 def main : IO Unit := do
-  let ls ← IO.FS.lines "ws201.txt"
-  let rs := ls.toList.map (λ l => (l, Lean.Parsec.run parseMRS l))
-  let _ ← rs.mapM report1
+  let as ← run_ace "Every boy loves a book."
+  for a in as do
+    println! f!"{a}"
   return ()
-
 
 -- #eval main
