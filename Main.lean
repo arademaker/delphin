@@ -18,10 +18,22 @@ def report1 (r : String × Except String MRS) :=
    (b.preds.map (λ p : EP => p.predicate)).filter (λ s : String => s.endsWith "q")
  | Except.error e => IO.println e
 
+def report2 (r : String × Except String MRS) : IO (Except String (Array Unit)) := do
+ match r.2 with
+ | Except.ok b =>
+    let ret <- Utool.solveIt b
+    match ret with
+    | Except.ok expansions => 
+      let retArray <- expansions.mapM (fun epList => IO.println $ f!"{epList}")
+      return (Except.ok retArray)
+    | Except.error e2 => return (Except.error e2)
+ | Except.error e => return (Except.error e)
+
 def main : IO Unit := do
-  let as ← run_ace "Every boy loves a book."
-  for a in as do
-    println! f!"{a}"
+  let ls ← IO.FS.lines "ws201.txt"
+  let rs := ls.toList.map (λ l => (l, Lean.Parsec.run parseMRS l))
+  let _ ← rs.mapM report2
   return ()
+
 
 -- #eval main
