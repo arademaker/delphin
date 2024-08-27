@@ -18,10 +18,10 @@ def report1 (r : String × Except String MRS) :=
    (b.preds.map (λ p : EP => p.predicate)).filter (λ s : String => s.endsWith "q")
  | Except.error e => IO.println e
 
-def main : IO Unit := do
+def main := do
   let as ← run_ace "Every boy loves a book."
-  for a in as do
-    println! f!"{a}"
-  return ()
+  match as.head? with
+  | none => println! "No parse"
+  | some a => println! a.toProlog
 
--- #eval main
+#eval main
