@@ -16,6 +16,9 @@ structure Var where
 instance : BEq Var where
  beq a b := a.id == b.id
 
+instance : Hashable Var where
+  hash v := hash s!"{v.sort}{v.id}"
+
 instance : ToFormat Var where
  format
   | {id := n, sort := s, props := #[]} =>
@@ -114,7 +117,7 @@ instance : Repr MRS where
  reprPrec m _ := f!"{m}"
 
 
-section PrettyPrint
+section MRS_Prolog
 open Std.Format
 
 def Var.toProlog (v : Var) : Std.Format :=
@@ -147,11 +150,14 @@ def MRS.toProlog (m : MRS) : Std.Format :=
   ++ text "," ++ text "["
   ++ Format.joinSep (m.preds.map EP.toProlog) ", "
   ++ text "]"
-  ++ text "," ++ text "["
+  ++ text ","
+  ++ text "hcons" ++ text "("
+  ++ text "["
   ++ Format.joinSep (m.hcons.map Constraint.toProlog) ", "
   ++ text "]"
   ++ text ")"
+  ++ text ")"
 
-end PrettyPrint
+end MRS_Prolog
 
 end MRS
