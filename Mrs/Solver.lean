@@ -61,5 +61,4 @@ def solve_mrs (m : MRS) (ps : Array Plug) : MRS :=
           | some v' => (v.1, v')
           | none => (v.1, v.2)) }), hcons := [] }
 
-
 end Utool

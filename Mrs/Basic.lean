@@ -2,11 +2,15 @@ import Lean
 
 /- the data structure
    https://github.com/delph-in/docs/wiki/MrsRFC
+
+set_option trace.Meta.synthInstance true in
+#synth Repr Var
 -/
 
 open Lean
 
 namespace MRS
+open Std.Format
 
 structure Var where
  id    : Nat
@@ -17,21 +21,21 @@ instance : BEq Var where
  beq a b := a.id == b.id
 
 instance : Hashable Var where
-  hash v := hash s!"{v.sort}{v.id}"
+ hash v := hash s!"{v.sort}{v.id}"
 
-instance : ToFormat Var where
- format
-  | {id := n, sort := s, props := #[]} =>
-    f!"{s}{n}"
-  | {id := n, sort := s, props := ps} =>
-    let a := Format.joinSep (ps.toList.map fun p => f!"{p.1}: {p.2}") " "
-    f!"{s}{n} [{s} {a}]"
+def Var.toSimple (v : Var) : Std.Format :=
+  let a := joinSep (v.props.toList.map fun p => f!"{p.1}: {p.2}") (text " ")
+  let p := s!"{v.sort}{v.id}"
+  match a with
+  | nil => text p
+  | fs => text p ++ text " [" ++ text s!"{v.sort} " ++ fs ++ text "]"
 
 instance : Repr Var where
- reprPrec v _ := f!"{v}"
+ reprPrec v _ := v.toSimple
 
--- set_option trace.Meta.synthInstance true in
--- #synth Repr Var
+instance : ToFormat Var where
+ format v := v.toSimple
+
 
 structure Constraint where
   rel : String
@@ -39,7 +43,7 @@ structure Constraint where
   rhs : Var
 
 instance : BEq Constraint where
-  beq a b := a.lhs == b.lhs && a.rhs == b.rhs
+ beq a b := a.lhs == b.lhs && a.rhs == b.rhs
 
 instance : ToFormat Constraint where
  format
@@ -57,7 +61,7 @@ structure EP where
   carg  : Option String
  deriving BEq
 
-def EP.toStr : EP → Format
+def EP.toSimple : EP → Format
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
     let as := Format.joinSep (rs.map fun a => f!"{a.1}: {a.2}") " "
     f!"[ {p}<{n}:{m}> LBL: {l} {as} CARG: {c} ]"
@@ -70,26 +74,12 @@ def EP.toStr : EP → Format
   | {predicate := p, link := none, label := l, rargs := rs, carg := none} =>
     let as := Format.joinSep (rs.map fun a => f!"{a.1}: {a.2}") " "
     f!"[ {p} LBL: {l} {as} ]"
-
-/-
-instance : ToFormat EP where
- format
-  | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
-    let as := Format.joinSep (rs.map fun a => f!"{a.1}: {a.2}") " "
-    f!"[ {p}<{n}:{m}> LBL: {l} {as} CARG: {c} ]"
-  | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := none} =>
-    let as := Format.joinSep (rs.map fun a => f!"{a.1}: {a.2}") " "
-    f!"[ {p}<{n}:{m}> LBL: {l} {as} ]"
-  | {predicate := p, link := none, label := l, rargs := rs, carg := some c} =>
-    let as := Format.joinSep (rs.map fun a => f!"{a.1}: {a.2}") " "
-    f!"[ {p} LBL: {l} {as} CARG: {c} ]"
-  | {predicate := p, link := none, label := l, rargs := rs, carg := none} =>
-    let as := Format.joinSep (rs.map fun a => f!"{a.1}: {a.2}") " "
-    f!"[ {p} LBL: {l} {as} ]"
--/
 
 instance : Repr EP where
- reprPrec e _ := f!"{e.toStr}"
+ reprPrec e _ := e.toSimple
+
+instance : ToFormat EP where
+ format e := e.toSimple
 
 
 structure MRS where
@@ -99,22 +89,24 @@ structure MRS where
   hcons : List Constraint
   icons : List Constraint
 
-instance : ToFormat MRS where
- format
+def MRS.toSimple : MRS → Format
  | {top := t, index := i, preds := ps, icons := [], hcons := hs} =>
    f!"[ LTOP: {t}
         INDEX: {i}
-        RELS: < {Format.joinSep (ps.map fun a => a.toStr) " "} >
-        HCONS: < {Format.joinSep (hs.map fun a => format a) " "} > ]"
+        RELS: < {Format.joinSep ps " "} >
+        HCONS: < {Format.joinSep hs " "} > ]"
  | {top := t, index := i, preds := ps, icons := is, hcons := hs} =>
    f!"[ LTOP: {t}
         INDEX: {i}
-        RELS: < {Format.joinSep (ps.map fun a => a.toStr) " "} >
-        HCONS: < {Format.joinSep (hs.map fun a => format a) " "} >
-        ICONS: < {Format.joinSep (is.map fun a => format a) " "} > ]"
+        RELS: < {Format.joinSep ps " "} >
+        HCONS: < {Format.joinSep hs " "} >
+        ICONS: < {Format.joinSep is " "} > ]"
 
 instance : Repr MRS where
- reprPrec m _ := f!"{m}"
+ reprPrec m _ := m.toSimple
+
+instance : ToFormat MRS where
+ format m := m.toSimple
 
 
 section MRS_Prolog
