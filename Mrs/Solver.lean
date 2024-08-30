@@ -1,5 +1,6 @@
 import Mrs.Basic
 import Ace
+import Lean.Data.HashMap
 
 namespace Utool
 
@@ -9,7 +10,8 @@ namespace Utool
 
 open Lean (Parsec)
 open Lean.Parsec (pchar pstring satisfy many1 asciiLetter digit many)
-open MRS (Var parseSpace)
+open MRS (Var EP Constraint MRS parseSpace)
+open Lean (HashMap)
 
 structure Plug where
   hol : Var
@@ -144,10 +146,37 @@ def updateEPs (mrs : MRS.MRS) (plugs : Array Plug) : List MRS.EP :=
 def expandPlugs (mrs : MRS.MRS) (plugsSet : Array (Array Plug)) : Array (List MRS.EP) :=
   plugsSet.map (fun plugs => (updateEPs mrs plugs))
 
-def solveIt (mrs : MRS.MRS) : IO (Except String (Array (List MRS.EP))) := do
+def insertDepsForEP (hm : HashMap Var Var) (ep : EP) : HashMap Var Var :=
+  ep.rargs.foldl (fun hmacc pair => hmacc.insert pair.2 ep.label) hm
+
+def collectDepsForEPs (preds : List EP) : HashMap Var Var :=
+  preds.foldl (fun hmacc ep => insertDepsForEP hmacc ep) HashMap.empty
+
+def findRoot (scopes : (HashMap Var Var)) (start : Var) : Var :=
+  let rec findRoot_aux (fuel : Nat) (current : Var) : Var :=
+    if fuel = 0 then
+      current  -- Base case: return current if we've exhausted our fuel
+    else
+      match scopes.find? current with
+      | some value => findRoot_aux (fuel - 1) value
+      | none => current
+  findRoot_aux (scopes.size + 1) start
+
+def createNewMRS (mrsIn : MRS) (newPreds : List EP) : MRS :=
+  let scopes := collectDepsForEPs newPreds
+  let newScopes := 
+    match mrsIn.hcons.find? (fun item => item.lhs == mrsIn.top) with
+    | some x => scopes.insert x.lhs x.rhs
+    | none => panic! "top node not found in hcons"
+  MRS.mk (findRoot newScopes mrsIn.top) mrsIn.index newPreds [] []
+
+def createNewMRS_many (mrsIn : MRS) (alep : (Array (List EP))) : (Array MRS) :=
+  alep.map (fun preds => createNewMRS mrsIn preds)
+
+def solveIt (mrs : MRS) : IO (Except String (Array MRS)) := do
   let ret ← run_utool $ MRS.format mrs
   match ret with
-  | Except.ok plugsSet => return (Except.ok (expandPlugs mrs plugsSet))
+  | Except.ok plugsSet => return (Except.ok (createNewMRS_many mrs (expandPlugs mrs plugsSet)))
   | Except.error e => return (Except.error e)
 
 end Utool
