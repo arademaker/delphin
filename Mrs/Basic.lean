@@ -13,6 +13,12 @@ structure Var where
  sort  : Char
  props : Array (String × String)
 
+instance : ToString Var where
+  toString var := s!"{var.sort}{var.id}"
+
+instance : Hashable Var where
+ hash var := hash var.id
+
 instance : BEq Var where
  beq a b := a.id == b.id
 
