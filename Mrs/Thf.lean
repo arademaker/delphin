@@ -66,19 +66,19 @@ def EP.format.axiom (ep : EP) : String :=
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
     let pairs := joinSep (rs.map fun a => Var.format.pair a.2)  ","
     let args := joinSep (rs.map fun a => Var.format.labelOnly a.2)  " @ "
-    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ pairs ++ ",'" ++ s!"{c}" ++ "'] : (" ++ p ++ " @ " ++ args ++ ")))"
+    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ pairs ++ ",'" ++ s!"{c}" ++ "'] : (" ++ p ++ " @ " ++ args ++ ")))."
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := none} =>
     let pairs := joinSep (rs.map fun a => Var.format.pair a.2)  ","
     let args := joinSep (rs.map fun a => Var.format.labelOnly a.2)  " @ "
-    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ pairs ++ "] : (" ++ p ++ " @ " ++ args ++ ")))"
+    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ pairs ++ "] : (" ++ p ++ " @ " ++ args ++ ")))."
   | {predicate := p, link := none, label := l, rargs := rs, carg := some c} =>
     let pairs := joinSep (rs.map fun a => Var.format.pair a.2)  ","
     let args := joinSep (rs.map fun a => Var.format.labelOnly a.2)  " @ "
-    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ pairs ++ ",'" ++ s!"{c}" ++ "'] : (" ++ p ++ " @ " ++ args ++ ")))"
+    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ pairs ++ ",'" ++ s!"{c}" ++ "'] : (" ++ p ++ " @ " ++ args ++ ")))."
   | {predicate := p, link := none, label := l, rargs := rs, carg := none} =>
     let pairs := joinSep (rs.map fun a => Var.format.pair a.2)  ","
     let args := joinSep (rs.map fun a => Var.format.labelOnly a.2)  " @ "
-    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = (^ [" ++ pairs ++ "] : (" ++ p ++ " @ " ++ args ++ ")))"
+    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = (^ [" ++ pairs ++ "] : (" ++ p ++ " @ " ++ args ++ ")))."
 
 def MRS.format (mrs : MRS.MRS) : String :=
  let header0 := "thf(x_decl,type,x : $tType)."
