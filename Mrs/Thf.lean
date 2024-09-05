@@ -26,6 +26,13 @@ open MRS (Var EP Constraint MRS)
 open Lean (HashMap)
 open MM
 
+def libraryRoutines : String := 
+  "thf(book_n_of_decl,type,book_n_of: x > $o).\n" ++
+  "thf(love_v_1_decl,type,love_v_1: x > x > $o).\n" ++
+  "thf(a_q_decl,type,every_q: (x > $o) > (x > $o) > $o).\n" ++ 
+  "thf(every_q_decl,type,a_q: (x > $o) > (x > $o) > $o).\n" ++
+  "thf(boy_n_1_decl,type,boy_n_1: x > $o)." 
+
 def joinSep (l : List String) (sep : String) : String := l.foldr (fun s r => (if r == "" then s else r ++ sep ++ s)) ""
 
 def Var.format.typeOnly (var : Var) : String :=
@@ -134,19 +141,19 @@ def EP.format.type (hm : HashMap Var Var) (em : Multimap) (ep : EP) : String :=
 
   match ep with
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
-    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ (extraArgs l) ++ (lookupArg l) ++ "string > $o)."
+    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ (extraArgs l) ++ (lookupArg l) ++ "string > $o)."
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := none} =>
-    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ (extraArgs l) ++ (lookupArg l) ++ "$o)."
+    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ (extraArgs l) ++ (lookupArg l) ++ "$o)."
   | {predicate := p, link := none, label := l, rargs := rs, carg := some c} =>
-    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ (extraArgs l) ++ (lookupArg l) ++ "string > $o)."
+    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ (extraArgs l) ++ (lookupArg l) ++ "string > $o)."
   | {predicate := p, link := none, label := l, rargs := rs, carg := none} =>
-    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ (extraArgs l) ++ (lookupArg l) ++ "$o)."
+    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ (extraArgs l) ++ (lookupArg l) ++ "$o)."
 
 
 def EP.format.axiom (hm : HashMap Var Var) (em : Multimap) (ep : EP) : String :=
   let lookupArg (labelVar : Var) : String :=
     match (hm.find? labelVar) with
-    | some value => Var.format.labelOnly value
+    | some value => Var.format.pair value
     | none => ""
 
   let getArgs (rs : List (String × Var)) : List (String × Var) :=
@@ -158,27 +165,40 @@ def EP.format.axiom (hm : HashMap Var Var) (em : Multimap) (ep : EP) : String :=
 
   let extraArgs (labelVar : Var) : String := 
     match (mm.find? em labelVar) with
-    | some value => (joinSep (value.map (fun var => Var.format.labelOnly var)) ",") ++ ","
+    | some value => (joinSep (value.map (fun var => Var.format.pair var)) ",") ++ ","
     | none => ""
+
+  let fixName (PredName : String) : String :=
+    match (PredName.get? 0) with
+      | '_' => PredName.drop 1
+      | _ => PredName
+
+  let printCarg (l : Var) (rs : List (String × Var)) (p : String) (c : String) : String :=
+    let args := joinSep ((getArgs rs).map fun a => Var.format.labelWithDep a.2 em)  " @ "
+    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ (extraArgs l) ++ (lookupArg l) ++ ",'" ++ s!"{c}" ++ "'] : (" ++ fixName p ++ " @ " ++ args ++ ")))."
+
+  let printNormal (l : Var) (rs : List (String × Var)) (p : String) : String :=
+    let args := joinSep ((getArgs rs).map fun a => Var.format.labelWithDep a.2 em)  " @ "
+    let combined := (extraArgs l) ++ (lookupArg l)
+    if combined == "" then
+      "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = (" ++ fixName p ++ " @ " ++ args ++ "))."
+    else
+      "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ combined ++ "] : (" ++ fixName p ++ " @ " ++ args ++ ")))."
 
   match ep with
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
-    let args := joinSep ((getArgs rs).map fun a => Var.format.labelWithDep a.2 em)  " @ "
-    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ (extraArgs l) ++ (lookupArg l) ++ ",'" ++ s!"{c}" ++ "'] : (" ++ p ++ " @ " ++ args ++ ")))."
+    printCarg l rs p c 
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := none} =>
-    let args := joinSep ((getArgs rs).map fun a => Var.format.labelWithDep a.2 em)  " @ "
-    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ (extraArgs l) ++ (lookupArg l) ++ "] : (" ++ p ++ " @ " ++ args ++ ")))."
+    printNormal l rs p 
   | {predicate := p, link := none, label := l, rargs := rs, carg := some c} =>
-    let args := joinSep ((getArgs rs).map fun a => Var.format.labelWithDep a.2 em)  " @ "
-    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ (extraArgs l) ++ (lookupArg l) ++ ",'" ++ s!"{c}" ++ "'] : (" ++ p ++ " @ " ++ args ++ ")))."
+    printCarg l rs p c 
   | {predicate := p, link := none, label := l, rargs := rs, carg := none} =>
-    let args := joinSep ((getArgs rs).map fun a => Var.format.labelWithDep a.2 em)  " @ "
-    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = (^ [" ++ (extraArgs l) ++ (lookupArg l) ++ "] : (" ++ p ++ " @ " ++ args ++ ")))."
+    printNormal l rs p 
 
 def MRS.format (mrs : MRS.MRS) : String :=
  let header0 := "thf(x_decl,type,x : $tType)."
  let header1 := "thf(e_decl,type,e : $tType)."
- let headers := header0 ++ "\n" ++ header1 ++ "\n"
+ let headers := header0 ++ "\n" ++ header1 ++ "\n" ++ libraryRoutines ++ "\n"
  let printIt ps :=
    let hm := collectVarsForEPs ps
    let em := collectExtraVarsForEPs ps hm
