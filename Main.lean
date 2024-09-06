@@ -41,8 +41,25 @@ def report2 (r : String × Except String MRS) : IO (Except String (Array Unit)) 
   | Except.error e => return (Except.error e)
 
 def main : IO Unit := do
- let as <- run_ace "Every boy loves a book."
- for mrs in as do
-   let val <- reportTHF mrs
+ let mrsList : List MRS <- run_ace "Agatha, the butler, and Charles live in Dreadbury Mansion, and are the only people who live therein."
+ _ <- match mrsList.head? with
+      | some firstMrs => 
+          let solveRet <- Utool.solveIt firstMrs
+          match solveRet with
+          | Except.ok sols => 
+            match sols.get? 0 with
+            | some sol => IO.println $ THF.MRS.format $ sol
+            | none => unreachable!
+          | Except.error e2 => unreachable!
+      | none => unreachable!
+
+/- ./parse "A killer always hates his victim, and is never richer than his victim." 2
+./parse "Charles hates no one that Aunt Agatha hates." 3
+./parse "Agatha hates everyone except the butler." 4
+./parse "The butler hates everyone not richer than Aunt Agatha." 5
+./parse "The butler hates everyone Aunt Agatha hates." 6
+./parse "No one hates everyone." 7
+./parse "Agatha is not the butler." 8
+./parse "Therefore : Agatha killed herself." 9 -/
   
 -- #eval main
