@@ -45,6 +45,17 @@ def libraryRoutines : String :=
   "thf(every_q_decl,type,a_q: (x > $o) > (x > $o) > $o).\n" ++
   "thf(boy_n_1_decl,type,boy_n_1: x > $o)." 
 
+
+def insert [Ord α] (x : α) : List α → List α
+  | [] => [x]
+  | y :: ys => if Ord.compare x y == .lt || Ord.compare x y == .eq 
+                then x :: y :: ys 
+                else y :: insert x ys
+
+def insertionSort [Ord α] : List α → List α
+  | [] => []
+  | x :: xs => insert x (insertionSort xs)
+
 def joinSep (l : List String) (sep : String) : String := l.foldr (fun s r => (if r == "" then s else r ++ sep ++ s)) ""
 
 def Var.format.typeOnly (var : Var) : String :=
@@ -64,15 +75,6 @@ def Var.format.labelOnly (var : Var) : String :=
 def Var.format.labelOnlyGround (var : Var) : String :=
   s!"{var.sort}{var.id}"
 
-def Var.format.labelWithDep (var : Var) (em : Multimap Var Var) : String :=
-  match (em.find? var) with
-  | some extraList => "(" ++ (Var.format.labelOnlyGround var) ++ " @ " ++ (joinSep (extraList.map (fun item => Var.format.labelOnly item)) " @ ") ++ ")"
-  | none => 
-    if var.sort == 'h' then
-      Var.format.labelOnlyGround var
-    else
-      Var.format.labelOnly var
-
 def Var.format.pair (var : Var) : String :=
   if var.sort == 'x' then
     s!"{var.sort.toUpper}{var.id} : {var.sort}"
@@ -82,6 +84,26 @@ def Var.format.pair (var : Var) : String :=
     s!"{var.sort}{var.id} : {var.sort}{var.id}"
   else
     unreachable!
+
+def Var.format.labelWithDeps (ep : EP) (var : Var) (qm : HashMap Var Var) (em : Multimap Var Var) : String :=
+  let defaultExpr := 
+    if var.sort == 'h' then
+      Var.format.labelOnlyGround var
+    else
+      Var.format.labelOnly var
+  match qm.find? var with
+  | some iterVar => 
+    match (em.find? var) with
+    | some extraList => 
+      dbg_trace ((Var.format.pair ep.label) ++ "/" ++ (Var.format.pair var))
+      let l := extraList.filter (fun evar => iterVar != evar)
+      let l2 := l.map (fun item => Var.format.labelOnly item)
+      "(" ++ (Var.format.labelOnlyGround var) ++ " @ " ++ (joinSep l2 " @ ") ++ ")"
+    | none => defaultExpr
+  | none =>
+    match (em.find? var) with
+    | some extraList => "(" ++ (Var.format.labelOnlyGround var) ++ " @ " ++ (joinSep (extraList.map (fun item => Var.format.labelOnly item)) " @ ") ++ ")"
+    | none => defaultExpr
 
 def Var.format.all (var : Var) : String :=
   s!"{var.sort}{var.id}{var.props}"
@@ -178,28 +200,23 @@ def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multima
   | some value => value
   | none => sorry
 
-  let lookupArg (labelVar : Var) : String :=
-    match (qm.find? labelVar) with
-    | some value => Var.format.pair value
-    | none => ""
-
   let getArgs (ep : EP) : List (String × Var) :=
     let ret1 := if lastTwoChars ep.predicate == "_q" then
                   ep.rargs.filter (fun item => item.1 != "ARG0") 
                 else
                   ep.rargs
-    ret1.filter (fun item => item.2.sort == 'x' || item.2.sort == 'h' || item.2.sort == 'e') 
+    let ret2 := ret1.filter (fun item => item.2.sort == 'x' || item.2.sort == 'h' || item.2.sort == 'e') 
+    ret2
 
   let extraArgs (qm : HashMap Var Var) (labelVar : Var) : String := 
-    dbg_trace ("<" ++ (Var.format.pair labelVar)) ;
     match (em.find? labelVar) with
     | some value => 
       let larg := match (qm.find? labelVar) with
                   | some value => value
                   | none => sorry
-      let l := value.filter (fun arg => arg != larg)
-      let str := (joinSep (l.map (fun var => Var.format.pair var)) ",") ++ "," ;
-      dbg_trace (str ++ ">") ;
+      let l : List Var := (value.filter (fun arg => arg != larg))
+      let ls : List Var := insertionSort l
+      let str := (joinSep (l.map (fun var => Var.format.pair var)) ",") ++ "," 
       str
     | none => ""
 
@@ -209,7 +226,11 @@ def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multima
       | _ => PredName
 
   let printNormal (l : Var) (preds : List EP) : String :=
-    let joinArgs0 (ep : EP) := joinSep ((getArgs ep).map fun a => Var.format.labelWithDep a.2 em)  " @ "
+    let lookupArg (labelVar : Var) : String :=
+      match (qm.find? labelVar) with
+      | some value => Var.format.pair value
+      | none => ""
+    let joinArgs0 (ep : EP) := joinSep ((getArgs ep).map fun a => Var.format.labelWithDeps ep a.2 qm em)  " @ "
     let joinArgs (ep : EP) := 
       match ep.carg with
       | some str => joinArgs0 ep ++ " @ " ++ str
