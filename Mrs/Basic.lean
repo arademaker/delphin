@@ -16,6 +16,12 @@ structure Var where
 instance : ToString Var where
   toString var := s!"{var.sort}{var.id}"
 
+instance : Ord Var where
+  compare := fun a b =>
+    match compare a.sort b.sort with
+    | .eq => compare a.id b.id
+    | ord => ord
+
 instance : Hashable Var where
  hash var := hash var.id
 
