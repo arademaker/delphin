@@ -50,7 +50,7 @@ def main : IO Unit := do
             match sols.get? 0 with
             | some sol => IO.println $ THF.MRS.format $ sol
             | none => unreachable!
-          | Except.error e2 => unreachable!
+          | Except.error _ => unreachable!
       | none => unreachable!
 
 /- ./parse "A killer always hates his victim, and is never richer than his victim." 2
