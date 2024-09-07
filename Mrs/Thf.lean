@@ -39,12 +39,27 @@ open Lean (HashMap)
 open MM
 
 def libraryRoutines : String := 
-  "thf(book_n_of_decl,type,book_n_of: x > $o).\n" ++
-  "thf(love_v_1_decl,type,love_v_1: x > x > $o).\n" ++
-  "thf(a_q_decl,type,every_q: (x > $o) > (x > $o) > $o).\n" ++ 
   "thf(every_q_decl,type,a_q: (x > $o) > (x > $o) > $o).\n" ++
-  "thf(boy_n_1_decl,type,boy_n_1: x > $o)." 
+  "thf(the_q_decl,type,the_q: (x > $o) > (x > $o) > $o).\n" ++
+  "thf(proper_q_decl,type,proper_q: (x > $o) > (x > $o) > $o).\n" ++
+  "thf(udef_q_decl,type,udef_q: (x > $o) > (x > $o) > $o).\n" ++
+  "\n" ++ 
+  -- "thf(book_n_of_decl,type,book_n_of: x > $o).\n" ++
+  -- "thf(love_v_1_decl,type,love_v_1: x > x > $o).\n" ++
+  -- "thf(a_q_decl,type,every_q: (x > $o) > (x > $o) > $o).\n" ++ 
+  -- "thf(boy_n_1_decl,type,boy_n_1: x > $o).\n"  ++
 
+  "thf(therein_p_dir_decl,type,therein_p_dir: e > e > $o).\n" ++
+  "thf(live_v_1_decl,type,live_v_1: e > x > $o).\n" ++
+  "thf(people_n_of_decl,type,people_n_of: x).\n" ++
+  "thf(only_n_1_decl,type,only_n_1: e > x > $o).\n" ++
+  "thf(named_decl,type,named: x > string > $o).\n" ++
+  "thf(and_c_decl,type,and_c_x: x > x > x > $o).\n" ++
+  "thf(butler_n_1_decl,type,butler_n_1: x > $o).\n" ++
+  "thf(implicit_conj_decl,type,implicit_conj: x > x > x > $o).\n" ++
+  "thf(be_v_id_decl,type,be_v_id: e > x > x > $o).\n" ++
+  "thf(in_p_loc_decl,type,in_p_loc: e > e > x > $o).\n" ++
+  "thf(live_v_1_decl,type,live_v_1: e > x > $o).\n"
 
 def insert [Ord α] (x : α) : List α → List α
   | [] => [x]
@@ -95,10 +110,12 @@ def Var.format.labelWithDeps (ep : EP) (var : Var) (qm : HashMap Var Var) (em : 
   | some iterVar => 
     match (em.find? var) with
     | some extraList => 
-      dbg_trace ((Var.format.pair ep.label) ++ "/" ++ (Var.format.pair var))
       let l := extraList.filter (fun evar => iterVar != evar)
-      let l2 := l.map (fun item => Var.format.labelOnly item)
-      "(" ++ (Var.format.labelOnlyGround var) ++ " @ " ++ (joinSep l2 " @ ") ++ ")"
+      let l1 := (insertionSort l).eraseDups
+      let l2 := l1.map (fun item => Var.format.labelOnly item)
+      let l2str := joinSep l2 " @ "
+      let lab := Var.format.labelOnlyGround var
+      if l2str == "" then lab else "(" ++ lab ++ " @ " ++ l2str ++ ")" 
     | none => defaultExpr
   | none =>
     match (em.find? var) with
@@ -136,22 +153,34 @@ def collectExtraVarsForEPs (preds : List EP) (qm : HashMap Var Var) : Multimap V
     if lastTwoChars ep.predicate == "_q" then
       em
     else
-      ep.rargs.foldl (fun (emac : Multimap Var Var) (pair : (String × Var)) => 
+      let add (emac : Multimap Var Var) (pair : (String × Var)) : Multimap Var Var :=
+        match emac.find? ep.label with
+          | some l => if l.contains pair.2 then emac else emac.insert ep.label pair.2
+          | none => emac.insert ep.label pair.2
+      let condAdd (emac : Multimap Var Var) (pair : (String × Var)) : Multimap Var Var :=
          match (qm.find? ep.label) with
          | some value => 
-           if pair.2.sort = 'x' && pair.2 != value then 
-             match emac.find? ep.label with
-             | some l => if l.contains pair.2 then emac else emac.insert ep.label pair.2
-             | none => emac.insert ep.label pair.2
-           else
-             emac
-         | none => emac) em
+             (if pair.2.sort == 'x' && pair.2 != value then 
+               add emac pair
+              else
+                emac)
+         | none => 
+             (if pair.2.sort == 'x' then
+               add emac pair
+             else
+               emac)
+      ep.rargs.foldl condAdd em
   preds.foldl insertExtra Multimap.empty
 
 def augmentIndirect (em : Multimap Var Var) (ep : EP) : Multimap Var Var :=
   let add (emin : Multimap Var Var) (var : Var) : Multimap Var Var := 
     match (emin.find? var) with
-    | some vals => vals.foldl (fun acc arg => acc.insert ep.label arg) emin
+    | some vals => vals.foldl (fun acc arg => 
+                               match (acc.find? arg) with
+                               | some _ => acc
+                               | none => dbg_trace ("Augmenting " ++ (Var.format.pair ep.label) ++ " with " ++ (Var.format.pair arg));
+                                         acc.insert ep.label arg)
+                              emin
     | none => emin
   if lastTwoChars ep.predicate == "_q" then
     match ep.rargs with
@@ -162,33 +191,45 @@ def augmentIndirect (em : Multimap Var Var) (ep : EP) : Multimap Var Var :=
         add (add em a.2) c.2
       else 
         add (add em a.2) b.2
-    | _ => sorry
+    | _ => 
+        dbg_trace "augmentIndirect" ;
+        sorry
   else
     em
 
 def collectHOExtraVarsForEPs (preds : List EP) (em : Multimap Var Var) : Multimap Var Var :=
-  preds.foldl (fun emac ep => augmentIndirect emac ep) em
+  preds.foldl augmentIndirect em
   
 def EP.format.type (qm : HashMap Var Var) (em : Multimap Var Var) (ep : EP) : String :=
   let lookupArg (labelVar : Var) : String :=
     match (qm.find? labelVar) with
-    | some value => (Var.format.typeOnly value) ++ " > "
+    | some value => Var.format.typeOnly value
     | none => ""
 
-  let extraArgs (labelVar : Var) : String := 
+  let extraArgs (qm : HashMap Var Var) (labelVar : Var) : String := 
     match (em.find? labelVar) with
-    | some value => (joinSep (value.map (fun var => Var.format.typeOnly var)) " > ") ++ " > "
+    | some value => 
+      let l := match (qm.find? labelVar) with
+               | some larg => value.filter (fun arg => arg != larg)
+               | none => value
+      let ls : List Var := (insertionSort l).eraseDups
+      let estr : String := (joinSep (ls.map (fun var => Var.format.typeOnly var)) " > ")
+      estr
     | none => ""
 
+  let lstr := lookupArg ep.label
+  let estr := extraArgs qm ep.label
+  let combined := (if estr == "" then estr else estr ++ " > ") ++ (if lstr == "" then lstr else lstr ++ " > ")
+  
   match ep with
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
-    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ (extraArgs l) ++ (lookupArg l) ++ "string > $o)."
+    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ combined ++ "string > $o)."
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := none} =>
-    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ (extraArgs l) ++ (lookupArg l) ++ "$o)."
+    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ combined ++ "$o)."
   | {predicate := p, link := none, label := l, rargs := rs, carg := some c} =>
-    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ (extraArgs l) ++ (lookupArg l) ++ "string > $o)."
+    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ combined ++ "string > $o)."
   | {predicate := p, link := none, label := l, rargs := rs, carg := none} =>
-    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ (extraArgs l) ++ (lookupArg l) ++ "$o)."
+    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ combined ++ "$o)."
 
 
 def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (handle : Var) : String :=
@@ -198,26 +239,27 @@ def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multima
 
   let firstEp := match preds.head? with
   | some value => value
-  | none => sorry
+  | none => 
+    dbg_trace "firstEP"; sorry
 
   let getArgs (ep : EP) : List (String × Var) :=
-    let ret1 := if lastTwoChars ep.predicate == "_q" then
-                  ep.rargs.filter (fun item => item.1 != "ARG0") 
-                else
-                  ep.rargs
+    -- let ret1 := if lastTwoChars ep.predicate == "_q" then
+    --              ep.rargs.filter (fun item => item.1 != "ARG0") 
+    --            else
+    --              ep.rargs
+    let ret1 := ep.rargs
     let ret2 := ret1.filter (fun item => item.2.sort == 'x' || item.2.sort == 'h' || item.2.sort == 'e') 
     ret2
 
   let extraArgs (qm : HashMap Var Var) (labelVar : Var) : String := 
     match (em.find? labelVar) with
     | some value => 
-      let larg := match (qm.find? labelVar) with
-                  | some value => value
-                  | none => sorry
-      let l : List Var := (value.filter (fun arg => arg != larg))
-      let ls : List Var := insertionSort l
-      let str := (joinSep (l.map (fun var => Var.format.pair var)) ",") ++ "," 
-      str
+      let l := match (qm.find? labelVar) with
+               | some larg => value.filter (fun arg => arg != larg)
+               | none => value
+      let ls : List Var := (insertionSort l).eraseDups
+      let estr : String := (joinSep (ls.map (fun var => Var.format.pair var)) ",")
+      estr
     | none => ""
 
   let fixName (PredName : String) : String :=
@@ -235,9 +277,11 @@ def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multima
       match ep.carg with
       | some str => joinArgs0 ep ++ " @ " ++ str
       | none => joinArgs0 ep
-    let combined := (extraArgs qm l) ++ (lookupArg l)
+    let lstr := lookupArg l
+    let estr := extraArgs qm l
+    let combined := estr ++ (if lstr == "" then "" else (if estr == "" then "" else ",") ++ lstr)
     if combined == "" then
-      "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = " ++ fixName (firstEp.predicate) ++ " @ " ++ (joinArgs firstEp)  ++ ")."
+      "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = (" ++ fixName (firstEp.predicate) ++ " @ " ++ (joinArgs firstEp)  ++ "))."
     else
       let (lparen,rparen) := if preds.length > 1 then ("(",")") else ("","")
       let allCalls := preds.foldl (fun acc ep => (acc.1 ++ acc.2 ++ lparen ++ (fixName ep.predicate) ++ " @ " ++ (joinArgs ep) ++ rparen," & ")) ("","")
@@ -258,10 +302,11 @@ def collectEvents (preds : List EP) : List Var :=
 def MRS.format (mrs : MRS.MRS) : String :=
  let header0 := "thf(x_decl,type,x : $tType)."
  let header1 := "thf(e_decl,type,e : $tType)."
- let headers := header0 ++ "\n" ++ header1 ++ "\n" ++ libraryRoutines ++ "\n"
+ let header2 := "thf(string_decl,type,string : $i)."
+ let headers := header0 ++ "\n" ++ header1 ++ "\n\n" ++ libraryRoutines ++ "\n"
  let eSet := collectEvents mrs.preds 
  let qm := collectQuantifierVars mrs.preds
- let em := collectHOExtraVarsForEPs mrs.preds $ collectExtraVarsForEPs mrs.preds qm
+ let em := collectHOExtraVarsForEPs mrs.preds $ collectHOExtraVarsForEPs mrs.preds $ collectExtraVarsForEPs mrs.preds qm
  let hm := collectEPsByHandle mrs.preds
  let rlt := (List.map (EP.format.type qm em) mrs.preds).eraseDups
  let rla := List.map (EP.format.axiom qm em hm) hm.keys 
