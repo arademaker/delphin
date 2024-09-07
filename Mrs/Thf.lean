@@ -52,14 +52,15 @@ def libraryRoutines : String :=
   "thf(therein_p_dir_decl,type,therein_p_dir: e > e > $o).\n" ++
   "thf(live_v_1_decl,type,live_v_1: e > x > $o).\n" ++
   "thf(people_n_of_decl,type,people_n_of: x).\n" ++
-  "thf(only_n_1_decl,type,only_n_1: e > x > $o).\n" ++
+  "thf(only_a_1_decl,type,only_a_1: e > x > $o).\n" ++
   "thf(named_decl,type,named: x > string > $o).\n" ++
-  "thf(and_c_decl,type,and_c_x: x > x > x > $o).\n" ++
+  "thf(and_c_decl,type,and_c: x > x > x > $o).\n" ++
   "thf(butler_n_1_decl,type,butler_n_1: x > $o).\n" ++
   "thf(implicit_conj_decl,type,implicit_conj: x > x > x > $o).\n" ++
   "thf(be_v_id_decl,type,be_v_id: e > x > x > $o).\n" ++
   "thf(in_p_loc_decl,type,in_p_loc: e > e > x > $o).\n" ++
-  "thf(live_v_1_decl,type,live_v_1: e > x > $o).\n"
+  "thf(live_v_1_decl,type,live_v_1: e > x > $o).\n" ++
+  "thf(compound_decl,type,compound: e > x > x > $o).\n" 
 
 def insert [Ord α] (x : α) : List α → List α
   | [] => [x]
@@ -160,7 +161,7 @@ def collectExtraVarsForEPs (preds : List EP) (qm : HashMap Var Var) : Multimap V
       let condAdd (emac : Multimap Var Var) (pair : (String × Var)) : Multimap Var Var :=
          match (qm.find? ep.label) with
          | some value => 
-             (if pair.2.sort == 'x' && pair.2 != value then 
+             (if pair.2.sort == 'x' then --  && pair.2 != value then 
                add emac pair
               else
                 emac)
@@ -285,7 +286,7 @@ def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multima
     else
       let (lparen,rparen) := if preds.length > 1 then ("(",")") else ("","")
       let allCalls := preds.foldl (fun acc ep => (acc.1 ++ acc.2 ++ lparen ++ (fixName ep.predicate) ++ " @ " ++ (joinArgs ep) ++ rparen," & ")) ("","")
-      "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ combined ++ "] : " ++ allCalls.1 ++ "))."
+      "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ combined ++ "] : " ++ "(" ++ allCalls.1 ++ ")))."
 
   printNormal firstEp.label preds
 
@@ -303,14 +304,16 @@ def MRS.format (mrs : MRS.MRS) : String :=
  let header0 := "thf(x_decl,type,x : $tType)."
  let header1 := "thf(e_decl,type,e : $tType)."
  let header2 := "thf(string_decl,type,string : $i)."
- let headers := header0 ++ "\n" ++ header1 ++ "\n\n" ++ libraryRoutines ++ "\n"
+ let headers := header0 ++ "\n" ++ header1 ++ header2 ++ "\n\n" ++ libraryRoutines ++ "\n"
  let eSet := collectEvents mrs.preds 
  let qm := collectQuantifierVars mrs.preds
- let em := collectHOExtraVarsForEPs mrs.preds $ collectHOExtraVarsForEPs mrs.preds $ collectExtraVarsForEPs mrs.preds qm
+ let em := collectHOExtraVarsForEPs mrs.preds $ collectHOExtraVarsForEPs mrs.preds $ collectHOExtraVarsForEPs mrs.preds $ collectExtraVarsForEPs mrs.preds qm
  let hm := collectEPsByHandle mrs.preds
  let rlt := (List.map (EP.format.type qm em) mrs.preds).eraseDups
  let rla := List.map (EP.format.axiom qm em hm) hm.keys 
- headers ++ (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id},type,$int @ {var.id}).")) "\n") ++ "\n" ++ (joinSep rlt "\n") ++ "\n" ++ (joinSep rla "\n")
+ let etypes := (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id}_decl,type,({var.sort}{var.id} : $int)).")) "\n")
+ let eaxioms := (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id}_value,axiom,({var.sort}{var.id} = {var.id})).")) "\n")
+ headers ++ etypes ++ "\n" ++ eaxioms ++ "\n" ++ (joinSep rlt "\n") ++ "\n" ++ (joinSep rla "\n")
 
 end THF
 
