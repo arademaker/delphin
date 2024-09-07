@@ -51,7 +51,7 @@ def libraryRoutines : String :=
 
   "thf(therein_p_dir_decl,type,therein_p_dir: e > e > $o).\n" ++
   "thf(live_v_1_decl,type,live_v_1: e > x > $o).\n" ++
-  "thf(people_n_of_decl,type,people_n_of: x).\n" ++
+  "thf(people_n_of_decl,type,people_n_of: x > $o).\n" ++
   "thf(only_a_1_decl,type,only_a_1: e > x > $o).\n" ++
   "thf(named_decl,type,named: x > string > $o).\n" ++
   "thf(and_c_decl,type,and_c: x > x > x > $o).\n" ++
@@ -304,15 +304,16 @@ def MRS.format (mrs : MRS.MRS) : String :=
  let header0 := "thf(x_decl,type,x : $tType)."
  let header1 := "thf(e_decl,type,e : $tType)."
  let header2 := "thf(string_decl,type,string : $i)."
- let headers := header0 ++ "\n" ++ header1 ++ header2 ++ "\n\n" ++ libraryRoutines ++ "\n"
+ let header3 := "thf(int_to_e_decl,type,int_to_e: $int > e)."
+ let headers := header0 ++ "\n" ++ header1 ++ "\n" ++ header2 ++ "\n" ++ header3 ++ "\n\n" ++ libraryRoutines ++ "\n"
  let eSet := collectEvents mrs.preds 
  let qm := collectQuantifierVars mrs.preds
  let em := collectHOExtraVarsForEPs mrs.preds $ collectHOExtraVarsForEPs mrs.preds $ collectHOExtraVarsForEPs mrs.preds $ collectExtraVarsForEPs mrs.preds qm
  let hm := collectEPsByHandle mrs.preds
  let rlt := (List.map (EP.format.type qm em) mrs.preds).eraseDups
  let rla := List.map (EP.format.axiom qm em hm) hm.keys 
- let etypes := (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id}_decl,type,({var.sort}{var.id} : $int)).")) "\n")
- let eaxioms := (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id}_value,axiom,({var.sort}{var.id} = {var.id})).")) "\n")
+ let etypes := (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id}_decl,type,({var.sort}{var.id} : e)).")) "\n")
+ let eaxioms := (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id}_value,axiom,({var.sort}{var.id} = (int_to_e @ {var.id}))).")) "\n")
  headers ++ etypes ++ "\n" ++ eaxioms ++ "\n" ++ (joinSep rlt "\n") ++ "\n" ++ (joinSep rla "\n")
 
 end THF
