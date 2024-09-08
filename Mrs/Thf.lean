@@ -40,9 +40,9 @@ open MM
 
 def libraryRoutines : String := 
   "thf(every_q_decl,type,a_q: (x > $o) > (x > $o) > $o).\n" ++
-  "thf(the_q_decl,type,the_q: (x > $o) > (x > $o) > $o).\n" ++
-  "thf(proper_q_decl,type,proper_q: (x > $o) > (x > $o) > $o).\n" ++
-  "thf(udef_q_decl,type,udef_q: (x > $o) > (x > $o) > $o).\n" ++
+  "thf(the_q_decl,type,the_q: x > (x > $o) > (x > $o) > $o).\n" ++
+  "thf(proper_q_decl,type,proper_q: x > (x > $o) > (x > $o) > $o).\n" ++
+  "thf(udef_q_decl,type,udef_q: x > (x > $o) > (x > $o) > $o).\n" ++
   "\n" ++ 
   -- "thf(book_n_of_decl,type,book_n_of: x > $o).\n" ++
   -- "thf(love_v_1_decl,type,love_v_1: x > x > $o).\n" ++
