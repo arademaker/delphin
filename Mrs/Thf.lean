@@ -179,8 +179,7 @@ def augmentIndirect (em : Multimap Var Var) (ep : EP) : Multimap Var Var :=
     | some vals => vals.foldl (fun acc arg => 
                                match (acc.find? arg) with
                                | some _ => acc
-                               | none => dbg_trace ("Augmenting " ++ (Var.format.pair ep.label) ++ " with " ++ (Var.format.pair arg));
-                                         acc.insert ep.label arg)
+                               | none => acc.insert ep.label arg)
                               emin
     | none => emin
   if lastTwoChars ep.predicate == "_q" then
@@ -200,12 +199,25 @@ def augmentIndirect (em : Multimap Var Var) (ep : EP) : Multimap Var Var :=
 
 def collectHOExtraVarsForEPs (preds : List EP) (em : Multimap Var Var) : Multimap Var Var :=
   preds.foldl augmentIndirect em
-  
-def EP.format.type (qm : HashMap Var Var) (em : Multimap Var Var) (ep : EP) : String :=
-  let lookupArg (labelVar : Var) : String :=
-    match (qm.find? labelVar) with
-    | some value => Var.format.typeOnly value
-    | none => ""
+
+def EP.format.type (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (handle : Var) : String :=
+  let preds := match (hm.find? handle) with
+  | some value => value
+  | none => []
+
+  let firstEp := match preds.head? with
+  | some value => value
+  | none => 
+    dbg_trace "firstEP"; sorry
+
+  let getArgs (ep : EP) : List (String × Var) :=
+    -- let ret1 := if lastTwoChars ep.predicate == "_q" then
+    --              ep.rargs.filter (fun item => item.1 != "ARG0") 
+    --            else
+    --              ep.rargs
+    let ret1 := ep.rargs
+    let ret2 := ret1.filter (fun item => item.2.sort == 'x' || item.2.sort == 'h' || item.2.sort == 'e') 
+    ret2
 
   let extraArgs (qm : HashMap Var Var) (labelVar : Var) : String := 
     match (em.find? labelVar) with
@@ -218,20 +230,27 @@ def EP.format.type (qm : HashMap Var Var) (em : Multimap Var Var) (ep : EP) : St
       estr
     | none => ""
 
-  let lstr := lookupArg ep.label
-  let estr := extraArgs qm ep.label
-  let combined := (if estr == "" then estr else estr ++ " > ") ++ (if lstr == "" then lstr else lstr ++ " > ")
-  
-  match ep with
-  | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
-    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ combined ++ "string > $o)."
-  | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := none} =>
-    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ combined ++ "$o)."
-  | {predicate := p, link := none, label := l, rargs := rs, carg := some c} =>
-    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ combined ++ "string > $o)."
-  | {predicate := p, link := none, label := l, rargs := rs, carg := none} =>
-    "thf(" ++ Var.format.labelOnlyGround l ++ "_decl,type," ++ Var.format.labelOnlyGround l ++ ": " ++ combined ++ "$o)."
+  let fixName (PredName : String) : String :=
+    match (PredName.get? 0) with
+      | '_' => PredName.drop 1
+      | _ => PredName
 
+  let printNormal (l : Var) (preds : List EP) : String :=
+    let lookupArg (labelVar : Var) : String :=
+      match (qm.find? labelVar) with
+      | some value => Var.format.typeOnly value
+      | none => ""
+    let joinArgs0 (ep : EP) := joinSep ((getArgs ep).map fun a => Var.format.typeOnly a.2)  " > "
+    let joinArgs (ep : EP) := 
+      match ep.carg with
+      | some str => joinArgs0 ep ++ " > " ++ str
+      | none => joinArgs0 ep
+    let lstr := lookupArg l
+    let estr := extraArgs qm l
+    let combined := estr ++ (if lstr == "" then "" else (if estr == "" then "" else " > ") ++ lstr)
+    let (lparen,rparen) := if preds.length > 1 then ("(",")") else ("","")
+    "thf(" ++ (Var.format.labelOnlyGround l) ++ "_decl,type," ++ (Var.format.labelOnlyGround l) ++ ": " ++ combined ++ " > $o)."
+  printNormal firstEp.label preds
 
 def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (handle : Var) : String :=
   let preds := match (hm.find? handle) with
@@ -310,7 +329,7 @@ def MRS.format (mrs : MRS.MRS) : String :=
  let qm := collectQuantifierVars mrs.preds
  let em := collectHOExtraVarsForEPs mrs.preds $ collectHOExtraVarsForEPs mrs.preds $ collectHOExtraVarsForEPs mrs.preds $ collectExtraVarsForEPs mrs.preds qm
  let hm := collectEPsByHandle mrs.preds
- let rlt := (List.map (EP.format.type qm em) mrs.preds).eraseDups
+ let rlt := List.map (EP.format.type qm em hm) hm.keys
  let rla := List.map (EP.format.axiom qm em hm) hm.keys 
  let etypes := (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id}_decl,type,({var.sort}{var.id} : e)).")) "\n")
  let eaxioms := (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id}_value,axiom,({var.sort}{var.id} = (int_to_e @ {var.id}))).")) "\n")
