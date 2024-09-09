@@ -54,7 +54,8 @@ def libraryRoutines : String :=
   "thf(people_n_of_decl,type,people_n_of: x > $o).\n" ++
   "thf(only_a_1_decl,type,only_a_1: e > x > $o).\n" ++
   "thf(named_decl,type,named: x > string > $o).\n" ++
-  "thf(and_c_decl,type,and_c: x > x > x > $o).\n" ++
+  "thf(and_c_x_decl,type,and_c_x: x > x > x > $o).\n" ++
+  "thf(and_c_e_decl,type,and_c_e: e > e > e > $o).\n" ++
   "thf(butler_n_1_decl,type,butler_n_1: x > $o).\n" ++
   "thf(implicit_conj_decl,type,implicit_conj: x > x > x > $o).\n" ++
   "thf(be_v_id_decl,type,be_v_id: e > x > x > $o).\n" ++
@@ -71,6 +72,23 @@ def insert [Ord α] (x : α) : List α → List α
 def insertionSort [Ord α] : List α → List α
   | [] => []
   | x :: xs => insert x (insertionSort xs)
+
+def removeQuotes (s : String) : String :=
+  if s.startsWith "\"" && s.endsWith "\"" then s.extract ⟨1⟩ ⟨s.length - 1⟩ else s
+
+def formatId (s : String) : String :=
+  "id_" ++ removeQuotes s
+
+def fixName (ep : EP) : String :=
+  let checkEonly (ep : EP) : Bool :=
+    let ret2 := ep.rargs.filter (fun item => item.2.sort == 'e')
+    (ret2.length == ep.rargs.length)
+  let selectAndForm (ep : EP) : String :=
+    if (checkEonly ep) then "_and_c_e" else "_and_c_x"
+  let PredName := if ep.predicate == "_and_c" then selectAndForm ep else ep.predicate
+  match (PredName.get? 0) with
+    | '_' => PredName.drop 1
+    | _ => PredName
 
 def joinSep (l : List String) (sep : String) : String := l.foldr (fun s r => (if r == "" then s else r ++ sep ++ s)) ""
 
@@ -230,11 +248,6 @@ def EP.format.type (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap
       estr
     | none => ""
 
-  let fixName (PredName : String) : String :=
-    match (PredName.get? 0) with
-      | '_' => PredName.drop 1
-      | _ => PredName
-
   let printNormal (l : Var) (preds : List EP) : String :=
     let lookupArg (labelVar : Var) : String :=
       match (qm.find? labelVar) with
@@ -243,7 +256,7 @@ def EP.format.type (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap
     let joinArgs0 (ep : EP) := joinSep ((getArgs ep).map fun a => Var.format.typeOnly a.2)  " > "
     let joinArgs (ep : EP) := 
       match ep.carg with
-      | some str => joinArgs0 ep ++ " > " ++ str
+      | some str => joinArgs0 ep ++ " > string"
       | none => joinArgs0 ep
     let lstr := lookupArg l
     let estr := extraArgs qm l
@@ -282,11 +295,6 @@ def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multima
       estr
     | none => ""
 
-  let fixName (PredName : String) : String :=
-    match (PredName.get? 0) with
-      | '_' => PredName.drop 1
-      | _ => PredName
-
   let printNormal (l : Var) (preds : List EP) : String :=
     let lookupArg (labelVar : Var) : String :=
       match (qm.find? labelVar) with
@@ -295,17 +303,14 @@ def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multima
     let joinArgs0 (ep : EP) := joinSep ((getArgs ep).map fun a => Var.format.labelWithDeps ep a.2 qm em)  " @ "
     let joinArgs (ep : EP) := 
       match ep.carg with
-      | some str => joinArgs0 ep ++ " @ " ++ str
+      | some str => joinArgs0 ep ++ " @ " ++ (formatId str)
       | none => joinArgs0 ep
     let lstr := lookupArg l
     let estr := extraArgs qm l
     let combined := estr ++ (if lstr == "" then "" else (if estr == "" then "" else ",") ++ lstr)
-    if combined == "" then
-      "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = (" ++ fixName (firstEp.predicate) ++ " @ " ++ (joinArgs firstEp)  ++ "))."
-    else
-      let (lparen,rparen) := if preds.length > 1 then ("(",")") else ("","")
-      let allCalls := preds.foldl (fun acc ep => (acc.1 ++ acc.2 ++ lparen ++ (fixName ep.predicate) ++ " @ " ++ (joinArgs ep) ++ rparen," & ")) ("","")
-      "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ combined ++ "] : " ++ "(" ++ allCalls.1 ++ ")))."
+    let (lparen,rparen) := if preds.length > 1 then ("(",")") else ("","")
+    let allCalls := preds.foldl (fun acc ep => (acc.1 ++ acc.2 ++ lparen ++ (fixName ep) ++ " @ " ++ (joinArgs ep) ++ rparen," & ")) ("","")
+    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ combined ++ "] : " ++ "(" ++ allCalls.1 ++ ")))."
 
   printNormal firstEp.label preds
 
@@ -325,15 +330,26 @@ def MRS.format (mrs : MRS.MRS) : String :=
  let header2 := "thf(string_decl,type,string : $i)."
  let header3 := "thf(int_to_e_decl,type,int_to_e: $int > e)."
  let headers := header0 ++ "\n" ++ header1 ++ "\n" ++ header2 ++ "\n" ++ header3 ++ "\n\n" ++ libraryRoutines ++ "\n"
+ let strings := mrs.preds.foldl (fun stab pred =>
+  match pred with
+  | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
+    stab.insert c l
+  | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := none} =>
+    stab
+  | {predicate := p, link := none, label := l, rargs := rs, carg := some c} =>
+    stab.insert c l
+  | {predicate := p, link := none, label := l, rargs := rs, carg := none} =>
+    stab) Multimap.empty
+ let stringDecls := strings.keys.foldl (fun strAcc str => strAcc ++ "thf(" ++ formatId str ++ "_decl,type," ++ formatId str ++ ": string).\n") ""
  let eSet := collectEvents mrs.preds 
  let qm := collectQuantifierVars mrs.preds
  let em := collectHOExtraVarsForEPs mrs.preds $ collectHOExtraVarsForEPs mrs.preds $ collectHOExtraVarsForEPs mrs.preds $ collectExtraVarsForEPs mrs.preds qm
  let hm := collectEPsByHandle mrs.preds
- let rlt := List.map (EP.format.type qm em hm) hm.keys
- let rla := List.map (EP.format.axiom qm em hm) hm.keys 
+ let rlt := hm.keys.map (EP.format.type qm em hm) 
+ let rla := hm.keys.map (EP.format.axiom qm em hm) 
  let etypes := (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id}_decl,type,({var.sort}{var.id} : e)).")) "\n")
  let eaxioms := (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id}_value,axiom,({var.sort}{var.id} = (int_to_e @ {var.id}))).")) "\n")
- headers ++ etypes ++ "\n" ++ eaxioms ++ "\n" ++ (joinSep rlt "\n") ++ "\n" ++ (joinSep rla "\n")
+ headers ++ etypes ++ "\n" ++ eaxioms ++ "\n" ++ stringDecls ++ (joinSep rlt "\n") ++ "\n" ++ (joinSep rla "\n")
 
 end THF
 
