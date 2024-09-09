@@ -39,10 +39,17 @@ open Lean (HashMap)
 open MM
 
 def libraryRoutines : String := 
-  "thf(every_q_decl,type,a_q: (x > $o) > (x > $o) > $o).\n" ++
-  "thf(the_q_decl,type,the_q: x > (x > $o) > (x > $o) > $o).\n" ++
-  "thf(proper_q_decl,type,proper_q: x > (x > $o) > (x > $o) > $o).\n" ++
-  "thf(udef_q_decl,type,udef_q: x > (x > $o) > (x > $o) > $o).\n" ++
+  "thf(every_q_decl,type,every_q:               x > (x > $o) > (x > $o) > $o).\n" ++
+  "thf(some_q_decl,type,some_q:                 x > (x > $o) > (x > $o) > $o).\n" ++
+  "thf(the_q_decl,type,the_q:                   x > (x > $o) > (x > $o) > $o).\n" ++
+  "thf(proper_q_decl,type,proper_q:             x > (x > $o) > (x > $o) > $o).\n" ++
+  "thf(pronoun_q_decl,type,pronoun_q:           x > (x > $o) > (x > $o) > $o).\n" ++
+  "thf(udef_q_decl,type,udef_q:                 x > (x > $o) > (x > $o) > $o).\n" ++
+  "thf(def_explicit_q_decl,type,def_explicit_q: x > (x > $o) > (x > $o) > $o).\n" ++
+  "thf(no_q_decl,type,no_q:                     x > (x > $o) > (x > $o) > $o).\n" ++
+  "thf(never_a_1_decl,type,never_a_1:           ($o) > $o).\n" ++
+  "thf(neg_decl,type,neg:                       e > ($o) > $o).\n" ++
+  "thf(colon_p_namely,type,colon_p_namely:      e > ($o) > ($o) > $o).\n" ++
   "\n" ++ 
   -- "thf(book_n_of_decl,type,book_n_of: x > $o).\n" ++
   -- "thf(love_v_1_decl,type,love_v_1: x > x > $o).\n" ++
@@ -52,16 +59,31 @@ def libraryRoutines : String :=
   "thf(therein_p_dir_decl,type,therein_p_dir: e > e > $o).\n" ++
   "thf(live_v_1_decl,type,live_v_1: e > x > $o).\n" ++
   "thf(people_n_of_decl,type,people_n_of: x > $o).\n" ++
+  "thf(vicitm_n_of_decl,type,victim_n_of: x > $o).\n" ++
   "thf(only_a_1_decl,type,only_a_1: e > x > $o).\n" ++
   "thf(named_decl,type,named: x > string > $o).\n" ++
   "thf(and_c_x_decl,type,and_c_x: x > x > x > $o).\n" ++
   "thf(and_c_e_decl,type,and_c_e: e > e > e > $o).\n" ++
   "thf(butler_n_1_decl,type,butler_n_1: x > $o).\n" ++
+  "thf(killer_n_1_decl,type,killer_n_1: x > $o).\n" ++
   "thf(implicit_conj_decl,type,implicit_conj: x > x > x > $o).\n" ++
   "thf(be_v_id_decl,type,be_v_id: e > x > x > $o).\n" ++
   "thf(in_p_loc_decl,type,in_p_loc: e > e > x > $o).\n" ++
-  "thf(live_v_1_decl,type,live_v_1: e > x > $o).\n" ++
-  "thf(compound_decl,type,compound: e > x > x > $o).\n" 
+  "thf(compound_decl,type,compound: e > x > x > $o).\n" ++
+  "thf(person_decl,type,person: x > $o).\n" ++
+  "thf(kill_v_1_decl,type,kill_v_1: e > x > x > $o).\n" ++
+  "thf(hate_v_1_decl,type,hate_v_1: e > x > x > $o).\n" ++
+  "thf(pron_decl,type,pron: x > $o).\n" ++
+  "thf(poss,type,poss: e > x > x > $o).\n" ++
+  "thf(more_comp,type,more_comp: e > e > x > $o).\n"  ++
+  "thf(rich_a_in,type,rich_a_in: e > x > $o).\n" ++
+  "thf(always_a_1,type,always_a_1: e > $o).\n" ++
+  "thf(aunt_n_of,type,aunt_n_of: x > $o).\n" ++
+  "thf(card,type,card: e > x > string > $o).\n" ++
+  "thf(generic_entity,type,generic_entity: x > $o).\n" ++
+  "thf(except_p,type,except_p: e > x > x > $o).\n" ++
+  "thf(therefore_a_1,type,therefore_a_1: ($o) > $o).\n" ++
+  "thf(unknown,type,unknown: e > $o).\n"
 
 def insert [Ord α] (x : α) : List α → List α
   | [] => [x]
@@ -138,7 +160,9 @@ def Var.format.labelWithDeps (ep : EP) (var : Var) (qm : HashMap Var Var) (em : 
     | none => defaultExpr
   | none =>
     match (em.find? var) with
-    | some extraList => "(" ++ (Var.format.labelOnlyGround var) ++ " @ " ++ (joinSep (extraList.map (fun item => Var.format.labelOnly item)) " @ ") ++ ")"
+    | some extraList => 
+      let l := (insertionSort extraList).eraseDups
+      "(" ++ (Var.format.labelOnlyGround var) ++ " @ " ++ (joinSep (l.map (fun item => Var.format.labelOnly item)) " @ ") ++ ")"
     | none => defaultExpr
 
 def Var.format.all (var : Var) : String :=
@@ -169,7 +193,7 @@ def collectQuantifierVars (preds : List EP) : HashMap Var Var :=
 
 def collectExtraVarsForEPs (preds : List EP) (qm : HashMap Var Var) : Multimap Var Var :=
   let insertExtra (em : Multimap Var Var) (ep : EP) : Multimap Var Var :=
-    if lastTwoChars ep.predicate == "_q" then
+    if lastTwoChars ep.predicate == "_q" || ep.predicate == "_never_a_1" then
       em
     else
       let add (emac : Multimap Var Var) (pair : (String × Var)) : Multimap Var Var :=
@@ -200,7 +224,7 @@ def augmentIndirect (em : Multimap Var Var) (ep : EP) : Multimap Var Var :=
                                | none => acc.insert ep.label arg)
                               emin
     | none => emin
-  if lastTwoChars ep.predicate == "_q" then
+  if lastTwoChars ep.predicate == "_q" || ep.predicate == "_colon_p_namely" then
     match ep.rargs with
     | a :: b :: c :: [] => 
       if a.1 == "ARG0" then
@@ -212,6 +236,24 @@ def augmentIndirect (em : Multimap Var Var) (ep : EP) : Multimap Var Var :=
     | _ => 
         dbg_trace "augmentIndirect" ;
         sorry
+  else if ep.predicate == "_never_a_1" then
+      match ep.rargs with
+      | a :: b :: [] => 
+        if a.1 == "ARG0" then
+          add em b.2
+        else
+          add em a.2
+      | _ => sorry
+  else if ep.predicate == "neg" then
+      match ep.rargs with
+      | a :: b :: [] => 
+        if a.1 == "ARG1" then
+          add em a.2
+        else if b.1 == "ARG1" then
+          add em b.2
+        else
+          sorry
+      | _ => sorry
   else
     em
 
@@ -262,7 +304,7 @@ def EP.format.type (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap
     let estr := extraArgs qm l
     let combined := estr ++ (if lstr == "" then "" else (if estr == "" then "" else " > ") ++ lstr)
     let (lparen,rparen) := if preds.length > 1 then ("(",")") else ("","")
-    "thf(" ++ (Var.format.labelOnlyGround l) ++ "_decl,type," ++ (Var.format.labelOnlyGround l) ++ ": " ++ combined ++ " > $o)."
+    "thf(" ++ (Var.format.labelOnlyGround l) ++ "_decl,type," ++ (Var.format.labelOnlyGround l) ++ ": " ++ combined ++ (if combined == "" then "" else " > ") ++ "$o)."
   printNormal firstEp.label preds
 
 def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (handle : Var) : String :=
@@ -310,7 +352,11 @@ def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multima
     let combined := estr ++ (if lstr == "" then "" else (if estr == "" then "" else ",") ++ lstr)
     let (lparen,rparen) := if preds.length > 1 then ("(",")") else ("","")
     let allCalls := preds.foldl (fun acc ep => (acc.1 ++ acc.2 ++ lparen ++ (fixName ep) ++ " @ " ++ (joinArgs ep) ++ rparen," & ")) ("","")
-    "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ combined ++ "] : " ++ "(" ++ allCalls.1 ++ ")))."
+    if combined == "" then
+      "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ((" ++ allCalls.1 ++ ")))."
+    else
+      "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ combined ++ "] : " ++ "(" ++ allCalls.1 ++ ")))."
+
 
   printNormal firstEp.label preds
 
@@ -343,7 +389,10 @@ def MRS.format (mrs : MRS.MRS) : String :=
  let stringDecls := strings.keys.foldl (fun strAcc str => strAcc ++ "thf(" ++ formatId str ++ "_decl,type," ++ formatId str ++ ": string).\n") ""
  let eSet := collectEvents mrs.preds 
  let qm := collectQuantifierVars mrs.preds
- let em := collectHOExtraVarsForEPs mrs.preds $ collectHOExtraVarsForEPs mrs.preds $ collectHOExtraVarsForEPs mrs.preds $ collectExtraVarsForEPs mrs.preds qm
+ let em := collectHOExtraVarsForEPs mrs.preds $
+           collectHOExtraVarsForEPs mrs.preds $
+           collectHOExtraVarsForEPs mrs.preds $
+           collectHOExtraVarsForEPs mrs.preds $ collectExtraVarsForEPs mrs.preds qm
  let hm := collectEPsByHandle mrs.preds
  let rlt := hm.keys.map (EP.format.type qm em hm) 
  let rla := hm.keys.map (EP.format.axiom qm em hm) 

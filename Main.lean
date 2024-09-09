@@ -41,7 +41,16 @@ def report2 (r : String × Except String MRS) : IO (Except String (Array Unit)) 
   | Except.error e => return (Except.error e)
 
 def main : IO Unit := do
- let mrsList : List MRS <- run_ace "Agatha, the butler, and Charles live in Dreadbury Mansion, and are the only people who live therein."
+ -- let mrsList : List MRS <- run_ace "Someone who lives in Dreadbury Mansion killed Aunt Agatha."
+ -- let mrsList : List MRS <- run_ace "Agatha, the butler, and Charles live in Dreadbury Mansion, and are the only people who live therein."
+ -- let mrsList : List MRS <- run_ace "A killer always hates his victim, and is never richer than his victim." 
+ -- let mrsList : List MRS <- run_ace "Charles hates no one that Aunt Agatha hates."
+ -- let mrsList : List MRS <- run_ace "Agatha hates everyone except the butler." 
+ -- let mrsList : List MRS <- run_ace "The butler hates everyone not richer than Aunt Agatha."
+ -- let mrsList : List MRS <- run_ace "The butler hates everyone Aunt Agatha hates." 
+ -- let mrsList : List MRS <- run_ace "No one hates everyone."
+ -- let mrsList : List MRS <- run_ace "Agatha is not the butler."
+ let mrsList : List MRS <- run_ace "Therefore : Agatha killed herself."
  _ <- match mrsList.head? with
       | some firstMrs => 
           let solveRet <- Utool.solveIt firstMrs
@@ -53,13 +62,5 @@ def main : IO Unit := do
           | Except.error _ => unreachable!
       | none => unreachable!
 
-/- ./parse "A killer always hates his victim, and is never richer than his victim." 2
-./parse "Charles hates no one that Aunt Agatha hates." 3
-./parse "Agatha hates everyone except the butler." 4
-./parse "The butler hates everyone not richer than Aunt Agatha." 5
-./parse "The butler hates everyone Aunt Agatha hates." 6
-./parse "No one hates everyone." 7
-./parse "Agatha is not the butler." 8
-./parse "Therefore : Agatha killed herself." 9 -/
   
 -- #eval main
