@@ -260,7 +260,7 @@ def augmentIndirect (em : Multimap Var Var) (ep : EP) : Multimap Var Var :=
 def collectHOExtraVarsForEPs (preds : List EP) (em : Multimap Var Var) : Multimap Var Var :=
   preds.foldl augmentIndirect em
 
-def EP.format.type (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (handle : Var) : String :=
+def EP.format.type (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (rootHandle : Var) (handle : Var) : String :=
   let preds := match (hm.find? handle) with
   | some value => value
   | none => []
@@ -307,7 +307,7 @@ def EP.format.type (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap
     "thf(" ++ (Var.format.labelOnlyGround l) ++ "_decl,type," ++ (Var.format.labelOnlyGround l) ++ ": " ++ combined ++ (if combined == "" then "" else " > ") ++ "$o)."
   printNormal firstEp.label preds
 
-def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (handle : Var) : String :=
+def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (rootHandle : Var) (handle : Var) : String :=
   let preds := match (hm.find? handle) with
   | some value => value
   | none => []
@@ -352,10 +352,11 @@ def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multima
     let combined := estr ++ (if lstr == "" then "" else (if estr == "" then "" else ",") ++ lstr)
     let (lparen,rparen) := if preds.length > 1 then ("(",")") else ("","")
     let allCalls := preds.foldl (fun acc ep => (acc.1 ++ acc.2 ++ lparen ++ (fixName ep) ++ " @ " ++ (joinArgs ep) ++ rparen," & ")) ("","")
+    let lab := if handle == rootHandle then "root" else Var.format.labelOnlyGround l
     if combined == "" then
-      "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ((" ++ allCalls.1 ++ ")))."
+      "thf(" ++ lab ++ ",axiom," ++ "\n   " ++ lab ++ " = ((" ++ allCalls.1 ++ ")))."
     else
-      "thf(" ++ Var.format.labelOnlyGround l ++ ",axiom," ++ "\n   " ++ Var.format.labelOnlyGround l ++ " = ( ^ [" ++ combined ++ "] : " ++ "(" ++ allCalls.1 ++ ")))."
+      "thf(" ++ lab ++ ",axiom," ++ "\n   " ++ lab ++ " = ( ^ [" ++ combined ++ "] : " ++ "(" ++ allCalls.1 ++ ")))."
 
 
   printNormal firstEp.label preds
@@ -394,8 +395,8 @@ def MRS.format (mrs : MRS.MRS) : String :=
            collectHOExtraVarsForEPs mrs.preds $
            collectHOExtraVarsForEPs mrs.preds $ collectExtraVarsForEPs mrs.preds qm
  let hm := collectEPsByHandle mrs.preds
- let rlt := hm.keys.map (EP.format.type qm em hm) 
- let rla := hm.keys.map (EP.format.axiom qm em hm) 
+ let rlt := hm.keys.map (EP.format.type qm em hm mrs.top) 
+ let rla := hm.keys.map (EP.format.axiom qm em hm mrs.top) 
  let etypes := (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id}_decl,type,({var.sort}{var.id} : e)).")) "\n")
  let eaxioms := (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id}_value,axiom,({var.sort}{var.id} = (int_to_e @ {var.id}))).")) "\n")
  headers ++ etypes ++ "\n" ++ eaxioms ++ "\n" ++ stringDecls ++ (joinSep rlt "\n") ++ "\n" ++ (joinSep rla "\n")
