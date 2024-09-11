@@ -62,7 +62,7 @@ def libraryRoutines : String :=
   "thf(people_n_of_decl,type,people_n_of: x > $o).\n" ++
   "thf(vicitm_n_of_decl,type,victim_n_of: x > $o).\n" ++
   "thf(only_a_1_decl,type,only_a_1: e > x > $o).\n" ++
-  "thf(named_decl,type,named: x > string > $o).\n" ++
+  "thf(named_decl,type,named: x > name > $o).\n" ++
   "thf(and_c_x_decl,type,and_c_x: x > x > x > $o).\n" ++
   "thf(and_c_e_decl,type,and_c_e: e > e > e > $o).\n" ++
   "thf(butler_n_1_decl,type,butler_n_1: x > $o).\n" ++
@@ -80,7 +80,7 @@ def libraryRoutines : String :=
   "thf(rich_a_in,type,rich_a_in: e > x > $o).\n" ++
   "thf(always_a_1,type,always_a_1: e > $o).\n" ++
   "thf(aunt_n_of,type,aunt_n_of: x > $o).\n" ++
-  "thf(card,type,card: e > x > string > $o).\n" ++
+  "thf(card,type,card: e > x > name > $o).\n" ++
   "thf(generic_entity,type,generic_entity: x > $o).\n" ++
   "thf(except_p,type,except_p: e > x > x > $o).\n" ++
   "thf(therefore_a_1,type,therefore_a_1: ($o) > $o).\n" ++
@@ -297,7 +297,7 @@ def EP.format.type (sentenceNumber : Nat) (qm : HashMap Var Var) (em : Multimap 
     let joinArgs0 (ep : EP) := joinSep ((getArgs ep).map fun a => Var.format.typeOnly a.2)  " > "
     let joinArgs (ep : EP) := 
       match ep.carg with
-      | some str => joinArgs0 ep ++ " > string"
+      | some str => joinArgs0 ep ++ " > name"
       | none => joinArgs0 ep
     let lstr := lookupArg l
     let estr := extraArgs qm l
@@ -381,7 +381,7 @@ def MRS.format (sentenceNumber : Nat) (mrs : MRS.MRS) : String :=
     stab.insert c l
   | {predicate := p, link := none, label := l, rargs := rs, carg := none} =>
     stab) Multimap.empty
- let stringDecls := strings.keys.foldl (fun strAcc str => strAcc ++ "thf(" ++ formatId sentenceNumber str ++ "_decl,type," ++ formatId sentenceNumber str ++ ": string).\n") ""
+ let nameDecls := strings.keys.foldl (fun strAcc str => strAcc ++ "thf(" ++ formatId sentenceNumber str ++ "_decl,type," ++ formatId sentenceNumber str ++ ": name).\n") ""
  let eSet := collectEvents mrs.preds 
  let qm := collectQuantifierVars mrs.preds
  let em := collectHOExtraVarsForEPs mrs.preds $
@@ -393,7 +393,7 @@ def MRS.format (sentenceNumber : Nat) (mrs : MRS.MRS) : String :=
  let rla := hm.keys.map (EP.format.axiom sentenceNumber qm em hm mrs.top) 
  let etypes := (joinSep (eSet.map (fun (var : Var) => s!"thf(s{sentenceNumber}_{var.sort}{var.id}_decl,type,(s{sentenceNumber}_{var.sort}{var.id} : e)).")) "\n")
  let eaxioms := (joinSep (eSet.map (fun (var : Var) => s!"thf(s{sentenceNumber}_{var.sort}{var.id}_value,axiom,(s{sentenceNumber}_{var.sort}{var.id} = (int_to_e @ {var.id}))).")) "\n")
- etypes ++ "\n\n" ++ eaxioms ++ "\n\n" ++ stringDecls ++ "\n" ++ (joinSep rlt "\n") ++ "\n\n" ++ (joinSep rla "\n")
+ etypes ++ "\n\n" ++ eaxioms ++ "\n\n" ++ nameDecls ++ "\n" ++ (joinSep rlt "\n") ++ "\n\n" ++ (joinSep rla "\n")
 
 end THF
 
