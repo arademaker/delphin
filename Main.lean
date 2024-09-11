@@ -49,7 +49,7 @@ def main : IO Unit := do
  let sentences <- mapWithIndexM sentences xform
  let header0 := "thf(x_decl,type,x : $tType)."
  let header1 := "thf(e_decl,type,e : $tType)."
- let header2 := "thf(string_decl,type,string : $i)."
+ let header2 := "thf(name_decl,type,name : $i)."
  let header3 := "thf(int_to_e_decl,type,int_to_e: $int > e)."
  let headers := header0 ++ "\n" ++ header1 ++ "\n" ++ header2 ++ "\n" ++ header3 ++ "\n\n" ++ THF.libraryRoutines ++ "\n"
  IO.FS.writeFile "thf-outputs/sentences.p" ((sentences.foldl (fun acc str => acc ++ str ++ "\n") headers))
