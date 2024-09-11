@@ -61,8 +61,8 @@ thf(h19,axiom,
    h19 = ( ^ [X15 : x] : (butler_n_1 @ X15))).
 thf(h16,axiom,
    h16 = ( ^ [X15 : x,X9 : x] : (the_q @ X15 @ h19 @ (h10 @ X9)))).
-thf(h11,axiom,
-   h11 = ( ^ [X15 : x,X9 : x,X3 : x] : (every_q @ X9 @ (h16 @ X15) @ (h4 @ X3)))).
+thf(root,axiom,
+   root = ( ^ [X15 : x,X9 : x,X3 : x] : (every_q @ X9 @ (h16 @ X15) @ (h4 @ X3)))).
 thf(h10,axiom,
    h10 = ( ^ [X9 : x,X15 : x] : ((except_p @ e14 @ X9 @ X15) & (person @ X9)))).
 thf(h7,axiom,

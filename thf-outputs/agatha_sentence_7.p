@@ -52,8 +52,8 @@ thf(h9_decl,type,h9: x > $o).
 thf(h5_decl,type,h5: x > x > $o).
 thf(h4_decl,type,h4: x > $o).
 thf(h1_decl,type,h1: x > x > $o).
-thf(h10,axiom,
-   h10 = ( ^ [X8 : x,X3 : x] : (every_q @ X8 @ h9 @ (h5 @ X3)))).
+thf(root,axiom,
+   root = ( ^ [X8 : x,X3 : x] : (every_q @ X8 @ h9 @ (h5 @ X3)))).
 thf(h9,axiom,
    h9 = ( ^ [X8 : x] : (person @ X8))).
 thf(h5,axiom,

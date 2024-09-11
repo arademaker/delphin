@@ -92,8 +92,8 @@ thf(h39,axiom,
    h39 = ( ^ [X38 : x,X32 : x] : (proper_q @ X38 @ h42 @ (h36 @ X32)))).
 thf(h36,axiom,
    h36 = ( ^ [X32 : x,X38 : x] : ((named @ X32 @ id_Mansion) & (compound @ e37 @ X32 @ X38)))).
-thf(h33,axiom,
-   h33 = ( ^ [X46 : x,X38 : x,X32 : x,X24 : x,X19 : x,X14 : x,X8 : x,X3 : x] : (proper_q @ X32 @ (h39 @ X38) @ (h13 @ X46 @ X24 @ X19 @ X14 @ X8 @ X3)))).
+thf(root,axiom,
+   root = ( ^ [X46 : x,X38 : x,X32 : x,X24 : x,X19 : x,X14 : x,X8 : x,X3 : x] : (proper_q @ X32 @ (h39 @ X38) @ (h13 @ X46 @ X24 @ X19 @ X14 @ X8 @ X3)))).
 thf(h28,axiom,
    h28 = ( ^ [X24 : x] : (named @ X24 @ id_Charles))).
 thf(h25,axiom,

@@ -75,8 +75,8 @@ thf(h16,axiom,
    h16 = ( ^ [X17 : x,X9 : x,X22 : x] : (proper_q @ X17 @ (h20 @ X22) @ (h13 @ X9)))).
 thf(h13,axiom,
    h13 = ( ^ [X9 : x,X17 : x] : ((hate_v_1 @ e29 @ X17 @ X9) & (card @ e15 @ X9 @ id_1) & (generic_entity @ X9)))).
-thf(h10,axiom,
-   h10 = ( ^ [X22 : x,X17 : x,X9 : x,X3 : x] : (no_q @ X9 @ (h23 @ X22 @ X17) @ (h4 @ X3)))).
+thf(root,axiom,
+   root = ( ^ [X22 : x,X17 : x,X9 : x,X3 : x] : (no_q @ X9 @ (h23 @ X22 @ X17) @ (h4 @ X3)))).
 thf(h7,axiom,
    h7 = ( ^ [X3 : x] : (named @ X3 @ id_Charles))).
 thf(h4,axiom,

@@ -68,8 +68,8 @@ thf(h18,axiom,
    h18 = ( ^ [X13 : x,X20 : x] : (kill_v_1 @ e19 @ X13 @ X20))).
 thf(h16,axiom,
    h16 = ( ^ [X13 : x] : (named @ X13 @ id_Agatha))).
-thf(h12,axiom,
-   h12 = ( ^ [X20 : x,X13 : x] : (proper_q @ X13 @ h16 @ (h1 @ X20)))).
+thf(root,axiom,
+   root = ( ^ [X20 : x,X13 : x] : (proper_q @ X13 @ h16 @ (h1 @ X20)))).
 thf(h6,axiom,
    h6 = ((therefore_a_1 @ h4))).
 thf(h4,axiom,

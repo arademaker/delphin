@@ -85,8 +85,8 @@ thf(h17,axiom,
    h17 = ( ^ [X16 : x,X10 : x] : (pronoun_q @ X16 @ h20 @ (h14 @ X10)))).
 thf(h14,axiom,
    h14 = ( ^ [X10 : x,X16 : x] : ((victim_n_of @ X10) & (poss @ e15 @ X10 @ X16)))).
-thf(h11,axiom,
-   h11 = ( ^ [X34 : x,X28 : x,X16 : x,X10 : x,X3 : x] : (def_explicit_q @ X10 @ (h17 @ X16) @ (h35 @ X34 @ X28 @ X3)))).
+thf(root,axiom,
+   root = ( ^ [X34 : x,X28 : x,X16 : x,X10 : x,X3 : x] : (def_explicit_q @ X10 @ (h17 @ X16) @ (h35 @ X34 @ X28 @ X3)))).
 thf(h7,axiom,
    h7 = ( ^ [X3 : x] : (killer_n_1 @ X3))).
 thf(h4,axiom,

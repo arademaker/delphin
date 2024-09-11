@@ -69,8 +69,8 @@ thf(h17,axiom,
    h17 = ( ^ [X19 : x,X14 : x] : ((named @ X14 @ id_Agatha) & (compound @ e18 @ X14 @ X19)))).
 thf(h13,axiom,
    h13 = ( ^ [X14 : x,X8 : x,X19 : x] : (proper_q @ X14 @ (h17 @ X19) @ (h9 @ X8)))).
-thf(h10,axiom,
-   h10 = ( ^ [X19 : x,X14 : x,X8 : x,X3 : x] : (every_q @ X8 @ (h20 @ X19 @ X14) @ (h4 @ X3)))).
+thf(root,axiom,
+   root = ( ^ [X19 : x,X14 : x,X8 : x,X3 : x] : (every_q @ X8 @ (h20 @ X19 @ X14) @ (h4 @ X3)))).
 thf(h9,axiom,
    h9 = ( ^ [X8 : x,X14 : x] : ((hate_v_1 @ e26 @ X14 @ X8) & (person @ X8)))).
 thf(h7,axiom,

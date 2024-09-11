@@ -72,8 +72,8 @@ thf(h4_decl,type,h4: x > x > $o).
 thf(h1_decl,type,h1: x > x > $o).
 thf(h33,axiom,
    h33 = ( ^ [X29 : x] : (named @ X29 @ id_Aunt))).
-thf(h30,axiom,
-   h30 = ( ^ [X29 : x,X23 : x,X16 : x,X10 : x,X3 : x] : (proper_q @ X29 @ h33 @ (h11 @ X23 @ X16 @ X10 @ X3)))).
+thf(root,axiom,
+   root = ( ^ [X29 : x,X23 : x,X16 : x,X10 : x,X3 : x] : (proper_q @ X29 @ h33 @ (h11 @ X23 @ X16 @ X10 @ X3)))).
 thf(h27,axiom,
    h27 = ( ^ [X29 : x,X23 : x] : ((named @ X23 @ id_Agatha) & (compound @ e28 @ X23 @ X29)))).
 thf(h24,axiom,

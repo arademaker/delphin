@@ -66,6 +66,6 @@ thf(h7,axiom,
    h7 = ( ^ [X3 : x] : (named @ X3 @ id_Agatha))).
 thf(h4,axiom,
    h4 = ( ^ [X3 : x,X10 : x] : (proper_q @ X3 @ h7 @ (h9 @ X10)))).
-thf(h1,axiom,
-   h1 = ( ^ [X10 : x,X3 : x] : (neg @ e11 @ (h13 @ X10 @ X3)))).
+thf(root,axiom,
+   root = ( ^ [X10 : x,X3 : x] : (neg @ e11 @ (h13 @ X10 @ X3)))).
 end Agatha_Sentence_8

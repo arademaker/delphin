@@ -77,8 +77,8 @@ thf(h20,axiom,
    h20 = ( ^ [X25 : x,X19 : x,X8 : x] : (proper_q @ X19 @ (h26 @ X25) @ (h15 @ X8)))).
 thf(h15,axiom,
    h15 = ( ^ [X8 : x,X19 : x] : ((more_comp @ e18 @ e16 @ X19) & (rich_a_in @ e16 @ X8)))).
-thf(h10,axiom,
-   h10 = ( ^ [X25 : x,X19 : x,X8 : x,X3 : x] : (every_q @ X8 @ (h9 @ X25 @ X19) @ (h4 @ X3)))).
+thf(root,axiom,
+   root = ( ^ [X25 : x,X19 : x,X8 : x,X3 : x] : (every_q @ X8 @ (h9 @ X25 @ X19) @ (h4 @ X3)))).
 thf(h9,axiom,
    h9 = ( ^ [X25 : x,X19 : x,X8 : x] : ((neg @ e13 @ (h20 @ X25 @ X19 @ X8)) & (person @ X8)))).
 thf(h7,axiom,
