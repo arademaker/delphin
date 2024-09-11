@@ -1,3 +1,4 @@
+module Agatha_Sentence_7
 thf(x_decl,type,x : $tType).
 thf(e_decl,type,e : $tType).
 thf(string_decl,type,string : $i).
@@ -61,3 +62,4 @@ thf(h4,axiom,
    h4 = ( ^ [X3 : x] : (person @ X3))).
 thf(h1,axiom,
    h1 = ( ^ [X8 : x,X3 : x] : (hate_v_1 @ e2 @ X3 @ X8))).
+end Agatha_Sentence_7

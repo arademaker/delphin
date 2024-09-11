@@ -1,3 +1,4 @@
+module Agatha_Sentence_1
 thf(x_decl,type,x : $tType).
 thf(e_decl,type,e : $tType).
 thf(string_decl,type,string : $i).
@@ -115,3 +116,4 @@ thf(h4,axiom,
    h4 = ( ^ [X32 : x,X14 : x,X8 : x,X3 : x,X46 : x] : (udef_q @ X3 @ (h7 @ X14 @ X8) @ (h1 @ X46 @ X32)))).
 thf(h1,axiom,
    h1 = ( ^ [X46 : x,X32 : x,X3 : x] : ((be_v_id @ e45 @ X3 @ X46) & (and_c_e @ e2 @ e30 @ e45) & (in_p_loc @ e31 @ e30 @ X32) & (live_v_1 @ e30 @ X3)))).
+end Agatha_Sentence_1

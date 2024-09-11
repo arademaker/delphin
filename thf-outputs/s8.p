@@ -13,6 +13,7 @@ thf(def_explicit_q_decl,type,def_explicit_q: x > (x > $o) > (x > $o) > $o).
 thf(no_q_decl,type,no_q:                     x > (x > $o) > (x > $o) > $o).
 thf(never_a_1_decl,type,never_a_1:           ($o) > $o).
 thf(neg_decl,type,neg:                       e > ($o) > $o).
+thf(colon_p_namely,type,colon_p_namely:      e > ($o) > ($o) > $o).
 
 thf(therein_p_dir_decl,type,therein_p_dir: e > e > $o).
 thf(live_v_1_decl,type,live_v_1: e > x > $o).
@@ -40,6 +41,8 @@ thf(aunt_n_of,type,aunt_n_of: x > $o).
 thf(card,type,card: e > x > string > $o).
 thf(generic_entity,type,generic_entity: x > $o).
 thf(except_p,type,except_p: e > x > x > $o).
+thf(therefore_a_1,type,therefore_a_1: ($o) > $o).
+thf(unknown,type,unknown: e > $o).
 
 thf(e2_decl,type,(e2 : e)).
 thf(e11_decl,type,(e11 : e)).

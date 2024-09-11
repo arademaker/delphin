@@ -1,3 +1,4 @@
+module Agatha_Sentence_5
 thf(x_decl,type,x : $tType).
 thf(e_decl,type,e : $tType).
 thf(string_decl,type,string : $i).
@@ -45,19 +46,45 @@ thf(therefore_a_1,type,therefore_a_1: ($o) > $o).
 thf(unknown,type,unknown: e > $o).
 
 thf(e2_decl,type,(e2 : e)).
+thf(e13_decl,type,(e13 : e)).
+thf(e16_decl,type,(e16 : e)).
+thf(e18_decl,type,(e18 : e)).
+thf(e24_decl,type,(e24 : e)).
 thf(e2_value,axiom,(e2 = (int_to_e @ 2))).
-thf(h10_decl,type,h10: x > x > $o).
-thf(h9_decl,type,h9: x > $o).
-thf(h5_decl,type,h5: x > x > $o).
-thf(h4_decl,type,h4: x > $o).
+thf(e13_value,axiom,(e13 = (int_to_e @ 13))).
+thf(e16_value,axiom,(e16 = (int_to_e @ 16))).
+thf(e18_value,axiom,(e18 = (int_to_e @ 18))).
+thf(e24_value,axiom,(e24 = (int_to_e @ 24))).
+thf(id_Agatha_decl,type,id_Agatha: string).
+thf(id_Aunt_decl,type,id_Aunt: string).
+thf(h29_decl,type,h29: x > $o).
+thf(h26_decl,type,h26: x > x > $o).
+thf(h23_decl,type,h23: x > x > $o).
+thf(h20_decl,type,h20: x > x > x > $o).
+thf(h15_decl,type,h15: x > x > $o).
+thf(h10_decl,type,h10: x > x > x > x > $o).
+thf(h9_decl,type,h9: x > x > x > $o).
+thf(h7_decl,type,h7: x > $o).
+thf(h4_decl,type,h4: x > x > $o).
 thf(h1_decl,type,h1: x > x > $o).
+thf(h29,axiom,
+   h29 = ( ^ [X25 : x] : (named @ X25 @ id_Aunt))).
+thf(h26,axiom,
+   h26 = ( ^ [X25 : x,X19 : x] : (proper_q @ X25 @ h29 @ (h23 @ X19)))).
+thf(h23,axiom,
+   h23 = ( ^ [X19 : x,X25 : x] : ((named @ X19 @ id_Agatha) & (compound @ e24 @ X19 @ X25)))).
+thf(h20,axiom,
+   h20 = ( ^ [X25 : x,X19 : x,X8 : x] : (proper_q @ X19 @ (h26 @ X25) @ (h15 @ X8)))).
+thf(h15,axiom,
+   h15 = ( ^ [X8 : x,X19 : x] : ((more_comp @ e18 @ e16 @ X19) & (rich_a_in @ e16 @ X8)))).
 thf(h10,axiom,
-   h10 = ( ^ [X8 : x,X3 : x] : (every_q @ X8 @ h9 @ (h5 @ X3)))).
+   h10 = ( ^ [X25 : x,X19 : x,X8 : x,X3 : x] : (every_q @ X8 @ (h9 @ X25 @ X19) @ (h4 @ X3)))).
 thf(h9,axiom,
-   h9 = ( ^ [X8 : x] : (person @ X8))).
-thf(h5,axiom,
-   h5 = ( ^ [X3 : x,X8 : x] : (no_q @ X3 @ h4 @ (h1 @ X8)))).
+   h9 = ( ^ [X25 : x,X19 : x,X8 : x] : ((neg @ e13 @ (h20 @ X25 @ X19 @ X8)) & (person @ X8)))).
+thf(h7,axiom,
+   h7 = ( ^ [X3 : x] : (butler_n_1 @ X3))).
 thf(h4,axiom,
-   h4 = ( ^ [X3 : x] : (person @ X3))).
+   h4 = ( ^ [X3 : x,X8 : x] : (the_q @ X3 @ h7 @ (h1 @ X8)))).
 thf(h1,axiom,
    h1 = ( ^ [X8 : x,X3 : x] : (hate_v_1 @ e2 @ X3 @ X8))).
+end Agatha_Sentence_5

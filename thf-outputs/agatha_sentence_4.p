@@ -1,3 +1,4 @@
+module Agatha_Sentence_4
 thf(x_decl,type,x : $tType).
 thf(e_decl,type,e : $tType).
 thf(string_decl,type,string : $i).
@@ -45,19 +46,29 @@ thf(therefore_a_1,type,therefore_a_1: ($o) > $o).
 thf(unknown,type,unknown: e > $o).
 
 thf(e2_decl,type,(e2 : e)).
+thf(e14_decl,type,(e14 : e)).
 thf(e2_value,axiom,(e2 = (int_to_e @ 2))).
+thf(e14_value,axiom,(e14 = (int_to_e @ 14))).
+thf(id_Agatha_decl,type,id_Agatha: string).
+thf(h19_decl,type,h19: x > $o).
+thf(h16_decl,type,h16: x > x > $o).
+thf(h11_decl,type,h11: x > x > x > $o).
 thf(h10_decl,type,h10: x > x > $o).
-thf(h9_decl,type,h9: x > $o).
-thf(h5_decl,type,h5: x > x > $o).
-thf(h4_decl,type,h4: x > $o).
+thf(h7_decl,type,h7: x > $o).
+thf(h4_decl,type,h4: x > x > $o).
 thf(h1_decl,type,h1: x > x > $o).
+thf(h19,axiom,
+   h19 = ( ^ [X15 : x] : (butler_n_1 @ X15))).
+thf(h16,axiom,
+   h16 = ( ^ [X15 : x,X9 : x] : (the_q @ X15 @ h19 @ (h10 @ X9)))).
+thf(h11,axiom,
+   h11 = ( ^ [X15 : x,X9 : x,X3 : x] : (every_q @ X9 @ (h16 @ X15) @ (h4 @ X3)))).
 thf(h10,axiom,
-   h10 = ( ^ [X8 : x,X3 : x] : (every_q @ X8 @ h9 @ (h5 @ X3)))).
-thf(h9,axiom,
-   h9 = ( ^ [X8 : x] : (person @ X8))).
-thf(h5,axiom,
-   h5 = ( ^ [X3 : x,X8 : x] : (no_q @ X3 @ h4 @ (h1 @ X8)))).
+   h10 = ( ^ [X9 : x,X15 : x] : ((except_p @ e14 @ X9 @ X15) & (person @ X9)))).
+thf(h7,axiom,
+   h7 = ( ^ [X3 : x] : (named @ X3 @ id_Agatha))).
 thf(h4,axiom,
-   h4 = ( ^ [X3 : x] : (person @ X3))).
+   h4 = ( ^ [X3 : x,X9 : x] : (proper_q @ X3 @ h7 @ (h1 @ X9)))).
 thf(h1,axiom,
-   h1 = ( ^ [X8 : x,X3 : x] : (hate_v_1 @ e2 @ X3 @ X8))).
+   h1 = ( ^ [X9 : x,X3 : x] : (hate_v_1 @ e2 @ X3 @ X9))).
+end Agatha_Sentence_4
