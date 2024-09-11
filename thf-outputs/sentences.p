@@ -1,6 +1,6 @@
 thf(x_decl,type,x : $tType).
 thf(e_decl,type,e : $tType).
-thf(string_decl,type,string : $i).
+thf(name_decl,type,name : $i).
 thf(int_to_e_decl,type,int_to_e: $int > e).
 
 thf(a_q_decl,type,a_q:                       x > (x > $o) > (x > $o) > $o).
@@ -21,7 +21,7 @@ thf(live_v_1_decl,type,live_v_1: e > x > $o).
 thf(people_n_of_decl,type,people_n_of: x > $o).
 thf(vicitm_n_of_decl,type,victim_n_of: x > $o).
 thf(only_a_1_decl,type,only_a_1: e > x > $o).
-thf(named_decl,type,named: x > string > $o).
+thf(named_decl,type,named: x > name > $o).
 thf(and_c_x_decl,type,and_c_x: x > x > x > $o).
 thf(and_c_e_decl,type,and_c_e: e > e > e > $o).
 thf(butler_n_1_decl,type,butler_n_1: x > $o).
@@ -39,7 +39,7 @@ thf(more_comp,type,more_comp: e > e > x > $o).
 thf(rich_a_in,type,rich_a_in: e > x > $o).
 thf(always_a_1,type,always_a_1: e > $o).
 thf(aunt_n_of,type,aunt_n_of: x > $o).
-thf(card,type,card: e > x > string > $o).
+thf(card,type,card: e > x > name > $o).
 thf(generic_entity,type,generic_entity: x > $o).
 thf(except_p,type,except_p: e > x > x > $o).
 thf(therefore_a_1,type,therefore_a_1: ($o) > $o).
@@ -57,10 +57,10 @@ thf(s0_e15_value,axiom,(s0_e15 = (int_to_e @ 15))).
 thf(s0_e2_value,axiom,(s0_e2 = (int_to_e @ 2))).
 thf(s0_e28_value,axiom,(s0_e28 = (int_to_e @ 28))).
 
-thf(s0_id_Agatha_decl,type,s0_id_Agatha: string).
-thf(s0_id_Aunt_decl,type,s0_id_Aunt: string).
-thf(s0_id_Dreadbury_decl,type,s0_id_Dreadbury: string).
-thf(s0_id_Mansion_decl,type,s0_id_Mansion: string).
+thf(s0_id_Agatha_decl,type,s0_id_Agatha: name).
+thf(s0_id_Aunt_decl,type,s0_id_Aunt: name).
+thf(s0_id_Dreadbury_decl,type,s0_id_Dreadbury: name).
+thf(s0_id_Mansion_decl,type,s0_id_Mansion: name).
 
 thf(s0_h33_decl,type,s0_h33: x > $o).
 thf(s0_root_decl,type,s0_root: x > x > x > x > x > $o).
@@ -114,10 +114,10 @@ thf(s1_e51_value,axiom,(s1_e51 = (int_to_e @ 51))).
 thf(s1_e53_value,axiom,(s1_e53 = (int_to_e @ 53))).
 thf(s1_e54_value,axiom,(s1_e54 = (int_to_e @ 54))).
 
-thf(s1_id_Agatha_decl,type,s1_id_Agatha: string).
-thf(s1_id_Charles_decl,type,s1_id_Charles: string).
-thf(s1_id_Dreadbury_decl,type,s1_id_Dreadbury: string).
-thf(s1_id_Mansion_decl,type,s1_id_Mansion: string).
+thf(s1_id_Agatha_decl,type,s1_id_Agatha: name).
+thf(s1_id_Charles_decl,type,s1_id_Charles: name).
+thf(s1_id_Dreadbury_decl,type,s1_id_Dreadbury: name).
+thf(s1_id_Mansion_decl,type,s1_id_Mansion: name).
 
 thf(s1_h50_decl,type,s1_h50: x > $o).
 thf(s1_h47_decl,type,s1_h47: x > x > x > x > x > $o).
@@ -233,9 +233,9 @@ thf(s3_e15_value,axiom,(s3_e15 = (int_to_e @ 15))).
 thf(s3_e21_value,axiom,(s3_e21 = (int_to_e @ 21))).
 thf(s3_e29_value,axiom,(s3_e29 = (int_to_e @ 29))).
 
-thf(s3_id_1_decl,type,s3_id_1: string).
-thf(s3_id_Agatha_decl,type,s3_id_Agatha: string).
-thf(s3_id_Charles_decl,type,s3_id_Charles: string).
+thf(s3_id_1_decl,type,s3_id_1: name).
+thf(s3_id_Agatha_decl,type,s3_id_Agatha: name).
+thf(s3_id_Charles_decl,type,s3_id_Charles: name).
 
 thf(s3_h26_decl,type,s3_h26: x > $o).
 thf(s3_h23_decl,type,s3_h23: x > x > x > $o).
@@ -271,7 +271,7 @@ thf(s4_e14_decl,type,(s4_e14 : e)).
 thf(s4_e2_value,axiom,(s4_e2 = (int_to_e @ 2))).
 thf(s4_e14_value,axiom,(s4_e14 = (int_to_e @ 14))).
 
-thf(s4_id_Agatha_decl,type,s4_id_Agatha: string).
+thf(s4_id_Agatha_decl,type,s4_id_Agatha: name).
 
 thf(s4_h19_decl,type,s4_h19: x > $o).
 thf(s4_h16_decl,type,s4_h16: x > x > $o).
@@ -307,8 +307,8 @@ thf(s5_e16_value,axiom,(s5_e16 = (int_to_e @ 16))).
 thf(s5_e18_value,axiom,(s5_e18 = (int_to_e @ 18))).
 thf(s5_e24_value,axiom,(s5_e24 = (int_to_e @ 24))).
 
-thf(s5_id_Agatha_decl,type,s5_id_Agatha: string).
-thf(s5_id_Aunt_decl,type,s5_id_Aunt: string).
+thf(s5_id_Agatha_decl,type,s5_id_Agatha: name).
+thf(s5_id_Aunt_decl,type,s5_id_Aunt: name).
 
 thf(s5_h29_decl,type,s5_h29: x > $o).
 thf(s5_h26_decl,type,s5_h26: x > x > $o).
@@ -349,7 +349,7 @@ thf(s6_e2_value,axiom,(s6_e2 = (int_to_e @ 2))).
 thf(s6_e18_value,axiom,(s6_e18 = (int_to_e @ 18))).
 thf(s6_e26_value,axiom,(s6_e26 = (int_to_e @ 26))).
 
-thf(s6_id_Agatha_decl,type,s6_id_Agatha: string).
+thf(s6_id_Agatha_decl,type,s6_id_Agatha: name).
 
 thf(s6_h23_decl,type,s6_h23: x > $o).
 thf(s6_h20_decl,type,s6_h20: x > x > x > $o).
@@ -406,7 +406,7 @@ thf(s8_e11_decl,type,(s8_e11 : e)).
 thf(s8_e2_value,axiom,(s8_e2 = (int_to_e @ 2))).
 thf(s8_e11_value,axiom,(s8_e11 = (int_to_e @ 11))).
 
-thf(s8_id_Agatha_decl,type,s8_id_Agatha: string).
+thf(s8_id_Agatha_decl,type,s8_id_Agatha: name).
 
 thf(s8_h16_decl,type,s8_h16: x > $o).
 thf(s8_h13_decl,type,s8_h13: x > x > $o).
@@ -435,7 +435,7 @@ thf(s9_e2_value,axiom,(s9_e2 = (int_to_e @ 2))).
 thf(s9_e9_value,axiom,(s9_e9 = (int_to_e @ 9))).
 thf(s9_e19_value,axiom,(s9_e19 = (int_to_e @ 19))).
 
-thf(s9_id_Agatha_decl,type,s9_id_Agatha: string).
+thf(s9_id_Agatha_decl,type,s9_id_Agatha: name).
 
 thf(s9_h22_decl,type,s9_h22: x > x > $o).
 thf(s9_h21_decl,type,s9_h21: x > $o).
