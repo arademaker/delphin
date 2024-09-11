@@ -9,22 +9,21 @@ open THF
 -- set_option pp.proofs true
 -- set_option trace.profiler true in
 
-def solveAndFormat (mrs : MRS) : IO String := do
+def solveAndFormat (sentenceNumber : Nat) (mrs : MRS) : IO String := do
   let solveRet <- Utool.solveIt mrs
   match solveRet with
   | Except.ok sols => 
     match sols.get? 0 with
-    | some sol => return THF.MRS.format $ sol
+    | some sol => return THF.MRS.format sentenceNumber sol
     | none => unreachable!
   | Except.error e2 => unreachable!
 
-def xform (i : Nat) (str : String) : IO Unit := do
+def xform (sentenceNumber : Nat) (str : String) : IO String := do
   let (mrsList : List MRS) <- run_ace str
   let ret <- match mrsList.head? with
-      | some firstMrs => solveAndFormat firstMrs
+      | some firstMrs => solveAndFormat sentenceNumber firstMrs
       | none => unreachable!
-  let moduleName := "Agatha_Sentence_" ++ toString i
-  IO.FS.writeFile ("thf-outputs/agatha_sentence_" ++ toString i ++ ".p") ("module " ++ moduleName ++ "\n" ++ ret ++ "\n" ++ "end " ++ moduleName ++ "\n")
+  return ret
 
 def mapWithIndexM [Monad m] (xs : List α) (f : Nat → α → m β) : m (List β) := do
   let rec loop : List α → Nat → m (List β)
@@ -47,7 +46,13 @@ def main : IO Unit := do
                    "Agatha is not the butler.",
                    "Therefore : Agatha killed herself."]
 
- _ <- mapWithIndexM sentences xform
+ let sentences <- mapWithIndexM sentences xform
+ let header0 := "thf(x_decl,type,x : $tType)."
+ let header1 := "thf(e_decl,type,e : $tType)."
+ let header2 := "thf(string_decl,type,string : $i)."
+ let header3 := "thf(int_to_e_decl,type,int_to_e: $int > e)."
+ let headers := header0 ++ "\n" ++ header1 ++ "\n" ++ header2 ++ "\n" ++ header3 ++ "\n\n" ++ THF.libraryRoutines ++ "\n"
+ IO.FS.writeFile "thf-outputs/sentences.p" ((sentences.foldl (fun acc str => acc ++ str ++ "\n") headers))
  return ()
   
 -- #eval main

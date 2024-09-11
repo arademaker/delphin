@@ -39,6 +39,7 @@ open Lean (HashMap)
 open MM
 
 def libraryRoutines : String := 
+  "thf(a_q_decl,type,a_q:                       x > (x > $o) > (x > $o) > $o).\n" ++
   "thf(every_q_decl,type,every_q:               x > (x > $o) > (x > $o) > $o).\n" ++
   "thf(some_q_decl,type,some_q:                 x > (x > $o) > (x > $o) > $o).\n" ++
   "thf(the_q_decl,type,the_q:                   x > (x > $o) > (x > $o) > $o).\n" ++
@@ -98,8 +99,9 @@ def insertionSort [Ord α] : List α → List α
 def removeQuotes (s : String) : String :=
   if s.startsWith "\"" && s.endsWith "\"" then s.extract ⟨1⟩ ⟨s.length - 1⟩ else s
 
-def formatId (s : String) : String :=
-  "id_" ++ removeQuotes s
+def formatId (sentenceNumber : Nat) (s : String) : String :=
+  let str := removeQuotes s
+  s!"s{sentenceNumber}_id_{str}"
 
 def fixName (ep : EP) : String :=
   let checkEonly (ep : EP) : Bool :=
@@ -122,51 +124,48 @@ def Var.format.typeOnly (var : Var) : String :=
   else
     s!"{var.sort}"
 
-def Var.format.labelOnly (var : Var) : String :=
+def Var.format.labelOnly (sentenceNumber : Nat) (var : Var) : String :=
   if var.sort == 'x' then
-    s!"{var.sort.toUpper}{var.id}"
+    s!"S{sentenceNumber}_{var.sort.toUpper}{var.id}"
   else
-    s!"{var.sort}{var.id}"
+    s!"s{sentenceNumber}_{var.sort}{var.id}"
 
-def Var.format.labelOnlyGround (var : Var) : String :=
-  s!"{var.sort}{var.id}"
+def Var.format.labelOnlyGround (sentenceNumber : Nat) (var : Var) : String :=
+  s!"s{sentenceNumber}_{var.sort}{var.id}"
 
-def Var.format.pair (var : Var) : String :=
+def Var.format.pair (sentenceNumber : Nat) (var : Var) : String :=
   if var.sort == 'x' then
-    s!"{var.sort.toUpper}{var.id} : {var.sort}"
+    s!"S{sentenceNumber}_{var.sort.toUpper}{var.id} : {var.sort}"
   else if var.sort == 'e' then
-    s!"{var.sort}{var.id} : {var.sort}"
+    s!"s{sentenceNumber}_{var.sort}{var.id} : {var.sort}"
   else if var.sort == 'h' then 
-    s!"{var.sort}{var.id} : {var.sort}{var.id}"
+    s!"s{sentenceNumber}_{var.sort}{var.id} : {var.sort}{var.id}"
   else
     unreachable!
 
-def Var.format.labelWithDeps (ep : EP) (var : Var) (qm : HashMap Var Var) (em : Multimap Var Var) : String :=
+def Var.format.labelWithDeps (sentenceNumber : Nat) (ep : EP) (var : Var) (qm : HashMap Var Var) (em : Multimap Var Var) : String :=
   let defaultExpr := 
     if var.sort == 'h' then
-      Var.format.labelOnlyGround var
+      Var.format.labelOnlyGround sentenceNumber var
     else
-      Var.format.labelOnly var
+      Var.format.labelOnly sentenceNumber var
   match qm.find? var with
   | some iterVar => 
     match (em.find? var) with
     | some extraList => 
       let l := extraList.filter (fun evar => iterVar != evar)
       let l1 := (insertionSort l).eraseDups
-      let l2 := l1.map (fun item => Var.format.labelOnly item)
+      let l2 := l1.map (fun item => Var.format.labelOnly sentenceNumber item)
       let l2str := joinSep l2 " @ "
-      let lab := Var.format.labelOnlyGround var
+      let lab := Var.format.labelOnlyGround sentenceNumber var
       if l2str == "" then lab else "(" ++ lab ++ " @ " ++ l2str ++ ")" 
     | none => defaultExpr
   | none =>
     match (em.find? var) with
     | some extraList => 
       let l := (insertionSort extraList).eraseDups
-      "(" ++ (Var.format.labelOnlyGround var) ++ " @ " ++ (joinSep (l.map (fun item => Var.format.labelOnly item)) " @ ") ++ ")"
+      "(" ++ (Var.format.labelOnlyGround sentenceNumber var) ++ " @ " ++ (joinSep (l.map (fun item => Var.format.labelOnly sentenceNumber item)) " @ ") ++ ")"
     | none => defaultExpr
-
-def Var.format.all (var : Var) : String :=
-  s!"{var.sort}{var.id}{var.props}"
 
 def lastTwoChars (s : String) : String :=
   if s.length <= 1 then
@@ -260,7 +259,7 @@ def augmentIndirect (em : Multimap Var Var) (ep : EP) : Multimap Var Var :=
 def collectHOExtraVarsForEPs (preds : List EP) (em : Multimap Var Var) : Multimap Var Var :=
   preds.foldl augmentIndirect em
 
-def EP.format.type (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (rootHandle : Var) (handle : Var) : String :=
+def EP.format.type (sentenceNumber : Nat) (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (rootHandle : Var) (handle : Var) : String :=
   let preds := match (hm.find? handle) with
   | some value => value
   | none => []
@@ -304,10 +303,11 @@ def EP.format.type (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap
     let estr := extraArgs qm l
     let combined := estr ++ (if lstr == "" then "" else (if estr == "" then "" else " > ") ++ lstr)
     let (lparen,rparen) := if preds.length > 1 then ("(",")") else ("","")
-    "thf(" ++ (Var.format.labelOnlyGround l) ++ "_decl,type," ++ (Var.format.labelOnlyGround l) ++ ": " ++ combined ++ (if combined == "" then "" else " > ") ++ "$o)."
+    let lab := if handle == rootHandle then s!"s{sentenceNumber}_root" else Var.format.labelOnlyGround sentenceNumber l
+    "thf(" ++ lab ++ "_decl,type," ++ lab ++ ": " ++ combined ++ (if combined == "" then "" else " > ") ++ "$o)."
   printNormal firstEp.label preds
 
-def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (rootHandle : Var) (handle : Var) : String :=
+def EP.format.axiom (sentenceNumber : Nat) (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (rootHandle : Var) (handle : Var) : String :=
   let preds := match (hm.find? handle) with
   | some value => value
   | none => []
@@ -333,31 +333,30 @@ def EP.format.axiom (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multima
                | some larg => value.filter (fun arg => arg != larg)
                | none => value
       let ls : List Var := (insertionSort l).eraseDups
-      let estr : String := (joinSep (ls.map (fun var => Var.format.pair var)) ",")
+      let estr : String := (joinSep (ls.map (fun var => Var.format.pair sentenceNumber var)) ",")
       estr
     | none => ""
 
   let printNormal (l : Var) (preds : List EP) : String :=
     let lookupArg (labelVar : Var) : String :=
       match (qm.find? labelVar) with
-      | some value => Var.format.pair value
+      | some value => Var.format.pair sentenceNumber value
       | none => ""
-    let joinArgs0 (ep : EP) := joinSep ((getArgs ep).map fun a => Var.format.labelWithDeps ep a.2 qm em)  " @ "
+    let joinArgs0 (ep : EP) := joinSep ((getArgs ep).map fun a => Var.format.labelWithDeps sentenceNumber ep a.2 qm em)  " @ "
     let joinArgs (ep : EP) := 
       match ep.carg with
-      | some str => joinArgs0 ep ++ " @ " ++ (formatId str)
+      | some str => joinArgs0 ep ++ " @ " ++ (formatId sentenceNumber str)
       | none => joinArgs0 ep
     let lstr := lookupArg l
     let estr := extraArgs qm l
     let combined := estr ++ (if lstr == "" then "" else (if estr == "" then "" else ",") ++ lstr)
     let (lparen,rparen) := if preds.length > 1 then ("(",")") else ("","")
     let allCalls := preds.foldl (fun acc ep => (acc.1 ++ acc.2 ++ lparen ++ (fixName ep) ++ " @ " ++ (joinArgs ep) ++ rparen," & ")) ("","")
-    let lab := if handle == rootHandle then "root" else Var.format.labelOnlyGround l
+    let lab := if handle == rootHandle then s!"s{sentenceNumber}_root" else Var.format.labelOnlyGround sentenceNumber l
     if combined == "" then
       "thf(" ++ lab ++ ",axiom," ++ "\n   " ++ lab ++ " = ((" ++ allCalls.1 ++ ")))."
     else
       "thf(" ++ lab ++ ",axiom," ++ "\n   " ++ lab ++ " = ( ^ [" ++ combined ++ "] : " ++ "(" ++ allCalls.1 ++ ")))."
-
 
   printNormal firstEp.label preds
 
@@ -371,12 +370,7 @@ def collectEvents (preds : List EP) : List Var :=
     rs.foldl (fun acc pair => if pair.2.sort == 'e' then insertUnique acc pair.2 else acc) acc
   preds.foldl (fun acc ep => collectEventsForArgs acc ep.rargs) []
 
-def MRS.format (mrs : MRS.MRS) : String :=
- let header0 := "thf(x_decl,type,x : $tType)."
- let header1 := "thf(e_decl,type,e : $tType)."
- let header2 := "thf(string_decl,type,string : $i)."
- let header3 := "thf(int_to_e_decl,type,int_to_e: $int > e)."
- let headers := header0 ++ "\n" ++ header1 ++ "\n" ++ header2 ++ "\n" ++ header3 ++ "\n\n" ++ libraryRoutines ++ "\n"
+def MRS.format (sentenceNumber : Nat) (mrs : MRS.MRS) : String :=
  let strings := mrs.preds.foldl (fun stab pred =>
   match pred with
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
@@ -387,7 +381,7 @@ def MRS.format (mrs : MRS.MRS) : String :=
     stab.insert c l
   | {predicate := p, link := none, label := l, rargs := rs, carg := none} =>
     stab) Multimap.empty
- let stringDecls := strings.keys.foldl (fun strAcc str => strAcc ++ "thf(" ++ formatId str ++ "_decl,type," ++ formatId str ++ ": string).\n") ""
+ let stringDecls := strings.keys.foldl (fun strAcc str => strAcc ++ "thf(" ++ formatId sentenceNumber str ++ "_decl,type," ++ formatId sentenceNumber str ++ ": string).\n") ""
  let eSet := collectEvents mrs.preds 
  let qm := collectQuantifierVars mrs.preds
  let em := collectHOExtraVarsForEPs mrs.preds $
@@ -395,11 +389,11 @@ def MRS.format (mrs : MRS.MRS) : String :=
            collectHOExtraVarsForEPs mrs.preds $
            collectHOExtraVarsForEPs mrs.preds $ collectExtraVarsForEPs mrs.preds qm
  let hm := collectEPsByHandle mrs.preds
- let rlt := hm.keys.map (EP.format.type qm em hm mrs.top) 
- let rla := hm.keys.map (EP.format.axiom qm em hm mrs.top) 
- let etypes := (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id}_decl,type,({var.sort}{var.id} : e)).")) "\n")
- let eaxioms := (joinSep (eSet.map (fun (var : Var) => s!"thf({var.sort}{var.id}_value,axiom,({var.sort}{var.id} = (int_to_e @ {var.id}))).")) "\n")
- headers ++ etypes ++ "\n" ++ eaxioms ++ "\n" ++ stringDecls ++ (joinSep rlt "\n") ++ "\n" ++ (joinSep rla "\n")
+ let rlt := hm.keys.map (EP.format.type sentenceNumber qm em hm mrs.top) 
+ let rla := hm.keys.map (EP.format.axiom sentenceNumber qm em hm mrs.top) 
+ let etypes := (joinSep (eSet.map (fun (var : Var) => s!"thf(s{sentenceNumber}_{var.sort}{var.id}_decl,type,(s{sentenceNumber}_{var.sort}{var.id} : e)).")) "\n")
+ let eaxioms := (joinSep (eSet.map (fun (var : Var) => s!"thf(s{sentenceNumber}_{var.sort}{var.id}_value,axiom,(s{sentenceNumber}_{var.sort}{var.id} = (int_to_e @ {var.id}))).")) "\n")
+ etypes ++ "\n\n" ++ eaxioms ++ "\n\n" ++ stringDecls ++ "\n" ++ (joinSep rlt "\n") ++ "\n\n" ++ (joinSep rla "\n")
 
 end THF
 
