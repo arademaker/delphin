@@ -52,7 +52,7 @@ def main : IO Unit := do
  let header2 := "thf(name_decl,type,name : $i)."
  let header3 := "thf(int_to_e_decl,type,int_to_e: $int > e)."
  let headers := header0 ++ "\n" ++ header1 ++ "\n" ++ header2 ++ "\n" ++ header3 ++ "\n\n" ++ THF.libraryRoutines ++ "\n"
- IO.FS.writeFile "thf-outputs/sentences.p" ((sentences.foldl (fun acc str => acc ++ str ++ "\n") headers))
+ IO.FS.writeFile "thf-outputs/sentences.p" ((sentences.foldl (fun acc str => acc ++ str ++ "\n\n") headers))
  return ()
   
 -- #eval main
