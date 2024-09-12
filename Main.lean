@@ -35,16 +35,17 @@ def mapWithIndexM [Monad m] (xs : List α) (f : Nat → α → m β) : m (List �
   loop xs 0
 
 def main : IO Unit := do
- let sentences := ["Someone who lives in Dreadbury Mansion killed Aunt Agatha.",
-                   "Agatha, the butler, and Charles live in Dreadbury Mansion, and are the only people who live therein.",
-                   "A killer always hates his victim, and is never richer than his victim.",
-                   "Charles hates no one that Aunt Agatha hates.",
-                   "Agatha hates everyone except the butler.",
-                   "The butler hates everyone not richer than Aunt Agatha.",
-                   "The butler hates everyone Aunt Agatha hates.",
-                   "No one hates everyone.",
-                   "Agatha is not the butler.",
-                   "Therefore : Agatha killed herself."]
+ let sentences := ["Someone who lives in Dreadbury Mansion killed Aunt Agatha.", -- 0
+                   "Agatha, the butler, and Charles live in Dreadbury Mansion, and are the only people who live therein.", -- 1
+                   "A killer always hates his victim, and is never richer than his victim.", -- 2
+                   "Charles hates no one that Aunt Agatha hates.", -- 3
+                   "Agatha hates everyone except the butler.", -- 4
+                   "The butler hates everyone not richer than Aunt Agatha.", -- 5
+                   "The butler hates everyone Aunt Agatha hates.", -- 6
+                   "No one hates everyone.", -- 7
+                   "Agatha is not the butler.", -- 8
+                   "Therefore : Agatha killed herself." -- 9
+                   ] 
 
  let sentences <- mapWithIndexM sentences xform
  let header0 := "thf(x_decl,type,x : $tType)."
