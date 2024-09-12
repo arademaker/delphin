@@ -96,6 +96,7 @@ thf(s0_h4,axiom,
    s0_h4 = ( ^ [S0_X10 : x,S0_X3 : x] : ((in_p_loc @ s0_e9 @ s0_e8 @ S0_X10) & (live_v_1 @ s0_e8 @ S0_X3) & (person @ S0_X3)))).
 thf(s0_h1,axiom,
    s0_h1 = ( ^ [S0_X23 : x,S0_X3 : x] : (kill_v_1 @ s0_e2 @ S0_X3 @ S0_X23))).
+
 thf(s1_e30_decl,type,(s1_e30 : e)).
 thf(s1_e31_decl,type,(s1_e31 : e)).
 thf(s1_e37_decl,type,(s1_e37 : e)).
@@ -171,6 +172,7 @@ thf(s1_h4,axiom,
    s1_h4 = ( ^ [S1_X32 : x,S1_X14 : x,S1_X8 : x,S1_X3 : x,S1_X46 : x] : (udef_q @ S1_X3 @ (s1_h7 @ S1_X14 @ S1_X8) @ (s1_h1 @ S1_X46 @ S1_X32)))).
 thf(s1_h1,axiom,
    s1_h1 = ( ^ [S1_X46 : x,S1_X32 : x,S1_X3 : x] : ((be_v_id @ s1_e45 @ S1_X3 @ S1_X46) & (and_c_e @ s1_e2 @ s1_e30 @ s1_e45) & (in_p_loc @ s1_e31 @ s1_e30 @ S1_X32) & (live_v_1 @ s1_e30 @ S1_X3)))).
+
 thf(s2_e9_decl,type,(s2_e9 : e)).
 thf(s2_e15_decl,type,(s2_e15 : e)).
 thf(s2_e22_decl,type,(s2_e22 : e)).
@@ -223,6 +225,7 @@ thf(s2_h4,axiom,
    s2_h4 = ( ^ [S2_X28 : x,S2_X10 : x,S2_X3 : x,S2_X34 : x] : (a_q @ S2_X3 @ s2_h7 @ (s2_h1 @ S2_X34 @ S2_X28 @ S2_X10)))).
 thf(s2_h1,axiom,
    s2_h1 = ( ^ [S2_X34 : x,S2_X28 : x,S2_X10 : x,S2_X3 : x] : ((never_a_1 @ (s2_h29 @ S2_X34 @ S2_X28 @ S2_X3)) & (and_c_e @ s2_e2 @ s2_e9 @ s2_e22) & (hate_v_1 @ s2_e9 @ S2_X3 @ S2_X10) & (always_a_1 @ s2_e9)))).
+
 thf(s3_e2_decl,type,(s3_e2 : e)).
 thf(s3_e15_decl,type,(s3_e15 : e)).
 thf(s3_e21_decl,type,(s3_e21 : e)).
@@ -265,6 +268,7 @@ thf(s3_h4,axiom,
    s3_h4 = ( ^ [S3_X3 : x,S3_X9 : x] : (proper_q @ S3_X3 @ s3_h7 @ (s3_h1 @ S3_X9)))).
 thf(s3_h1,axiom,
    s3_h1 = ( ^ [S3_X9 : x,S3_X3 : x] : (hate_v_1 @ s3_e2 @ S3_X3 @ S3_X9))).
+
 thf(s4_e2_decl,type,(s4_e2 : e)).
 thf(s4_e14_decl,type,(s4_e14 : e)).
 
@@ -295,6 +299,7 @@ thf(s4_h4,axiom,
    s4_h4 = ( ^ [S4_X3 : x,S4_X9 : x] : (proper_q @ S4_X3 @ s4_h7 @ (s4_h1 @ S4_X9)))).
 thf(s4_h1,axiom,
    s4_h1 = ( ^ [S4_X9 : x,S4_X3 : x] : (hate_v_1 @ s4_e2 @ S4_X3 @ S4_X9))).
+
 thf(s5_e2_decl,type,(s5_e2 : e)).
 thf(s5_e13_decl,type,(s5_e13 : e)).
 thf(s5_e16_decl,type,(s5_e16 : e)).
@@ -341,6 +346,7 @@ thf(s5_h4,axiom,
    s5_h4 = ( ^ [S5_X3 : x,S5_X8 : x] : (the_q @ S5_X3 @ s5_h7 @ (s5_h1 @ S5_X8)))).
 thf(s5_h1,axiom,
    s5_h1 = ( ^ [S5_X8 : x,S5_X3 : x] : (hate_v_1 @ s5_e2 @ S5_X3 @ S5_X8))).
+
 thf(s6_e2_decl,type,(s6_e2 : e)).
 thf(s6_e18_decl,type,(s6_e18 : e)).
 thf(s6_e26_decl,type,(s6_e26 : e)).
@@ -379,6 +385,7 @@ thf(s6_h4,axiom,
    s6_h4 = ( ^ [S6_X3 : x,S6_X8 : x] : (the_q @ S6_X3 @ s6_h7 @ (s6_h1 @ S6_X8)))).
 thf(s6_h1,axiom,
    s6_h1 = ( ^ [S6_X8 : x,S6_X3 : x] : (hate_v_1 @ s6_e2 @ S6_X3 @ S6_X8))).
+
 thf(s7_e2_decl,type,(s7_e2 : e)).
 
 thf(s7_e2_value,axiom,(s7_e2 = (int_to_e @ 2))).
@@ -400,6 +407,7 @@ thf(s7_h4,axiom,
    s7_h4 = ( ^ [S7_X3 : x] : (person @ S7_X3))).
 thf(s7_h1,axiom,
    s7_h1 = ( ^ [S7_X8 : x,S7_X3 : x] : (hate_v_1 @ s7_e2 @ S7_X3 @ S7_X8))).
+
 thf(s8_e2_decl,type,(s8_e2 : e)).
 thf(s8_e11_decl,type,(s8_e11 : e)).
 
@@ -427,6 +435,7 @@ thf(s8_h4,axiom,
    s8_h4 = ( ^ [S8_X3 : x,S8_X10 : x] : (proper_q @ S8_X3 @ s8_h7 @ (s8_h9 @ S8_X10)))).
 thf(s8_root,axiom,
    s8_root = ( ^ [S8_X10 : x,S8_X3 : x] : (neg @ s8_e11 @ (s8_h13 @ S8_X10 @ S8_X3)))).
+
 thf(s9_e2_decl,type,(s9_e2 : e)).
 thf(s9_e9_decl,type,(s9_e9 : e)).
 thf(s9_e19_decl,type,(s9_e19 : e)).
@@ -462,3 +471,4 @@ thf(s9_h4,axiom,
    s9_h4 = ((unknown @ s9_e2))).
 thf(s9_h1,axiom,
    s9_h1 = ( ^ [S9_X20 : x,S9_X13 : x] : (colon_p_namely @ s9_e9 @ s9_h6 @ (s9_h22 @ S9_X20 @ S9_X13)))).
+
