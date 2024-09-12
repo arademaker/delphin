@@ -2,9 +2,6 @@ thf(x_decl,type,x : $tType).
 thf(e_decl,type,e : $tType).
 thf(int_to_e_decl,type,int_to_e: $int > e).
 
-thf(person,axiom,
-  person = ( ^[X : x] : (named(X,s0_id_Agatha) | named(X,s1_id_Charles) | butler_n_1(X)) )).
-
 include('thf-outputs/sentences-trim.p').
 % include('id-decls.p').
 
@@ -29,6 +26,9 @@ thf(mansion_ids, axiom,
 
 thf(named_match,axiom, ![X : x, Y : x, N : name] : (((named @ X @ N) & (named @ Y @ N)) => (X = Y))).
 thf(named_not_match,axiom, ![X : x, Y : x, N : name] : ((~(named @ X @ N) & ~(named @ Y @ N)) => ~(X = Y))).
+
+% thf(person,axiom,
+%  person = ( ^[X : x] : (named(X,s0_id_Agatha) | named(X,s1_id_Charles) | butler_n_1(X)) )).
 
 % thf(s9_conjecture,conjecture,?[X : x] : s9_root(X,X)).
 thf(myconj,conjecture,?[X : x] : (person(X) => named(X,s0_id_Agatha))).
