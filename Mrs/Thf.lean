@@ -307,7 +307,7 @@ def EP.format.type (sentenceNumber : Nat) (qm : HashMap Var Var) (em : Multimap 
     "thf(" ++ lab ++ "_decl,type," ++ lab ++ ": " ++ combined ++ (if combined == "" then "" else " > ") ++ "$o)."
   printNormal firstEp.label preds
 
-def EP.format.axiom (sentenceNumber : Nat) (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (rootHandle : Var) (handle : Var) : String :=
+def EP.format.defn (sentenceNumber : Nat) (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (rootHandle : Var) (handle : Var) : String :=
   let preds := match (hm.find? handle) with
   | some value => value
   | none => []
@@ -354,9 +354,9 @@ def EP.format.axiom (sentenceNumber : Nat) (qm : HashMap Var Var) (em : Multimap
     let allCalls := preds.foldl (fun acc ep => (acc.1 ++ acc.2 ++ lparen ++ (fixName ep) ++ " @ " ++ (joinArgs ep) ++ rparen," & ")) ("","")
     let lab := if handle == rootHandle then s!"s{sentenceNumber}_root" else Var.format.labelOnlyGround sentenceNumber l
     if combined == "" then
-      "thf(" ++ lab ++ ",axiom," ++ "\n   " ++ lab ++ " = ((" ++ allCalls.1 ++ ")))."
+      "thf(" ++ lab ++ ",definition," ++ "\n   " ++ lab ++ " = ((" ++ allCalls.1 ++ ")))."
     else
-      "thf(" ++ lab ++ ",axiom," ++ "\n   " ++ lab ++ " = ( ^ [" ++ combined ++ "] : " ++ "(" ++ allCalls.1 ++ ")))."
+      "thf(" ++ lab ++ ",definition," ++ "\n   " ++ lab ++ " = ( ^ [" ++ combined ++ "] : " ++ "(" ++ allCalls.1 ++ ")))."
 
   printNormal firstEp.label preds
 
@@ -390,10 +390,10 @@ def MRS.format (sentenceNumber : Nat) (mrs : MRS.MRS) : String :=
            collectHOExtraVarsForEPs mrs.preds $ collectExtraVarsForEPs mrs.preds qm
  let hm := collectEPsByHandle mrs.preds
  let rlt := hm.keys.map (EP.format.type sentenceNumber qm em hm mrs.top) 
- let rla := hm.keys.map (EP.format.axiom sentenceNumber qm em hm mrs.top) 
+ let rla := hm.keys.map (EP.format.defn sentenceNumber qm em hm mrs.top) 
  let etypes := (joinSep (eSet.map (fun (var : Var) => s!"thf(s{sentenceNumber}_{var.sort}{var.id}_decl,type,(s{sentenceNumber}_{var.sort}{var.id} : e)).")) "\n")
- let eaxioms := (joinSep (eSet.map (fun (var : Var) => s!"thf(s{sentenceNumber}_{var.sort}{var.id}_value,axiom,(s{sentenceNumber}_{var.sort}{var.id} = (int_to_e @ {var.id}))).")) "\n")
- etypes ++ "\n\n" ++ eaxioms ++ "\n\n" ++ nameDecls ++ "\n" ++ (joinSep rlt "\n") ++ "\n\n" ++ (joinSep rla "\n")
+ -- let eaxioms := (joinSep (eSet.map (fun (var : Var) => s!"thf(s{sentenceNumber}_{var.sort}{var.id}_value,axiom,(s{sentenceNumber}_{var.sort}{var.id} = (int_to_e @ {var.id}))).")) "\n")
+ etypes ++ "\n\n" ++ nameDecls ++ "\n" ++ (joinSep rlt "\n") ++ "\n\n" ++ (joinSep rla "\n")
 
 end THF
 
