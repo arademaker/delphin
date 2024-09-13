@@ -38,20 +38,29 @@ thf(agatha_ids, axiom,
      (s0_id_Agatha = s5_id_Agatha) &
      (s0_id_Agatha = s6_id_Agatha) &
      (s0_id_Agatha = s8_id_Agatha) &
-     (s0_id_Agatha = s9_id_Agatha) &
-     (s0_id_Agatha = s0_id_Aunt) &
-     (s0_id_Agatha = s5_id_Aunt))).
+     (s0_id_Agatha = s9_id_Agatha))).
 
-thf(charles_ids, axiom,
-    (s1_id_Charles = s3_id_Charles)).
+thf(aunt_ids, axiom, ((s0_id_Aunt = s5_id_Aunt))).
 
-thf(mansion_ids, axiom,
-    ((s0_id_Dreadbury = s0_id_Mansion) &
-     (s0_id_Dreadbury = s1_id_Dreadbury) &
-     (s0_id_Dreadbury = s1_id_Mansion))).
+thf(charles_ids, axiom, (s1_id_Charles = s3_id_Charles)).
 
-thf(named_match,axiom, ![X : x, Y : x, Z : name] : (((named @ X @ Z) & (named @ Y @ Z)) => (X = Y))).
-thf(named_not_match,axiom, ![X : x, Y : x, Z : name] : ((~(named @ X @ Z) & ~(named @ Y @ Z)) => ~(X = Y))).
+thf(dreadbury_ids, axiom, (s0_id_Dreadbury = s1_id_Dreadbury)).
+
+thf(mansion_ids, axiom, (s0_id_Mansion = s1_id_Mansion)).
+
+thf(id_difference, axiom, ~((s0_id_Agatha = s0_id_Aunt) | (s0_id_Agatha = s1_id_Charles) | (s0_id_Agatha = s0_id_Dreadbury) | (s0_id_Agatha = s0_id_Mansion)  |
+                            (s0_id_Aunt = s1_id_Charles) | (s0_id_Aunt = s0_id_Dreadbury) | (s0_id_Aunt = s0_id_Mansion) |
+                            (s1_id_Charles = s0_id_Dreadbury) | (s1_id_Charles = s0_id_Mansion) |
+                            (s0_id_Dreadbury = s0_id_Mansion))).
+
+thf(s0_id_Agatha_named, axiom, ?[X : x] : (named @ X @ s0_id_Agatha)).
+thf(s0_id_Aunt_named, axiom, ?[X : x] : (named @ X @ s0_id_Aunt)).
+thf(s1_id_Charles_named, axiom, ?[X : x] : (named @ X @ s1_id_Charles)).
+thf(s0_id_Dreadbury_named, axiom, ?[X : x] : (named @ X @ s0_id_Dreadbury)).
+thf(s0_id_Mansion_named, axiom, ?[X : x] : (named @ X @ s0_id_Mansion)).
+
+thf(assert_same, axiom, ![X : x,Y : x,Name : name] : ( ((named @ X @ Name) & (named @ Y @ Name)) => (X = Y) )).
+thf(assert_different, axiom, ![X : x,Y : x,NX : name, NY: name] : ( ((named @ X @ NX) & (named @ Y @ NY) & ~(NX = NY)) => (~(X = Y)) )).
 
 thf(person,axiom,
   person = (^[X : x] : ((butler_n_1 @ X) | (named @ X @ s0_id_Agatha) | (named @ X @ s1_id_Charles)))).
