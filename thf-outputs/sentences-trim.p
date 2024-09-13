@@ -51,11 +51,11 @@ thf(s0_e15_decl,type,(s0_e15 : e)).
 thf(s0_e2_decl,type,(s0_e2 : e)).
 thf(s0_e28_decl,type,(s0_e28 : e)).
 
-thf(s0_e8_value,axiom,(s0_e8 = (int_to_e @ 8))).
-thf(s0_e9_value,axiom,(s0_e9 = (int_to_e @ 9))).
-thf(s0_e15_value,axiom,(s0_e15 = (int_to_e @ 15))).
-thf(s0_e2_value,axiom,(s0_e2 = (int_to_e @ 2))).
-thf(s0_e28_value,axiom,(s0_e28 = (int_to_e @ 28))).
+%thf(s0_e8_value,axiom,(s0_e8 = (int_to_e @ 8))).
+%thf(s0_e9_value,axiom,(s0_e9 = (int_to_e @ 9))).
+%thf(s0_e15_value,axiom,(s0_e15 = (int_to_e @ 15))).
+%thf(s0_e2_value,axiom,(s0_e2 = (int_to_e @ 2))).
+%thf(s0_e28_value,axiom,(s0_e28 = (int_to_e @ 28))).
 
 thf(s0_id_Agatha_decl,type,s0_id_Agatha: name).
 thf(s0_id_Aunt_decl,type,s0_id_Aunt: name).
@@ -106,14 +106,14 @@ thf(s1_e51_decl,type,(s1_e51 : e)).
 thf(s1_e53_decl,type,(s1_e53 : e)).
 thf(s1_e54_decl,type,(s1_e54 : e)).
 
-thf(s1_e30_value,axiom,(s1_e30 = (int_to_e @ 30))).
-thf(s1_e31_value,axiom,(s1_e31 = (int_to_e @ 31))).
-thf(s1_e37_value,axiom,(s1_e37 = (int_to_e @ 37))).
-thf(s1_e45_value,axiom,(s1_e45 = (int_to_e @ 45))).
-thf(s1_e2_value,axiom,(s1_e2 = (int_to_e @ 2))).
-thf(s1_e51_value,axiom,(s1_e51 = (int_to_e @ 51))).
-thf(s1_e53_value,axiom,(s1_e53 = (int_to_e @ 53))).
-thf(s1_e54_value,axiom,(s1_e54 = (int_to_e @ 54))).
+%thf(s1_e30_value,axiom,(s1_e30 = (int_to_e @ 30))).
+%thf(s1_e31_value,axiom,(s1_e31 = (int_to_e @ 31))).
+%thf(s1_e37_value,axiom,(s1_e37 = (int_to_e @ 37))).
+%thf(s1_e45_value,axiom,(s1_e45 = (int_to_e @ 45))).
+%thf(s1_e2_value,axiom,(s1_e2 = (int_to_e @ 2))).
+%thf(s1_e51_value,axiom,(s1_e51 = (int_to_e @ 51))).
+%thf(s1_e53_value,axiom,(s1_e53 = (int_to_e @ 53))).
+%thf(s1_e54_value,axiom,(s1_e54 = (int_to_e @ 54))).
 
 thf(s1_id_Agatha_decl,type,s1_id_Agatha: name).
 thf(s1_id_Charles_decl,type,s1_id_Charles: name).
@@ -180,12 +180,12 @@ thf(s2_e2_decl,type,(s2_e2 : e)).
 thf(s2_e27_decl,type,(s2_e27 : e)).
 thf(s2_e33_decl,type,(s2_e33 : e)).
 
-thf(s2_e9_value,axiom,(s2_e9 = (int_to_e @ 9))).
-thf(s2_e15_value,axiom,(s2_e15 = (int_to_e @ 15))).
-thf(s2_e22_value,axiom,(s2_e22 = (int_to_e @ 22))).
-thf(s2_e2_value,axiom,(s2_e2 = (int_to_e @ 2))).
-thf(s2_e27_value,axiom,(s2_e27 = (int_to_e @ 27))).
-thf(s2_e33_value,axiom,(s2_e33 = (int_to_e @ 33))).
+%thf(s2_e9_value,axiom,(s2_e9 = (int_to_e @ 9))).
+%thf(s2_e15_value,axiom,(s2_e15 = (int_to_e @ 15))).
+%thf(s2_e22_value,axiom,(s2_e22 = (int_to_e @ 22))).
+%thf(s2_e2_value,axiom,(s2_e2 = (int_to_e @ 2))).
+%thf(s2_e27_value,axiom,(s2_e27 = (int_to_e @ 27))).
+%thf(s2_e33_value,axiom,(s2_e33 = (int_to_e @ 33))).
 
 
 thf(s2_h38_decl,type,s2_h38: x > $o).
@@ -231,10 +231,10 @@ thf(s3_e15_decl,type,(s3_e15 : e)).
 thf(s3_e21_decl,type,(s3_e21 : e)).
 thf(s3_e29_decl,type,(s3_e29 : e)).
 
-thf(s3_e2_value,axiom,(s3_e2 = (int_to_e @ 2))).
-thf(s3_e15_value,axiom,(s3_e15 = (int_to_e @ 15))).
-thf(s3_e21_value,axiom,(s3_e21 = (int_to_e @ 21))).
-thf(s3_e29_value,axiom,(s3_e29 = (int_to_e @ 29))).
+%thf(s3_e2_value,axiom,(s3_e2 = (int_to_e @ 2))).
+%thf(s3_e15_value,axiom,(s3_e15 = (int_to_e @ 15))).
+%thf(s3_e21_value,axiom,(s3_e21 = (int_to_e @ 21))).
+%thf(s3_e29_value,axiom,(s3_e29 = (int_to_e @ 29))).
 
 thf(s3_id_1_decl,type,s3_id_1: name).
 thf(s3_id_Agatha_decl,type,s3_id_Agatha: name).
@@ -272,8 +272,8 @@ thf(s3_h1,axiom,
 thf(s4_e2_decl,type,(s4_e2 : e)).
 thf(s4_e14_decl,type,(s4_e14 : e)).
 
-thf(s4_e2_value,axiom,(s4_e2 = (int_to_e @ 2))).
-thf(s4_e14_value,axiom,(s4_e14 = (int_to_e @ 14))).
+%thf(s4_e2_value,axiom,(s4_e2 = (int_to_e @ 2))).
+%thf(s4_e14_value,axiom,(s4_e14 = (int_to_e @ 14))).
 
 thf(s4_id_Agatha_decl,type,s4_id_Agatha: name).
 
@@ -306,11 +306,11 @@ thf(s5_e16_decl,type,(s5_e16 : e)).
 thf(s5_e18_decl,type,(s5_e18 : e)).
 thf(s5_e24_decl,type,(s5_e24 : e)).
 
-thf(s5_e2_value,axiom,(s5_e2 = (int_to_e @ 2))).
-thf(s5_e13_value,axiom,(s5_e13 = (int_to_e @ 13))).
-thf(s5_e16_value,axiom,(s5_e16 = (int_to_e @ 16))).
-thf(s5_e18_value,axiom,(s5_e18 = (int_to_e @ 18))).
-thf(s5_e24_value,axiom,(s5_e24 = (int_to_e @ 24))).
+%thf(s5_e2_value,axiom,(s5_e2 = (int_to_e @ 2))).
+%thf(s5_e13_value,axiom,(s5_e13 = (int_to_e @ 13))).
+%thf(s5_e16_value,axiom,(s5_e16 = (int_to_e @ 16))).
+%thf(s5_e18_value,axiom,(s5_e18 = (int_to_e @ 18))).
+%thf(s5_e24_value,axiom,(s5_e24 = (int_to_e @ 24))).
 
 thf(s5_id_Agatha_decl,type,s5_id_Agatha: name).
 thf(s5_id_Aunt_decl,type,s5_id_Aunt: name).
@@ -351,9 +351,9 @@ thf(s6_e2_decl,type,(s6_e2 : e)).
 thf(s6_e18_decl,type,(s6_e18 : e)).
 thf(s6_e26_decl,type,(s6_e26 : e)).
 
-thf(s6_e2_value,axiom,(s6_e2 = (int_to_e @ 2))).
-thf(s6_e18_value,axiom,(s6_e18 = (int_to_e @ 18))).
-thf(s6_e26_value,axiom,(s6_e26 = (int_to_e @ 26))).
+%thf(s6_e2_value,axiom,(s6_e2 = (int_to_e @ 2))).
+%thf(s6_e18_value,axiom,(s6_e18 = (int_to_e @ 18))).
+%thf(s6_e26_value,axiom,(s6_e26 = (int_to_e @ 26))).
 
 thf(s6_id_Agatha_decl,type,s6_id_Agatha: name).
 
@@ -389,7 +389,7 @@ thf(s6_h1,axiom,
 
 thf(s7_e2_decl,type,(s7_e2 : e)).
 
-thf(s7_e2_value,axiom,(s7_e2 = (int_to_e @ 2))).
+%thf(s7_e2_value,axiom,(s7_e2 = (int_to_e @ 2))).
 
 
 thf(s7_root_decl,type,s7_root: x > x > $o).
@@ -412,8 +412,8 @@ thf(s7_h1,axiom,
 thf(s8_e2_decl,type,(s8_e2 : e)).
 thf(s8_e11_decl,type,(s8_e11 : e)).
 
-thf(s8_e2_value,axiom,(s8_e2 = (int_to_e @ 2))).
-thf(s8_e11_value,axiom,(s8_e11 = (int_to_e @ 11))).
+%thf(s8_e2_value,axiom,(s8_e2 = (int_to_e @ 2))).
+%thf(s8_e11_value,axiom,(s8_e11 = (int_to_e @ 11))).
 
 thf(s8_id_Agatha_decl,type,s8_id_Agatha: name).
 
@@ -441,9 +441,9 @@ thf(s9_e2_decl,type,(s9_e2 : e)).
 thf(s9_e9_decl,type,(s9_e9 : e)).
 thf(s9_e19_decl,type,(s9_e19 : e)).
 
-thf(s9_e2_value,axiom,(s9_e2 = (int_to_e @ 2))).
-thf(s9_e9_value,axiom,(s9_e9 = (int_to_e @ 9))).
-thf(s9_e19_value,axiom,(s9_e19 = (int_to_e @ 19))).
+%thf(s9_e2_value,axiom,(s9_e2 = (int_to_e @ 2))).
+%thf(s9_e9_value,axiom,(s9_e9 = (int_to_e @ 9))).
+%thf(s9_e19_value,axiom,(s9_e19 = (int_to_e @ 19))).
 
 thf(s9_id_Agatha_decl,type,s9_id_Agatha: name).
 
