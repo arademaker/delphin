@@ -99,9 +99,9 @@ def insertionSort [Ord α] : List α → List α
 def removeQuotes (s : String) : String :=
   if s.startsWith "\"" && s.endsWith "\"" then s.extract ⟨1⟩ ⟨s.length - 1⟩ else s
 
-def formatId (sentenceNumber : Nat) (s : String) : String :=
+def formatId (s : String) : String :=
   let str := removeQuotes s
-  s!"s{sentenceNumber}_id_{str}"
+  s!"id_{str}"
 
 def fixName (ep : EP) : String :=
   let checkEonly (ep : EP) : Bool :=
@@ -345,7 +345,7 @@ def EP.format.defn (sentenceNumber : Nat) (qm : HashMap Var Var) (em : Multimap 
     let joinArgs0 (ep : EP) := joinSep ((getArgs ep).map fun a => Var.format.labelWithDeps sentenceNumber ep a.2 qm em)  " @ "
     let joinArgs (ep : EP) := 
       match ep.carg with
-      | some str => joinArgs0 ep ++ " @ " ++ (formatId sentenceNumber str)
+      | some str => joinArgs0 ep ++ " @ " ++ (formatId str)
       | none => joinArgs0 ep
     let lstr := lookupArg l
     let estr := extraArgs qm l
@@ -370,7 +370,7 @@ def collectEvents (preds : List EP) : List Var :=
     rs.foldl (fun acc pair => if pair.2.sort == 'e' then insertUnique acc pair.2 else acc) acc
   preds.foldl (fun acc ep => collectEventsForArgs acc ep.rargs) []
 
-def MRS.format (sentenceNumber : Nat) (mrs : MRS.MRS) : String :=
+def MRS.format (sentenceNumber : Nat) (mrs : MRS.MRS) : (String × List String × List Var) :=
  let strings := mrs.preds.foldl (fun stab pred =>
   match pred with
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
@@ -381,7 +381,6 @@ def MRS.format (sentenceNumber : Nat) (mrs : MRS.MRS) : String :=
     stab.insert c l
   | {predicate := p, link := none, label := l, rargs := rs, carg := none} =>
     stab) Multimap.empty
- let nameDecls := strings.keys.foldl (fun strAcc str => strAcc ++ "thf(" ++ formatId sentenceNumber str ++ "_decl,type," ++ formatId sentenceNumber str ++ ": name).\n") ""
  let eSet := collectEvents mrs.preds 
  let qm := collectQuantifierVars mrs.preds
  let em := collectHOExtraVarsForEPs mrs.preds $
@@ -392,8 +391,8 @@ def MRS.format (sentenceNumber : Nat) (mrs : MRS.MRS) : String :=
  let rlt := hm.keys.map (EP.format.type sentenceNumber qm em hm mrs.top) 
  let rla := hm.keys.map (EP.format.defn sentenceNumber qm em hm mrs.top) 
  let etypes := (joinSep (eSet.map (fun (var : Var) => s!"thf(s{sentenceNumber}_{var.sort}{var.id}_decl,type,(s{sentenceNumber}_{var.sort}{var.id} : e)).")) "\n")
- -- let eaxioms := (joinSep (eSet.map (fun (var : Var) => s!"thf(s{sentenceNumber}_{var.sort}{var.id}_value,axiom,(s{sentenceNumber}_{var.sort}{var.id} = (int_to_e @ {var.id}))).")) "\n")
- etypes ++ "\n\n" ++ nameDecls ++ "\n" ++ (joinSep rlt "\n") ++ "\n\n" ++ (joinSep rla "\n")
+ let str := etypes ++ "\n\n" ++ (joinSep rlt "\n") ++ "\n\n" ++ (joinSep rla "\n")
+ (str,strings.keys,eSet)
 
 end THF
 
