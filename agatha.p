@@ -26,16 +26,10 @@ thf(pronoun_q_decl,definition,
   pronoun_q = ( ^[X : x, Rstr : (x > $o), Body : (x > $o)] : (? [X : x] : ((Rstr @ X) & (Body @ X))))).
 thf(the_q_decl,definition,
   the_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)) & (! [Y : x] : ((Rstr @ Y)  & (Body @ Y) & (Y = X))))))).
-%thf(def_explicit_q_decl,definition,
-%  def_explicit_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)) & (! [Y : x] : ((Rstr @ Y)  & (Body @ Y) & (Y = X))))))).
-%thf(proper_q_decl,definition,
-%  proper_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)) & (! [Y : x] : ((Rstr @ Y)  & (Body @ Y) & (Y = X))))))).
-%thf(the_q_decl,definition,
-%  the_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)))))).
+thf(proper_q_decl,definition,
+  proper_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)) & (! [Y : x] : ((Rstr @ Y)  & (Body @ Y) & (Y = X))))))).
 thf(def_explicit_q_decl,definition,
   def_explicit_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)))))).
-thf(proper_q_decl,definition,
-  proper_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)))))).
 thf(colon_p_namely,definition,
   colon_p_namely = (^[Event : e,Pred1 : ($o),Pred2: ($o)] : Pred2)).
 
@@ -75,7 +69,7 @@ thf(assert_same, axiom, ![X : x,Y : x,Name : name] : ( ((named @ X @ Name) & (na
 thf(assert_different, axiom, ![X : x,Y : x,NX : name, NY: name] : ( ((named @ X @ NX) & (named @ Y @ NY) & ~(NX = NY)) => (~(X = Y)) )).
 
 thf(person,definition,
-  person = (^[X : x] : ((butler_n_1 @ X) | (named @ X @ id_Agatha) | (named @ X @ id_Charles)))).
+  person = (^[X : x] : (((butler_n_1 @ X) | (named @ X @ id_Agatha) | (named @ X @ id_Charles)) & ~((named @ X @ id_Dreadbury) | (named @ X @ id_Mansion)) & ~(named @ X @ id_Aunt)))).
 
 thf(conj,conjecture,
   ?[
@@ -89,15 +83,15 @@ thf(conj,conjecture,
     S7_X8 : x, S7_X3 : x,
     S8_X10 : x,S8_X3 : x
    ] : (
-           %(s0_root @ S0_X29 @ S0_X23 @ S0_X16 @ S0_X10 @ S0_X3) &
-           %(s1_root @ S1_X46 @ S1_X38 @ S1_X32 @ S1_X24 @ S1_X19 @ S1_X14 @ S1_X8 @ S1_X3) &
-           %(s2_root @ S2_X34 @ S2_X28 @ S2_X16 @ S2_X10 @ S2_X3) &
-           %(s3_root @ S3_X22 @ S3_X17 @ S3_X9 @ S3_X3) &
+           (s0_root @ S0_X29 @ S0_X23 @ S0_X16 @ S0_X10 @ S0_X3) &
+           (s1_root @ S1_X46 @ S1_X38 @ S1_X32 @ S1_X24 @ S1_X19 @ S1_X14 @ S1_X8 @ S1_X3) &
+           (s2_root @ S2_X34 @ S2_X28 @ S2_X16 @ S2_X10 @ S2_X3) &
+           (s3_root @ S3_X22 @ S3_X17 @ S3_X9 @ S3_X3) &
            (s4_root @ S4_X15 @ S4_X9 @ S4_X3) &
-           %(s5_root @ S5_X25 @ S5_X19 @ S5_X8 @ S5_X3) &
-           %(s6_root @ S6_X19 @ S6_X14 @ S6_X8 @ S6_X3) &
-           %(s7_root @ S7_X8 @ S7_X3) &
-           %(s8_root @ S8_X10 @ S8_X3) &
+           (s5_root @ S5_X25 @ S5_X19 @ S5_X8 @ S5_X3) &
+           (s6_root @ S6_X19 @ S6_X14 @ S6_X8 @ S6_X3) &
+           (s7_root @ S7_X8 @ S7_X3) &
+           (s8_root @ S8_X10 @ S8_X3) & % ~(S8_X10 = S8_X3) & (person @ S8_X10) & (person @ S8_X3)) 
            ((S0_X23 = S1_X8) & (S0_X23 = S3_X17) & (S0_X23 = S5_X19) & (S0_X23 = S6_X14) & (S0_X23 = S8_X3)) & % Agatha
            ((S1_X19 = S4_X15) & (S1_X19 = S5_X3) & (S1_X19 = S6_X3) & (S1_X19 = S8_X10)) & % butler_n_1 
            (S1_X24 = S3_X3) & % Charles
