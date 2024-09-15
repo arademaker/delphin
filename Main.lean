@@ -51,7 +51,8 @@ def enumerateUniquePairs [Ord α] (list : List α) : List (α × α) :=
   aux list
 
 def main : IO Unit := do
- let sentencesText := ["Someone who lives in Dreadbury Mansion killed Aunt Agatha.", -- 0
+ let sentencesText := [
+                      "Someone who lives in Dreadbury Mansion killed Aunt Agatha.", -- 0
                       "Agatha, the butler, and Charles live in Dreadbury Mansion, and are the only people who live therein.", -- 1
                       "A killer always hates his victim, and is never richer than his victim.", -- 2
                       "Charles hates no one that Aunt Agatha hates.", -- 3
