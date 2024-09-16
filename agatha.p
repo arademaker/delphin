@@ -35,7 +35,7 @@ thf(proper_q_decl,definition,
   proper_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X))) ))).
   % proper_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)) & (! [Y : x] : (((Rstr @ Y) & (Body @ Y)) => (Y = X))))))).
 thf(def_explicit_q_decl,definition,
-  def_explicit_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)))))).
+  def_explicit_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)) & (! [Y : x] : (((Rstr @ Y) & (Body @ Y)) => (Y = X))))))).
 thf(colon_p_namely,definition,
   colon_p_namely = (^[Event : e,Pred1 : ($o),Pred2: ($o)] : Pred2)).
 
@@ -50,8 +50,6 @@ thf(neg,definition,
   neg = (^[Event : e,Cond : $o] : (~Cond))).
 thf(never_a_1,definition,
   never_a_1 = (^[Cond : $o] : (~Cond))).
-thf(compound,definition,
-  compound = (^[Event : e,Obj1 : x, Obj2: x] : (Obj1 = Obj2))).
 thf(implicit_conj,definition,
   implicit_conj = (^[Out : x,A : x, B : x] : ((Out = A) | (Out = B)))).
 thf(and_c_x,definition,
@@ -89,6 +87,8 @@ thf(always_a_1,definition,
   always_a_1 = (^[Event : e] : $true)).
 thf(killer_n_1,definition,
   killer_n_1 = (^[X : x] : $true)).
+thf(compound,definition,
+  compound = (^[Event : e,Obj1 : x, Obj2: x] : $true)).
 
 thf(id_Agatha_named, axiom, ?[X : x] : (named @ X @ id_Agatha)).
 thf(id_Aunt_named, axiom, ?[X : x] : (named @ X @ id_Aunt)).
@@ -140,31 +140,38 @@ thf(conj,conjecture,
            (S0_X10 = S1_X32) & % Mansion
 
            % "Someone who lives in Dreadbury Mansion killed Aunt Agatha."
-           (s0_root @ S0_X29 @ S0_X23 @ S0_X16 @ S0_X10 @ S0_X3) &
+           %(s0_root @ S0_X29 @ S0_X23 @ S0_X16 @ S0_X10 @ S0_X3) &
 
            % "Agatha, the butler, and Charles live in Dreadbury Mansion, and are the only people who live therein."
-           (s1_root @ S1_X46 @ S1_X38 @ S1_X32 @ S1_X24 @ S1_X19 @ S1_X14 @ S1_X8 @ S1_X3) &
+           %(s1_root @ S1_X46 @ S1_X38 @ S1_X32 @ S1_X24 @ S1_X19 @ S1_X14 @ S1_X8 @ S1_X3) &
 
            % "A killer always hates his victim, and is never richer than his victim."
-           (s2_root @ S2_X34 @ S2_X28 @ S2_X16 @ S2_X10 @ S2_X3) &
+          (a_q @ S2_X10 @ (s2_h17 @ S2_X16) @ (s2_h35 @ S2_X34 @ S2_X28 @ S2_X3))
+           % (s2_h17 @ S2_X16 @ S2_X10)
+           % (s2_h35 @ S2_X34 @ S2_X28 @ S2_X3 @ S2_X10)
+           % (s2_h1 @ S2_X34 @ S2_X28 @ S2_X10 @ S2_X3)
+           % (s2_h4 @ S2_X28 @ S2_X10 @ S2_X3 @ S2_X34)
+           %(s2_root @ S2_X34 @ S2_X28 @ S2_X16 @ S2_X10 @ S2_X3) 
 
            % "Charles hates no one that Aunt Agatha hates."
-           (s3_root @ S3_X22 @ S3_X17 @ S3_X9 @ S3_X3) &
+           %(s3_root @ S3_X22 @ S3_X17 @ S3_X9 @ S3_X3) &
 
            % "Agatha hates everyone except the butler."
-           (s4_root @ S4_X15 @ S4_X9 @ S4_X3) &
+           %(s4_root @ S4_X15 @ S4_X9 @ S4_X3) &
 
            % "The butler hates everyone not richer than Aunt Agatha."
-           (s5_root @ S5_X25 @ S5_X19 @ S5_X8 @ S5_X3) &
+           %(s5_root @ S5_X25 @ S5_X19 @ S5_X8 @ S5_X3) &
 
            % "The butler hates everyone Aunt Agatha hates."
-           (s6_root @ S6_X19 @ S6_X14 @ S6_X8 @ S6_X3) &
+           %(s6_root @ S6_X19 @ S6_X14 @ S6_X8 @ S6_X3) &
 
            % "No one hates everyone."
-           (s7_root @ S7_X8 @ S7_X3) &
+           %(s7_root @ S7_X8 @ S7_X3) &
 
            % "Agatha is not the butler."
-           (s8_root @ S8_X10 @ S8_X3) 
+           % (s8_root @ S8_X10 @ S8_X3) &
+
+           % (S0_X23 = S0_X3)
 
      )).
 
