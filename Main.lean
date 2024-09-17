@@ -55,7 +55,7 @@ def main : IO Unit := do
                       "Someone who lives in Dreadbury Mansion killed Aunt Agatha.", -- 0
                       "Agatha, the butler, and Charles live in Dreadbury Mansion, and are the only people who live therein.", -- 1
                       "A killer always hates his victim, and is never richer than his victim.", -- 2
-                      "Charles hates no one that Aunt Agatha hates.", -- 3
+                      "Charles hates nobody that Aunt Agatha hates.", -- 3 (was "no one")
                       "Agatha hates everyone except the butler.", -- 4
                       "The butler hates everyone not richer than Aunt Agatha.", -- 5
                       "The butler hates everyone Aunt Agatha hates.", -- 6
