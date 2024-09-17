@@ -19,7 +19,7 @@ thf(other_object_decl,type,other_object: x > $o).
 thf(a_q_decl,definition,
    a_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : ((Rstr @ X) & (Body @ X))))).
 thf(every_q_decl,definition,
-  every_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ![X : x] : ((Rstr @ X) & (Body @ X))))).
+  every_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ![X : x] : ((Rstr @ X) <=> (Body @ X))))).
 thf(udef_q_decl,definition,
   udef_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : ((Rstr @ X) & (Body @ X))))).
 thf(no_q_decl,definition,
@@ -30,12 +30,14 @@ thf(pronoun_q_decl,definition,
   pronoun_q = ( ^[X : x, Rstr : (x > $o), Body : (x > $o)] : (? [X : x] : ((Rstr @ X) & (Body @ X))))).
 
 thf(the_q_decl,definition,
-  the_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)) & (! [Y : x] : (((Rstr @ Y) & (Body @ Y)) => (Y = X))))))).
+  the_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)) & (! [Y : x] : (((Rstr @ Y)) => ((Y = X) & (Body @ Y)))))))).
+  %the_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)) & (! [Y : x] : (((Rstr @ Y) & (Body @ Y)) => (Y = X))))))).
 thf(proper_q_decl,definition,
-  proper_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X))) ))).
-  % proper_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)) & (! [Y : x] : (((Rstr @ Y) & (Body @ Y)) => (Y = X))))))).
+  proper_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (Rstr @ X) & (Body @ X)))).
+%thf(def_explicit_q_decl,definition,
+%  def_explicit_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)) & (! [Y : x] : (((Rstr @ Y) & (Body @ Y)) => (Y = X))))))).
 thf(def_explicit_q_decl,definition,
-  def_explicit_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)) & (! [Y : x] : (((Rstr @ Y) & (Body @ Y)) => (Y = X))))))).
+  def_explicit_q = (^[X : x, Rstr : (x > $o), Body : (x > $o)] : ( ?[X : x] : (((Rstr @ X)  & (Body @ X)))))).
 thf(colon_p_namely,definition,
   colon_p_namely = (^[Event : e,Pred1 : ($o),Pred2: ($o)] : Pred2)).
 
@@ -43,7 +45,7 @@ include('thf-outputs/sentences.p').
 % include('id-decls.p').
 
 thf(except_p,definition,
-  except_p = (^[Event : e,Included : x,Excluded : x] : (~(Included = Excluded)))).
+  except_p = (^[Event : e,Included : x,Excluded : x] : ~(Included = Excluded))).
 thf(be_v_id,definition,
   be_v_id = (^[Event : e,Obj1 : x,Obj2 : x] : (Obj1 = Obj2))).
 thf(neg,definition,
@@ -59,8 +61,8 @@ thf(card,definition,
   card = (^[Event : e, Obj : x, Name: name] : $true)).
 thf(generic_entity,definition,
   generic_entity = (^[Obj : x] : $true)).
-thf(hate_v_1,definition,
-  hate_v_1 = (^[Event : e,Hater : x,Hated : x] : $true)).
+%thf(hate_v_1,definition,
+%  hate_v_1 = (^[Event : e,Hater : x,Hated : x] : $true)).
 thf(pron,definition,
   pron = (^[Pron : x] : $true)).
 thf(in_p_loc,definition,
@@ -75,8 +77,6 @@ thf(only_a_1,definition,
   only_a_1 = (^[Event : e, X : x] : $true)).
 thf(and_c_e,definition,
   and_c_e = (^[EventOut : e,Event1 : e,Event2 : e] : $true)).
-thf(victim_n_of,definition,
-  victim_n_of = (^[X : x] : $true)).
 thf(poss,definition,
   poss = (^[Event : e, Possessed : x, Possessor : x] : $true)).
 thf(more_comp,definition,
@@ -89,6 +89,9 @@ thf(killer_n_1,definition,
   killer_n_1 = (^[X : x] : $true)).
 thf(compound,definition,
   compound = (^[Event : e,Obj1 : x, Obj2: x] : $true)).
+
+thf(victim_n_of,definition,
+  victim_n_of = (^[X : x] : (person @ X))).
 
 thf(id_Agatha_named, axiom, ?[X : x] : (named @ X @ id_Agatha)).
 thf(id_Aunt_named, axiom, ?[X : x] : (named @ X @ id_Aunt)).
@@ -121,6 +124,13 @@ thf(butler_exists, axiom, ?[X : x] : ( ((butler_n_1 @ X) & (![Y : x] : ((butler_
 
 thf(person_exists, axiom, ?[X : x] : ((person @ X))).
 
+%thf(agatha_hate,axiom, (![S4_X9 : x] : (every_q @ S4_X9 @ (^[X : x] : ?[S4_X15 : x] : (s4_h16 @ S4_X15 @ X)) @ (^[X : x] : ?[S4_X3 : x] : (s4_h4 @ S4_X3 @ X))))).
+thf(agatha_hate,axiom, (?[S4_X3 : x] : (![S4_X9 : x] : (every_q @ S4_X9 @ (^[X : x] : ?[S4_X15 : x] : (s4_h16 @ S4_X15 @ X)) @ (s4_h4 @ S4_X3))))).
+%thf(agatha_hate,axiom, (?[S4_X3 : x, S4_X15 : x] : (![S4_X9 : x] : (every_q @ S4_X9 @ (s4_h16 @ S4_X15) @ (s4_h4 @ S4_X3))))).
+
+%thf(agatha_hate,axiom, (?[S4_X3 : x,S4_X15 : x] : (![S4_X9 : x] : ((person @ S4_X9) => ((s4_h16 @ S4_X15 @ S4_X9) <=> (s4_h4 @ S4_X3 @ S4_X9)))))).
+%thf(s4_axiom,axiom, (! [S4_X15, S4_X9, S4_X3] : (s4_root @ S4_X15 @ S4_X9 @ S4_X3))).
+
 thf(conj,conjecture,
   ?[
     S0_X29 : x, S0_X23 : x, S0_X16 : x, S0_X10 : x, S0_X3 : x,
@@ -146,32 +156,33 @@ thf(conj,conjecture,
            %(s1_root @ S1_X46 @ S1_X38 @ S1_X32 @ S1_X24 @ S1_X19 @ S1_X14 @ S1_X8 @ S1_X3) &
 
            % "A killer always hates his victim, and is never richer than his victim."
-          (a_q @ S2_X10 @ (s2_h17 @ S2_X16) @ (s2_h35 @ S2_X34 @ S2_X28 @ S2_X3))
-           % (s2_h17 @ S2_X16 @ S2_X10)
-           % (s2_h35 @ S2_X34 @ S2_X28 @ S2_X3 @ S2_X10)
-           % (s2_h1 @ S2_X34 @ S2_X28 @ S2_X10 @ S2_X3)
-           % (s2_h4 @ S2_X28 @ S2_X10 @ S2_X3 @ S2_X34)
-           %(s2_root @ S2_X34 @ S2_X28 @ S2_X16 @ S2_X10 @ S2_X3) 
+           % (s2_root @ S2_X34 @ S2_X28 @ S2_X16 @ S2_X10 @ S2_X3) 
 
            % "Charles hates no one that Aunt Agatha hates."
            %(s3_root @ S3_X22 @ S3_X17 @ S3_X9 @ S3_X3) &
 
            % "Agatha hates everyone except the butler."
-           %(s4_root @ S4_X15 @ S4_X9 @ S4_X3) &
+           (s4_root @ S4_X15 @ S4_X9 @ S4_X3) &
 
            % "The butler hates everyone not richer than Aunt Agatha."
-           %(s5_root @ S5_X25 @ S5_X19 @ S5_X8 @ S5_X3) &
+           % (s5_root @ S5_X25 @ S5_X19 @ S5_X8 @ S5_X3) &
 
            % "The butler hates everyone Aunt Agatha hates."
-           %(s6_root @ S6_X19 @ S6_X14 @ S6_X8 @ S6_X3) &
+           % (s6_root @ S6_X19 @ S6_X14 @ S6_X8 @ S6_X3) &
 
            % "No one hates everyone."
-           %(s7_root @ S7_X8 @ S7_X3) &
+           % (s7_root @ S7_X8 @ S7_X3) &
 
            % "Agatha is not the butler."
            % (s8_root @ S8_X10 @ S8_X3) &
 
-           % (S0_X23 = S0_X3)
+           (butler_n_1 @ S4_X15) &
+           (named_people @ S4_X9) &
+           ~(named_people @ S4_X15) &
+           %(named_people @ S4_X15) &
+           (hate_v_1 @ s4_e2 @ S4_X3 @ S1_X24) &
+           (hate_v_1 @ s4_e2 @ S4_X3 @ S3_X3) &
+           ~(hate_v_1 @ s4_e2 @ S4_X3 @ S4_X15)
 
      )).
 
