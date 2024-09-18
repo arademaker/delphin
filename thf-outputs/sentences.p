@@ -13,10 +13,13 @@ thf(every_q_decl,type,every_q:               x > (x > $o) > (x > $o) > $o).
 thf(some_q_decl,type,some_q:                 x > (x > $o) > (x > $o) > $o).
 thf(the_q_decl,type,the_q:                   x > (x > $o) > (x > $o) > $o).
 thf(proper_q_decl,type,proper_q:             x > (x > $o) > (x > $o) > $o).
+thf(proper_in_q_decl,type,proper_in_q:       ($o) > ($o) > $o).
 thf(pronoun_q_decl,type,pronoun_q:           x > (x > $o) > (x > $o) > $o).
 thf(udef_q_decl,type,udef_q:                 x > (x > $o) > (x > $o) > $o).
+thf(udef_in_q_decl,type,udef_in_q:           ($o) > ($o) > $o).
 thf(def_explicit_q_decl,type,def_explicit_q: x > (x > $o) > (x > $o) > $o).
 thf(no_q_decl,type,no_q:                     x > (x > $o) > (x > $o) > $o).
+thf(no_in_q_decl,type,no_in_q:               ($o) > ($o) > $o).
 thf(never_a_1_decl,type,never_a_1:           ($o) > $o).
 thf(neg_decl,type,neg:                       e > ($o) > $o).
 thf(colon_p_namely,type,colon_p_namely:      e > ($o) > ($o) > $o).
@@ -215,26 +218,30 @@ thf(s3_h7_decl,type,s3_h7: x > $o).
 thf(s3_h4_decl,type,s3_h4: x > x > $o).
 thf(s3_h1_decl,type,s3_h1: x > x > $o).
 
+thf(s4_e2_decl,type,(s4_e2 : e)).
+
 thf(s3_h24,definition,
    s3_h24 = ( ^ [S3_X20 : x] : (aunt_n_of @ S3_X20))).
 thf(s3_root,definition,
-   s3_root = ( ^ [S3_X20 : x,S3_X15 : x,S3_X9 : x,S3_X3 : x] : (udef_q @ S3_X20 @ s3_h24 @ (s3_h11 @ S3_X15 @ S3_X9 @ S3_X3)))).
+   s3_root = ( ^ [S3_X20 : x,S3_X15 : x,S3_X9 : x,S3_X3 : x] : (s3_h11 @ S3_X15 @ S3_X9 @ S3_X3 @ S3_X20))).
+   % s3_root = ( ^ [S3_X20 : x,S3_X15 : x,S3_X9 : x,S3_X3 : x] : (udef_in_q @ (s3_h24 @ S3_X20) @ (s3_h11 @ S3_X15 @ S3_X9 @ S3_X3 @ S3_X20)))).
 thf(s3_h18,definition,
-   s3_h18 = ( ^ [S3_X20 : x,S3_X15 : x] : ((named @ S3_X15 @ id_Agatha) & (compound @ s3_e19 @ S3_X15 @ S3_X20)))).
+   s3_h18 = ( ^ [S3_X20 : x,S3_X15 : x] : (named @ S3_X15 @ id_Agatha))).
+   %s3_h18 = ( ^ [S3_X20 : x,S3_X15 : x] : ((named @ S3_X15 @ id_Agatha) & (compound @ s3_e19 @ S3_X15 @ S3_X20)))).
 thf(s3_h14,definition,
-   s3_h14 = ( ^ [S3_X20 : x,S3_X15 : x,S3_X9 : x] : (proper_q @ S3_X15 @ (s3_h18 @ S3_X20) @ (s3_h10 @ S3_X9)))).
+   s3_h14 = ( ^ [S3_X20 : x,S3_X15 : x,S3_X9 : x] : ((hate_v_1 @ s4_e2 @ S3_X15 @ S3_X9)))).
 thf(s3_h11,definition,
-   s3_h11 = ( ^ [S3_X15 : x,S3_X9 : x,S3_X3 : x,S3_X20 : x] : (no_q @ S3_X9 @ (s3_h14 @ S3_X20 @ S3_X15) @ (s3_h4 @ S3_X3)))).
+   s3_h11 = ( ^ [S3_X15 : x,S3_X9 : x,S3_X3 : x,S3_X20 : x] : ((hate_v_1 @ s4_e2 @ S3_X15 @ S3_X9) => ~(hate_v_1 @ s4_e2 @ S3_X3 @ S3_X9)))).
 thf(s3_h10,definition,
-   s3_h10 = ( ^ [S3_X9 : x,S3_X15 : x] : ((hate_v_1 @ s3_e27 @ S3_X15 @ S3_X9) & (person @ S3_X9)))).
+   s3_h10 = ( ^ [S3_X9 : x,S3_X15 : x] : ((hate_v_1 @ s4_e2 @ S3_X15 @ S3_X9)))).
+   %s3_h10 = ( ^ [S3_X9 : x,S3_X15 : x] : ((hate_v_1 @ s4_e2 @ S3_X15 @ S3_X9) & (person @ S3_X9)))).
 thf(s3_h7,definition,
    s3_h7 = ( ^ [S3_X3 : x] : (named @ S3_X3 @ id_Charles))).
 thf(s3_h4,definition,
-   s3_h4 = ( ^ [S3_X3 : x,S3_X9 : x] : (proper_q @ S3_X3 @ s3_h7 @ (s3_h1 @ S3_X9)))).
+   s3_h4 = ( ^ [S3_X3 : x,S3_X9 : x] : (proper_in_q @ (s3_h7 @ S3_X3) @ (s3_h1 @ S3_X9 @ S3_X3)))).
 thf(s3_h1,definition,
-   s3_h1 = ( ^ [S3_X9 : x,S3_X3 : x] : (hate_v_1 @ s3_e2 @ S3_X3 @ S3_X9))).
+   s3_h1 = ( ^ [S3_X9 : x,S3_X3 : x] : (hate_v_1 @ s4_e2 @ S3_X3 @ S3_X9))).
 
-thf(s4_e2_decl,type,(s4_e2 : e)).
 thf(s4_e14_decl,type,(s4_e14 : e)).
 
 thf(s4_h19_decl,type,s4_h19: x > $o).
@@ -280,23 +287,24 @@ thf(s5_h1_decl,type,s5_h1: x > x > $o).
 thf(s5_h29,definition,
    s5_h29 = ( ^ [S5_X25 : x] : (named @ S5_X25 @ id_Aunt))).
 thf(s5_h26,definition,
-   s5_h26 = ( ^ [S5_X25 : x,S5_X19 : x] : (proper_q @ S5_X25 @ s5_h29 @ (s5_h23 @ S5_X19)))).
+   s5_h26 = ( ^ [S5_X25 : x,S5_X19 : x] : (proper_in_q @ (s5_h29 @ S5_X25) @ (s5_h23 @ S5_X19 @ S5_X25)))).
 thf(s5_h23,definition,
    s5_h23 = ( ^ [S5_X19 : x,S5_X25 : x] : ((named @ S5_X19 @ id_Agatha) & (compound @ s5_e24 @ S5_X19 @ S5_X25)))).
 thf(s5_h20,definition,
-   s5_h20 = ( ^ [S5_X25 : x,S5_X19 : x,S5_X8 : x] : (proper_q @ S5_X19 @ (s5_h26 @ S5_X25) @ (s5_h15 @ S5_X8)))).
+   s5_h20 = ( ^ [S5_X25 : x,S5_X19 : x,S5_X8 : x] : (s5_h15 @ S5_X8 @ S5_X19))).
 thf(s5_h15,definition,
    s5_h15 = ( ^ [S5_X8 : x,S5_X19 : x] : ((more_comp @ s5_e18 @ s5_e16 @ S5_X19) & (rich_a_in @ s5_e16 @ S5_X8)))).
 thf(s5_root,definition,
    s5_root = ( ^ [S5_X25 : x,S5_X19 : x,S5_X8 : x,S5_X3 : x] : (every_q @ S5_X8 @ (s5_h9 @ S5_X25 @ S5_X19) @ (s5_h4 @ S5_X3)))).
+
 thf(s5_h9,definition,
-   s5_h9 = ( ^ [S5_X25 : x,S5_X19 : x,S5_X8 : x] : ((neg @ s5_e13 @ (s5_h20 @ S5_X25 @ S5_X19 @ S5_X8)) & (person @ S5_X8)))).
+   s5_h9 = ( ^ [S5_X25 : x,S5_X19 : x,S5_X8 : x] : (~((more_comp @ s5_e18 @ s5_e16 @ S5_X19) & (rich_a_in @ s5_e16 @ S5_X8)) & (person @ S5_X8)))).
 thf(s5_h7,definition,
    s5_h7 = ( ^ [S5_X3 : x] : (butler_n_1 @ S5_X3))).
 thf(s5_h4,definition,
    s5_h4 = ( ^ [S5_X3 : x,S5_X8 : x] : (the_q @ S5_X3 @ s5_h7 @ (s5_h1 @ S5_X8)))).
 thf(s5_h1,definition,
-   s5_h1 = ( ^ [S5_X8 : x,S5_X3 : x] : (hate_v_1 @ s5_e2 @ S5_X3 @ S5_X8))).
+   s5_h1 = ( ^ [S5_X8 : x,S5_X3 : x] : (hate_v_1 @ s4_e2 @ S5_X3 @ S5_X8))).
 
 thf(s6_e2_decl,type,(s6_e2 : e)).
 thf(s6_e18_decl,type,(s6_e18 : e)).
@@ -323,13 +331,13 @@ thf(s6_h13,definition,
 thf(s6_root,definition,
    s6_root = ( ^ [S6_X19 : x,S6_X14 : x,S6_X8 : x,S6_X3 : x] : (every_q @ S6_X8 @ (s6_h20 @ S6_X19 @ S6_X14) @ (s6_h4 @ S6_X3)))).
 thf(s6_h9,definition,
-   s6_h9 = ( ^ [S6_X8 : x,S6_X14 : x] : ((hate_v_1 @ s6_e26 @ S6_X14 @ S6_X8) & (person @ S6_X8)))).
+   s6_h9 = ( ^ [S6_X8 : x,S6_X14 : x] : ((hate_v_1 @ s4_e2 @ S6_X14 @ S6_X8) & (person @ S6_X8)))).
 thf(s6_h7,definition,
    s6_h7 = ( ^ [S6_X3 : x] : (butler_n_1 @ S6_X3))).
 thf(s6_h4,definition,
    s6_h4 = ( ^ [S6_X3 : x,S6_X8 : x] : (the_q @ S6_X3 @ s6_h7 @ (s6_h1 @ S6_X8)))).
 thf(s6_h1,definition,
-   s6_h1 = ( ^ [S6_X8 : x,S6_X3 : x] : (hate_v_1 @ s6_e2 @ S6_X3 @ S6_X8))).
+   s6_h1 = ( ^ [S6_X8 : x,S6_X3 : x] : (hate_v_1 @ s4_e2 @ S6_X3 @ S6_X8))).
 
 thf(s7_e2_decl,type,(s7_e2 : e)).
 
