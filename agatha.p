@@ -211,10 +211,13 @@ thf(s4_root_alt_decl,type,s4_root_alt: x > x > x > $o).
 thf(s4_root_alt,definition,
   s4_root_alt = 
   (^[S4_X15 : x,S4_X9 : x,S4_X3 : x] : 
-    (every_q @ S4_X9 @ (s4_h16 @ S4_X15) @ (s4_h4 @ S4_X3)))).
+       (((person @ S4_X9) & ~(S4_X9 = S4_X15)) <=> (hate_v_1 @ s4_e2 @ S4_X3 @ S4_X9)))).
 
 thf(s4_root_axiom,axiom,
-    (?[S4_X3 : x] : (?[S4_X9 : x] : (every_q @ S4_X9 @ (^[X : x] : ?[S4_X15 : x] : (s4_h16 @ S4_X15 @ X)) @ (s4_h4 @ S4_X3))))).
+    (?[S4_X15 : x, S4_X3 : x] : 
+       ((butler_n_1 @ S4_X15) &
+        (named @ S4_X3 @ id_Agatha) &
+        (![S4_X9 : x] : (((person @ S4_X9) & ~(S4_X9 = S4_X15)) <=> (hate_v_1 @ s4_e2 @ S4_X3 @ S4_X9)))))).
 
 %thf(s4_root_axiom,axiom, (![S4_X9 : x] : (every_q @ S4_X9 @ (^[X : x] : ?[S4_X15 : x] : (s4_h16 @ S4_X15 @ X)) @ (^[X : x] : ?[S4_X3 : x] : (s4_h4 @ S4_X3 @ X))))).
 %thf(s4_root_axiom,axiom, (?[S4_X3 : x, S4_X15 : x] : (![S4_X9 : x] : (every_q @ S4_X9 @ (s4_h16 @ S4_X15) @ (s4_h4 @ S4_X3))))).
@@ -230,7 +233,7 @@ thf(s5_root_alt,definition,
      ((person @ S5_X8) =>
        ((~((more_comp @ s5_e18 @ s5_e16 @ S5_X19) & (rich_a_in @ s5_e16 @ S5_X8))) <=> (hate_v_1 @ s4_e2 @ S5_X3 @ S5_X8)))
    ))).
-%% "The butler hates everyone not richer than Aunt Agatha."
+% "The butler hates everyone not richer than Aunt Agatha."
 thf(s5_root_alt,axiom,
    (?[S5_X25 : x,S5_X19 : x,S5_X3 : x] :
      (![S5_X8 : x] : (s5_root_alt @ S5_X25 @ S5_X19 @ S5_X8 @ S5_X3)))).
@@ -306,27 +309,36 @@ thf(conj,conjecture,
     S7_X8 : x, S7_X3 : x,
     S8_X10 : x,S8_X3 : x
    ] : (
+           (named @ S4_X3 @ id_Agatha) & 
+           (butler_n_1 @ S4_X15) &
+           (named @ S1_X24 @ id_Charles) &
+           (aunt_n_of @ S3_X20) &
+           (named @ S0_X29 @ id_Aunt) &
+           (named @ S0_X16 @ id_Dreadbury) &
+           (named @ S0_X10 @ id_Mansion) &
+ 
            ((S0_X23 = S1_X8) & (S0_X23 = S3_X15) & (S0_X23 = S4_X3) & (S0_X23 = S5_X19) & (S0_X23 = S6_X14) & (S0_X23 = S8_X3)) & % Agatha
            ((S1_X19 = S4_X15) & (S1_X19 = S5_X3) & (S1_X19 = S6_X3) & (S1_X19 = S8_X10)) & % butler_n_1 
            (S1_X24 = S3_X3) & % Charles
            (S0_X16 = S1_X38) & % Dreadbury
            (S0_X10 = S1_X32) & % Mansion
-           ((S3_X20 = S5_X25) & (S3_X20 = S6_X19)) & % Aunt
+           (S3_X20 = S6_X19) & % aunt_n_of
+           (S0_X29 = S5_X25) & % Aunt
+ 
+           %(s0_root_alt @ S0_X29 @ S0_X23 @ S0_X16 @ S0_X10 @ S0_X3) &
+           %(s1_root_alt @ S1_X46 @ S1_X38 @ S1_X32 @ S1_X24 @ S1_X19 @ S1_X14 @ S1_X8 @ S1_X3) &
+           %(s2_root_alt @ S2_X34 @ S2_X28 @ S2_X16 @ S2_X10 @ S2_X3) &
+           %(s3_root_alt @ S3_X20 @ S3_X15 @ S3_X9 @ S3_X3) &
+           %(s4_root_alt @ S4_X15 @ S4_X9 @ S4_X3) &
+           %(s5_root_alt @ S5_X25 @ S5_X19 @ S5_X8 @ S5_X3) &
+           %(s6_root_alt @ S6_X19 @ S6_X14 @ S6_X8 @ S6_X3) &
+           %(s7_root_alt @ S7_X8 @ S7_X3) &
+           %(s8_root_alt @ S8_X10 @ S8_X3) &
 
-           (s0_root_alt @ S0_X29 @ S0_X23 @ S0_X16 @ S0_X10 @ S0_X3) &
-           (s1_root_alt @ S1_X46 @ S1_X38 @ S1_X32 @ S1_X24 @ S1_X19 @ S1_X14 @ S1_X8 @ S1_X3) &
-           (s2_root_alt @ S2_X34 @ S2_X28 @ S2_X16 @ S2_X10 @ S2_X3) &
-           (s3_root_alt @ S3_X20 @ S3_X15 @ S3_X9 @ S3_X3) &
-           (s4_root_alt @ S4_X15 @ S4_X9 @ S4_X3) &
-           (s5_root_alt @ S5_X25 @ S5_X19 @ S5_X8 @ S5_X3) &
-           (s6_root_alt @ S6_X19 @ S6_X14 @ S6_X8 @ S6_X3) &
-           (s7_root_alt @ S7_X8 @ S7_X3) &
-           (s8_root_alt @ S8_X10 @ S8_X3) &
-
-           (named @ S0_X23 @ id_Agatha) &
-           (killer_n_1 @ S0_X3) &
-
-           (S0_X3 = S0_X23)
+           (hate_v_1 @ s4_e2 @ S4_X3 @ S1_X24) &
+           (hate_v_1 @ s4_e2 @ S4_X3 @ S4_X3) &
+           ~(hate_v_1 @ s4_e2 @ S4_X3 @ S4_X15) &
+           (kill_v_1 @ s0_e2 @ S0_X23 @ S0_X23) 
            
      )).
 
