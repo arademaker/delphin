@@ -302,28 +302,6 @@ thf(s8_root_alt,definition,
 thf(s8_root_alt,axiom,
   (?[S8_X10 : x , S8_X3 : x] : (s8_root_alt @ S8_X10 @ S8_X3))).
 
-% "Agatha hates everyone except the butler."
-thf(agatha_hate_check_decl,type,agatha_hate_check: x > x > x > x > $o).
-thf(agatha_hate_check, definition, 
-  agatha_hate_check = (^[S1_X24 : x, S4_X3 :x , S4_X9 : x, S4_X15 : x] :
-                        ((butler_n_1 @ S4_X15) &
-                         (named_people @ S4_X9) &
-                         ~(named_people @ S4_X15) &
-                         %(named_people @ S4_X15) &
-
-                         (hate_v_1 @ s4_e2 @ S4_X3 @ S1_X24) &
-                         (hate_v_1 @ s4_e2 @ S4_X3 @ S4_X3) &
-                         ~(hate_v_1 @ s4_e2 @ S4_X3 @ S4_X15)
-  ))).
-
-% "Charles hates nobody that Aunt Agatha hates." -- was "no one"
-thf(charles_hate_check_decl,type,charles_hate_check: x > x > x > x > $o).
-thf(charles_hate_check, definition, 
-  charles_hate_check = (^[S3_X3 : x, S3_X9 : x, S3_X15 : x, S3_X20 : x] :  % Charles, Hated, Agatha, aunt_n_of
-                          (~((hate_v_1 @ s4_e2 @ S3_X3 @ S3_X9)))
-                         )
-  ).
-
 thf(conj,conjecture,
   ?[
     S0_X29 : x, S0_X23 : x, S0_X16 : x, S0_X10 : x, S0_X3 : x,
