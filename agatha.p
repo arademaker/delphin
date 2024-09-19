@@ -258,12 +258,17 @@ thf(s5_root_alt,definition,
      (named @ S5_X19 @ id_Agatha) &
      (butler_n_1 @ S5_X3) &
      ((person @ S5_X8) =>
-       ((~((more_comp @ s5_e18 @ s5_e16 @ S5_X19) & (rich_a_in @ s5_e16 @ S5_X8))) => (hate_v_1 @ s4_e2 @ S5_X3 @ S5_X8)))
+       ((~((more_comp @ s5_e18 @ s5_e16 @ S5_X19) & (rich_a_in @ s5_e16 @ S5_X8))) <=> (hate_v_1 @ s4_e2 @ S5_X3 @ S5_X8)))
    ))).
 
 thf(s5_root_alt,axiom,
    (?[S5_X25 : x,S5_X19 : x,S5_X3 : x] :
-     (![S5_X8 : x] : (s5_root_alt @ S5_X25 @ S5_X19 @ S5_X8 @ S5_X3)))).
+    ((aunt_n_of @ S5_X25) &
+     (named @ S5_X19 @ id_Agatha) &
+     (butler_n_1 @ S5_X3) &
+     (![S5_X8 : x] :
+       ((person @ S5_X8) =>
+         ((~((more_comp @ s5_e18 @ s5_e16 @ S5_X19) & (rich_a_in @ s5_e16 @ S5_X8))) <=> (hate_v_1 @ s4_e2 @ S5_X3 @ S5_X8))))))).
 
 % "The butler hates everyone Aunt Agatha hates."
 thf(s6_root_alt_decl,type,s6_root_alt: x > x > x > x > $o).
@@ -360,6 +365,7 @@ thf(conj,conjecture,
            ~(hate_v_1 @ s4_e2 @ S4_X3 @ S4_X15) &
 
            % "The butler hates everyone not richer than Aunt Agatha." -- 5
+           %(((more_comp @ s5_e18 @ s5_e16 @ S5_X19) & (rich_a_in @ s5_e16 @ S4_X15))) &
 
            % "The butler hates everyone Aunt Agatha hates." -- 6
            (hate_v_1 @ s4_e2 @ S4_X15 @ S1_X24) &
@@ -373,7 +379,7 @@ thf(conj,conjecture,
   
            % "Agatha is not the butler." -- 8
            ~(S4_X3 = S4_X15) 
-            
+           
            %(kill_v_1 @ s0_e2 @ S0_X23 @ S0_X23) 
            
      )).
