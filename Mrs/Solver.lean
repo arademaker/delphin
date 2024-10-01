@@ -51,14 +51,19 @@ def run_utool (txt : String) : IO (Except String $ Array $ Array Plug) := do
   let p := Parsec.run parseOutput ret.stdout
   return p
 
-
+/- in pydelphin, the top need to be one among the labels of the EPs, otherwise,
+   none is returned. We don't have provision for a none in the top field of an
+   MRS. -/
 def solve_mrs (m : MRS) (ps : Array Plug) : MRS :=
   let map := Lean.HashMap.ofList $ ps.map (λ p => (p.hol, p.lbl)) |>.toList
+  let top' := match m.hcons.find? (λ h => h.lhs == m.top) with
+              | some h => h.rhs
+              | none => m.top
   { m with preds := m.preds.map (λ p : EP =>
       { p with rargs :=
          p.rargs.map (λ v =>
           match map.find? v.2 with
           | some v' => (v.1, v')
-          | none => (v.1, v.2)) }), hcons := [] }
+          | none => (v.1, v.2)) }), hcons := [], top := top' }
 
 end Utool

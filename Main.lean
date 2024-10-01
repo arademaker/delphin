@@ -25,4 +25,4 @@ def main₃ (s : String) := do
      | Except.ok ps => return some (solve_mrs a (ps.get! 0))
      | Except.error _ => return none
 
-#eval main₃ "Every boy does not love a book."
+#eval main₃ "A man is walking."
