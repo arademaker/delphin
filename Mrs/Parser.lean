@@ -1,11 +1,12 @@
 
-import Lean.Data.Parsec
+import Std.Internal.Parsec
 import Mrs.Basic
 
 namespace MRS
-
 open Array
-open Lean Parsec
+open Lean
+open Std.Internal.Parsec
+open Std.Internal.Parsec.String
 
 def _root_.Array.asString (a : Array Char) : String :=
   a.foldl (λ s c => s ++ c.toString) ""
@@ -14,27 +15,27 @@ def _root_.Array.asString (a : Array Char) : String :=
    defined from the BNF https://github.com/delph-in/docs/wiki/MrsRFC
 -/
 
-def parseSpace : Parsec String := do
+def parseSpace : Parser String := do
   let a ← many (satisfy $ fun c => c.isWhitespace)
   return a.asString
 
-def parsePath : Parsec String := do
+def parsePath : Parser String := do
   let p ← asciiLetter
   let s ← many (satisfy $ fun c => c.isAlphanum)
   return (#[p] ++ s).asString
 
-def parseToken : Parsec String := do
+def parseToken : Parser String := do
   let p ← many1 $ satisfy $ fun c =>
     ¬ "\\:]>".data.elem c ∧ ¬ c.isWhitespace
   return p.asString
 
-def parseTypePred : Parsec String := do
+def parseTypePred : Parser String := do
  let aux : Char → Bool := fun c => (¬ "<>\"".data.elem c ∧ ¬ c.isWhitespace)
  let p ← many1 $ satisfy aux
  return p.asString
 
 
-def parseQuotedString : Parsec String := do
+def parseQuotedString : Parser String := do
   let a1 ← pchar '"'
   let a2 ← many $ satisfy $ fun c => ¬ ['"', '\\'].elem c
   let a3 ← many (do
@@ -46,7 +47,7 @@ def parseQuotedString : Parsec String := do
   return (a1.toString ++ a2.asString ++
     (Array.foldl (λ s c => s ++ c) "" a3) ++ a4.toString)
 
-def parseVarProps : Parsec (Char × Array (String × String)) := do
+def parseVarProps : Parser (Char × Array (String × String)) := do
   let _ ← pstring "[" *> parseSpace
   let varSort ← (do
      let p ← asciiLetter
@@ -61,7 +62,7 @@ def parseVarProps : Parsec (Char × Array (String × String)) := do
   let _ ← parseSpace *> pstring "]"
   return (varSort, extraPairs)
 
-def parseVarName : Parsec (Char × Nat) := do
+def parseVarName : Parser (Char × Nat) := do
   let p ← asciiLetter
   let s ← many1 digit
   return (p, s.asString.toNat!)
@@ -73,20 +74,20 @@ def parseVarName : Parsec (Char × Nat) := do
 #eval parseVar "e44 [x rel: t SUB: -]".mkIterator
 -/
 
-def parseVar : Parsec Var := do
+def parseVar : Parser Var := do
   let nm ← parseVarName <* parseSpace
   let ps ← attempt parseVarProps <|> pure ('u', #[])
   return {id := nm.2, sort := nm.1, props := ps.2 : Var}
 
-def parseHandle : Parsec Var := do
+def parseHandle : Parser Var := do
   let p ← parseVarName
   return { id := p.2 , sort := p.1, props := #[] : Var }
 
-def pinteger : Parsec Int := do
+def pinteger : Parser Int := do
  let a ← (pchar '-' >>= (fun a => manyCore digit #[a])) <|> (many digit)
  return a.asString.toInt!
 
-def parseLnk : Parsec (Int × Int) := do
+def parseLnk : Parser (Int × Int) := do
   let _ ← pchar '<'
   let a ← pinteger
   let _ ← pchar ':'
@@ -94,7 +95,7 @@ def parseLnk : Parsec (Int × Int) := do
   let _ ← pchar '>'
   return (a, b)
 
-def parseArg : Parsec (String × Sum Var String) := do
+def parseArg : Parser (String × Sum Var String) := do
  let p ← parseToken
  let _ ← pstring ":" *> parseSpace
  let v ← (Sum.inl <$> parseVar) <|> (Sum.inr <$> parseQuotedString)
@@ -121,7 +122,7 @@ def procArgs (acc : List $ String × Sum Var String)
                      | .inl b => procArgs as p lnk lbl carg ((a.1, b) :: ras)
                      | _      => none
 
-def parseEP : Parsec EP := do
+def parseEP : Parser EP := do
   let _   ← pstring "[" <* parseSpace
   let p   ← parseTypePred <|> parseQuotedString
   let lnk ← parseLnk <* parseSpace
@@ -132,13 +133,13 @@ def parseEP : Parsec EP := do
   | none => fail "invalid EP"
   | some e => return e
 
-def parseTop : Parsec Var :=
+def parseTop : Parser Var :=
   pstring "LTOP: " *> parseHandle
 
-def parseIndex : Parsec Var :=
+def parseIndex : Parser Var :=
   pstring "INDEX: " *> parseVar
 
-def parseHcons : Parsec (Array Constraint) := do
+def parseHcons : Parser (Array Constraint) := do
   let _ ← pstring "HCONS:" <* parseSpace
   let _ ← pchar '<' <* parseSpace
   let cs ← many (do
@@ -149,7 +150,7 @@ def parseHcons : Parsec (Array Constraint) := do
   let _ ← pchar '>'
   return cs
 
-def parseIcons : Parsec (Array Constraint) := do
+def parseIcons : Parser (Array Constraint) := do
   let _ ← pstring "ICONS:" <* parseSpace
   let _ ← pchar '<' <* parseSpace
   let cs ← many (do
@@ -160,14 +161,14 @@ def parseIcons : Parsec (Array Constraint) := do
   let _ ← pchar '>'
   return cs
 
-def parseRels : Parsec (Array EP) := do
+def parseRels : Parser (Array EP) := do
   let _  ← pstring "RELS:" <* parseSpace
   let _  ← pchar '<' <* parseSpace
   let rs ← many (parseEP <* parseSpace)
   let _  ← pchar '>'
   return rs
 
-def parseMRS : Parsec MRS := do
+def parseMRS : Parser MRS := do
     let _ ← pchar '['      <* parseSpace
     let top ← parseTop     <* parseSpace
     let idx ← parseIndex   <* parseSpace

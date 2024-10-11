@@ -30,6 +30,6 @@ def run_ace (sentence : String) : IO (List MRS) := do
   let ret ← cmd_with_stdin {cmd := "ace", args := #["-g","/Users/ar/r/erg.dat","-T"], cwd := "."} sentence
   let res := ret.stdout.splitOn "\n"
   let  ms := res.filter (fun s => s.startsWith "[")
-  let   p := Lean.Parsec.run parseMRS
+  let   p := Std.Internal.Parsec.String.Parser.run parseMRS
   let  as ← (ms.map p).mapM IO.ofExcept
   return as

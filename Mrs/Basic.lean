@@ -24,18 +24,18 @@ instance : Hashable Var where
  hash v := hash s!"{v.sort}{v.id}"
 
 def Var.toSimple (v : Var) : Std.Format :=
-  let a := joinSep (v.props.toList.map fun p => f!"{p.1}: {p.2}") (text " ")
-  let p := s!"{v.sort}{v.id}"
-  match a with
-  | nil => text p
-  | fs => text p ++ text " [" ++ text s!"{v.sort} " ++ fs ++ text "]"
+  let a := v.props.toList.map fun p => f!"{p.1}: {p.2}"
+  let p := f!"{v.sort}{v.id}"
+  let c := [f!"{v.sort}"]
+  if a.isEmpty then p
+  else
+   group (p ++ text " " ++ (bracket "[ " (joinSep (c ++ a) .line) " ]"))
 
 instance : Repr Var where
  reprPrec v _ := v.toSimple
 
 instance : ToFormat Var where
  format v := v.toSimple
-
 
 structure Constraint where
   rel : String
@@ -60,6 +60,29 @@ structure EP where
   rargs : List (String × Var)
   carg  : Option String
  deriving BEq
+
+/- pretty printer -/
+
+def priority (s : String) : Nat :=
+ (priorities.find? s).getD 50
+ where
+  priorities := [
+   ("RSTR", 1),("BODY", 2),
+   ("ARG0", 3),("ARG1", 4),("ARG2", 5),("ARG3", 6),("ARG4", 7),("ARG5", 8),
+   ("CARG", 100)].toAssocList'
+
+def EP.toSimple' (e : EP) : Format :=
+  nest 2 (bracket "[ " (text e.predicate ++ lnk ++ f!"LBL: {e.label}") " ]")
+ where
+  lnk : Format :=
+   match e.link with
+   | some (n,m) => f!"<{n}:{m}>"
+   | none => Format.nil
+
+#eval Var.mk 0 'h' #[("PERS","3"),("NUM","sg"),("IND","+")]
+#eval Var.mk 0 'h' #[]
+
+#eval (EP.mk "teste" (some (1,2)) (Var.mk 0 'h' #[]) [] none).toSimple'
 
 def EP.toSimple : EP → Format
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
@@ -116,20 +139,20 @@ def Var.toProlog (v : Var) : Std.Format :=
   f!"{v.sort}{v.id}"
 
 def EP.toProlog (e : EP) : Std.Format :=
-  text "rel" ++ text "("
+  nest 1 (text "rel" ++ text "("
   ++ f!"'{text e.predicate}'"
   ++ text "," ++ e.label.toProlog
   ++ text "," ++ text "["
   ++ Format.joinSep (e.rargs.map farg) ", "
   ++ text "]"
   ++ text ")"
-  ++ line
+  ++ line)
  where
   farg (a : String × Var) : Std.Format :=
-    text "attrval"
+    nest 1 (text "attrval"
     ++ text "("
     ++ f!"'{text a.1}'" ++ text "," ++ a.2.toProlog
-    ++ text ")"
+    ++ text ")")
 
 def Constraint.toProlog (c : Constraint) : Std.Format :=
   text c.rel ++ text "("
@@ -139,9 +162,10 @@ def Constraint.toProlog (c : Constraint) : Std.Format :=
 def MRS.toProlog (m : MRS) : Std.Format :=
   text "psoa" ++ text "("
   ++ m.top.toProlog ++ text "," ++ m.index.toProlog
-  ++ text "," ++ text "["
-  ++ Format.joinSep (m.preds.map EP.toProlog) ", "
-  ++ text "]"
+  ++ text "," ++ nest 1 (
+     text "["
+     ++ Format.joinSep (m.preds.map EP.toProlog) ", "
+     ++ text "]")
   ++ text ","
   ++ text "hcons" ++ text "("
   ++ text "["

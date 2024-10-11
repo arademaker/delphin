@@ -6,8 +6,9 @@ namespace Utool
 /- In this namespace we have the code to parse the Utool output
    and produce the Utool Input from a MRS -/
 
-open Lean (Parsec)
-open Lean.Parsec (pchar pstring satisfy many1 asciiLetter digit many)
+open Lean
+open Std.Internal.Parsec (satisfy many1 many)
+open Std.Internal.Parsec.String (Parser pchar digit asciiLetter pstring)
 open MRS (Var parseSpace MRS EP)
 
 structure Plug where
@@ -19,12 +20,12 @@ instance : ToString Plug where
   toString
   | s => s!"({s.hol.toProlog},{s.lbl.toProlog})"
 
-def parseVarName : Parsec (Char × Nat) := do
+def parseVarName : Parser (Char × Nat) := do
   let p ← asciiLetter
   let s ← many1 digit
   return (p, s.asString.toNat!)
 
-def parsePlug : Parsec Plug := do
+def parsePlug : Parser Plug := do
   let _ ← pstring "plug" <* pchar '('
   let lo ← parseVarName <* parseSpace
   let hi ← parseVarName
@@ -33,13 +34,13 @@ def parsePlug : Parsec Plug := do
   let vhi := {id := hi.2, sort := hi.1, props := #[] : Var}
   return {hol := vlo, lbl := vhi}
 
-def parseSolution : Parsec (Array Plug) := do
+def parseSolution : Parser (Array Plug) := do
   let _ ← pchar '['
   let ps ← many $ (parsePlug <* parseSpace)
   let _ ← pchar ']'
   return ps
 
-def parseOutput : Parsec (Array (Array Plug)) := do
+def parseOutput : Parser (Array (Array Plug)) := do
   let _ ← pchar '%' *> many (satisfy $ fun c => c ≠ '\n')
   let _ ← parseSpace *> pchar '['
   let ps ← many $ (parseSolution <* parseSpace)
@@ -48,21 +49,21 @@ def parseOutput : Parsec (Array (Array Plug)) := do
 
 def run_utool (txt : String) : IO (Except String $ Array $ Array Plug) := do
   let ret ← cmd_with_stdin {cmd := "java", args := #["-jar","utool-3.4.jar", "solve", "-I", "mrs-prolog", "-O", "plugging-oz", "-"], cwd := "."} txt
-  let p := Parsec.run parseOutput ret.stdout
+  let p := Parser.run parseOutput ret.stdout
   return p
 
 /- in pydelphin, the top need to be one among the labels of the EPs, otherwise,
    none is returned. We don't have provision for a none in the top field of an
    MRS. -/
 def solve_mrs (m : MRS) (ps : Array Plug) : MRS :=
-  let map := Lean.HashMap.ofList $ ps.map (λ p => (p.hol, p.lbl)) |>.toList
+  let map := Std.HashMap.ofList $ ps.map (λ p => (p.hol, p.lbl)) |>.toList
   let top' := match m.hcons.find? (λ h => h.lhs == m.top) with
               | some h => h.rhs
               | none => m.top
   { m with preds := m.preds.map (λ p : EP =>
       { p with rargs :=
          p.rargs.map (λ v =>
-          match map.find? v.2 with
+          match map.get? v.2 with
           | some v' => (v.1, v')
           | none => (v.1, v.2)) }), hcons := [], top := top' }
 

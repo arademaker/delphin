@@ -1,14 +1,5 @@
-{"version": "1.0.0",
+{"version": "1.1.0",
  "packagesDir": ".lake/packages",
- "packages":
- [{"url": "https://github.com/leanprover-community/batteries",
-   "type": "git",
-   "subDir": null,
-   "rev": "dc4a6b1ac3cd502988e283d5c9c5fdf261125a07",
-   "name": "batteries",
-   "manifestFile": "lake-manifest.json",
-   "inputRev": "main",
-   "inherited": false,
-   "configFile": "lakefile.lean"}],
+ "packages": [],
  "name": "delphin",
  "lakeDir": ".lake"}
