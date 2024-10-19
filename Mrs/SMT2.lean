@@ -212,7 +212,26 @@ def EP.format.defn (sentenceNumber : Nat) (qm : HashMap Var Var) (em : Multimap 
 
   printNormal firstEp.label preds
 
-def MRS.format (sentenceNumber : Nat) (mrs : MRS.MRS) : (String × List String × List Var) :=
+def EP.format.axiom (sentenceNumber : Nat) (qm : HashMap Var Var) (em : Multimap Var Var) (hm : Multimap Var EP) (rootHandle : Var) : String :=
+  let preds := match (hm.find? rootHandle) with
+  | some value => value
+  | none => []
+
+  match preds.head? with
+  | some firstEp =>
+    let getArgs (ep : EP) : List (String × String) :=
+      ep.rargs.filter (fun item => item.2.sort == 'x' || item.2.sort == 'h' || item.2.sort == 'e')
+        |>.map (fun (_, var) => (Var.format.labelOnly sentenceNumber var, Var.format.typeOnly var))
+
+    let args := getArgs firstEp
+    let existentialVarsStr := String.intercalate " " (args.map (λ (name, type) => s!"({name} {type})"))
+    let argsStr := String.intercalate " " (args.map (λ (name, _) => name))
+    
+    s!"(assert (exists ({existentialVarsStr}) (s{sentenceNumber}_root {argsStr})))"
+  | none => 
+    s!"; No predicates found for root handle in sentence {sentenceNumber}"
+
+def MRS.format (sentenceNumber : Nat) (mrs : MRS) : (String × List String × List Var) :=
  let strings := mrs.preds.foldl (fun stab pred =>
   match pred with
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
@@ -233,7 +252,16 @@ def MRS.format (sentenceNumber : Nat) (mrs : MRS.MRS) : (String × List String �
  let rlt := hm.keys.map (EP.format.type sentenceNumber qm em hm mrs.top) 
  let rla := hm.keys.map (EP.format.defn sentenceNumber qm em hm mrs.top) 
  let etypes := (joinSep (eSet.map (fun (var : Var) => s!"(declare-const s{sentenceNumber}_{var.sort}{var.id} Event)")) "\n")
- let str := "(set-logic ALL)\n\n" ++ libraryRoutines ++ "\n" ++ etypes ++ "\n\n" ++ (joinSep rlt "\n") ++ "\n\n" ++ (joinSep rla "\n") ++ "\n\n(check-sat)\n(get-model)"
- (str,strings.keys,eSet)
+ 
+ -- Generate axiom only for the root predicate
+ let rootAxiom := EP.format.axiom sentenceNumber qm em hm mrs.top
+ 
+ let str := etypes ++ "\n\n" ++ 
+            (joinSep rlt "\n") ++ "\n\n" ++ 
+            (joinSep rla "\n") ++ "\n\n" ++
+            "; Additional axiom\n" ++
+            rootAxiom
+ 
+ (str, strings.keys, eSet)
 
 end SMT2
