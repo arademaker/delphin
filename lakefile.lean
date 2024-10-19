@@ -11,6 +11,9 @@ lean_lib «Mrs» where
 lean_lib «Ace» where
   -- add library configuration options here
 
+lean_lib «Util» where
+  -- add library configuration options here
+
 @[default_target]
 lean_exe «delphin» where
   root := `Main
