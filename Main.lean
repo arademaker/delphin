@@ -1,9 +1,10 @@
 import Mrs
 import Ace
+import Util.InsertionSort
 
 open MRS
 open THF
-
+open InsertionSort
 
 -- set_option pp.oneline true
 -- set_option pp.proofs true
@@ -78,7 +79,7 @@ def main : IO Unit := do
  let itypes := (insertionSort iSet).eraseDups.reverse.map (fun str =>
                                                             let lab := formatId str
                                                             "thf(" ++ lab ++ "_decl,type," ++ lab ++ ": " ++ "name).")
- let (epairs : List ((Nat × Var) × (Nat × Var)))  := (enumerateUniquePairs $ THF.insertionSort eSet).reverse
+ let (epairs : List ((Nat × Var) × (Nat × Var)))  := (enumerateUniquePairs $ insertionSort eSet).reverse
  let uids := (insertionSort iSet).eraseDups
  let ipairs := enumerateUniquePairs $ uids
  let ecompares := epairs.map (fun pair => ("(" ++ (Var.format.labelOnlyGround pair.1.1 pair.1.2) ++ " != " ++ (Var.format.labelOnlyGround pair.2.1 pair.2.2) ++ ")" ))
