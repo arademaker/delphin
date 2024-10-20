@@ -14,10 +14,7 @@ def solveAndFormat (sentenceNumber : Nat) (mrs : MRS) : IO (String × List Strin
     match sols.get? 0 with
     | some sol => 
       let (formatted, strings, vars) := SMT2.MRS.format sentenceNumber sol
-      -- Remove (set-logic ALL), (check-sat), and (get-model) from individual sentence outputs
-      let formattedWithoutSetLogic := formatted.replace "(set-logic ALL)\n\n" ""
-      let formattedWithoutChecks := formattedWithoutSetLogic.replace "(check-sat)\n(get-model)" ""
-      return (formattedWithoutChecks, strings, vars)
+      return (formatted, strings, vars)
     | none => unreachable!
   | Except.error _ => unreachable!
 
@@ -68,7 +65,7 @@ def main : IO Unit := do
                    ] 
 
  let (sentences : List (Nat × (String × (List String) × (List Var)))) <- mapWithIndexM sentencesText xform
- let header := "(set-logic ALL)\n\n(declare-sort Individual 0)\n(declare-sort Event 0)\n(declare-sort Name 0)\n\n"
+ let header := "(declare-sort Individual 0)\n(declare-sort Event 0)\n(declare-sort Name 0)\n(declare-sort Pred 0)\n\n"
  let (eSet : List (Nat × Var)) := sentences.foldl (fun acc tup => 
                                                     let (trip : (String × (List String) × (List Var))) := tup.snd
                                                     acc ++ (addSentenceNumber tup.fst trip.snd.snd)) []
@@ -89,8 +86,7 @@ def main : IO Unit := do
  
  let headers := header ++ (joinSep itypes "\n") ++ "\n\n" ++ SMT2.libraryRoutines ++ "\n" ++ iaxioms ++ "\n"
  let sentenceContent := sentences.foldl (fun acc pair => acc ++ pair.snd.fst ++ "\n\n") ""
- let finalContent := headers ++ sentenceContent ++ eaxioms ++ "\n(check-sat)\n(get-model)"
+ let finalContent := headers ++ sentenceContent ++ eaxioms ++ "\n"
  IO.FS.writeFile "smt2-outputs/sentences.smt2" finalContent
  return ()
   
--- #eval main
