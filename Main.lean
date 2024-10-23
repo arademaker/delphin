@@ -1,10 +1,10 @@
 import Mrs
 import Ace
 import Util.InsertionSort
-import Mrs.SMT2
+import Mrs.Rulelog
 
 open MRS
-open SMT2
+open Rulelog
 open InsertionSort
 
 def solveAndFormat (sentenceNumber : Nat) (mrs : MRS) : IO (String × List String × List Var) := do
@@ -13,7 +13,7 @@ def solveAndFormat (sentenceNumber : Nat) (mrs : MRS) : IO (String × List Strin
   | Except.ok sols => 
     match sols.get? 0 with
     | some sol => 
-      let (formatted, strings, vars) := SMT2.MRS.format sentenceNumber sol
+      let (formatted, strings, vars) := Rulelog.MRS.format sentenceNumber sol
       return (formatted, strings, vars)
     | none => unreachable!
   | Except.error _ => unreachable!
@@ -84,9 +84,9 @@ def main : IO Unit := do
  let eaxioms := s!"(assert (and {joinSep ecompares " "}))\n"
  let iaxioms := s!"(assert (and {joinSep icompares " "}))\n"
  
- let headers := header ++ (joinSep itypes "\n") ++ "\n\n" ++ SMT2.libraryRoutines ++ "\n" ++ iaxioms ++ "\n"
+ let headers := header ++ (joinSep itypes "\n") ++ "\n\n" ++ Rulelog.libraryRoutines ++ "\n" ++ iaxioms ++ "\n"
  let sentenceContent := sentences.foldl (fun acc pair => acc ++ pair.snd.fst ++ "\n\n") ""
  let finalContent := headers ++ sentenceContent ++ eaxioms ++ "\n"
- IO.FS.writeFile "smt2-outputs/sentences.smt2" finalContent
+ IO.FS.writeFile "rulelog-outputs/sentences.ergo" finalContent
  return ()
   
