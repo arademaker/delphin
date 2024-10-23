@@ -1,0 +1,638 @@
+(declare-sort Individual 0)
+(declare-sort Event 0)
+(declare-sort Name 0)
+(declare-sort Pred 0)
+
+(declare-const id_Agatha Name)
+(declare-const id_Aunt Name)
+(declare-const id_Charles Name)
+(declare-const id_Dreadbury Name)
+(declare-const id_Mansion Name)
+
+% Library predicates
+a_q(?Restr, ?Body) :- true.
+every_q(?Restr, ?Body) :- true.
+some_q(?Restr, ?Body) :- true.
+the_q(?Restr, ?Body) :- true.
+proper_q(?Restr, ?Body) :- true.
+pronoun_q(?Restr, ?Body) :- true.
+udef_q(?Restr, ?Body) :- true.
+def_explicit_q(?Restr, ?Body) :- true.
+no_q(?Restr, ?Body) :- true.
+never_a_1(?X) :- true.
+neg(?E, ?X) :- true.
+colon_p_namely(?E, ?X, ?Y) :- true.
+therein_p_dir(?E1, ?E2) :- true.
+live_v_1(?E, ?X) :- true.
+people_n_of(?X) :- true.
+victim_n_of(?X) :- true.
+only_a_1(?E, ?X) :- true.
+named(?X, ?Name) :- true.
+and_c(?X, ?Y, ?Z) :- true.
+butler_n_1(?X) :- true.
+killer_n_1(?X) :- true.
+implicit_conj(?X, ?Y, ?Z) :- true.
+be_v_id(?E, ?X, ?Y) :- true.
+in_p_loc(?E, ?E2, ?X) :- true.
+compound(?E, ?X, ?Y) :- true.
+person(?X) :- true.
+kill_v_1(?E, ?X, ?Y) :- true.
+hate_v_1(?E, ?X, ?Y) :- true.
+pron(?X) :- true.
+poss(?E, ?X, ?Y) :- true.
+
+(assert (and (distinct id_Dreadbury id_Mansion) (distinct id_Charles id_Mansion) (distinct id_Charles id_Dreadbury) (distinct id_Aunt id_Mansion) (distinct id_Aunt id_Dreadbury) (distinct id_Aunt id_Charles) (distinct id_Agatha id_Mansion) (distinct id_Agatha id_Dreadbury) (distinct id_Agatha id_Charles) (distinct id_Agatha id_Aunt)))
+
+% Library predicates
+a_q(?Restr, ?Body) :- true.
+every_q(?Restr, ?Body) :- true.
+some_q(?Restr, ?Body) :- true.
+the_q(?Restr, ?Body) :- true.
+proper_q(?Restr, ?Body) :- true.
+pronoun_q(?Restr, ?Body) :- true.
+udef_q(?Restr, ?Body) :- true.
+def_explicit_q(?Restr, ?Body) :- true.
+no_q(?Restr, ?Body) :- true.
+never_a_1(?X) :- true.
+neg(?E, ?X) :- true.
+colon_p_namely(?E, ?X, ?Y) :- true.
+therein_p_dir(?E1, ?E2) :- true.
+live_v_1(?E, ?X) :- true.
+people_n_of(?X) :- true.
+victim_n_of(?X) :- true.
+only_a_1(?E, ?X) :- true.
+named(?X, ?Name) :- true.
+and_c(?X, ?Y, ?Z) :- true.
+butler_n_1(?X) :- true.
+killer_n_1(?X) :- true.
+implicit_conj(?X, ?Y, ?Z) :- true.
+be_v_id(?E, ?X, ?Y) :- true.
+in_p_loc(?E, ?E2, ?X) :- true.
+compound(?E, ?X, ?Y) :- true.
+person(?X) :- true.
+kill_v_1(?E, ?X, ?Y) :- true.
+hate_v_1(?E, ?X, ?Y) :- true.
+pron(?X) :- true.
+poss(?E, ?X, ?Y) :- true.
+
+event(s0_e8).
+event(s0_e9).
+event(s0_e15).
+event(s0_e2).
+event(s0_e28).
+
+named(?S0_X29, ""Aunt"").
+
+proper_q(?S0_X29, ?S0_H33, ?S0_H11).
+
+named(?S0_X23, ""Agatha"").
+compound(?S0_E28, ?S0_X23, ?S0_X29).
+
+proper_q(?S0_X23, ?S0_H27, ?S0_H5).
+
+named(?S0_X16, ""Dreadbury"").
+
+proper_q(?S0_X16, ?S0_H20, ?S0_H14).
+
+named(?S0_X10, ""Mansion"").
+compound(?S0_E15, ?S0_X10, ?S0_X16).
+
+proper_q(?S0_X10, ?S0_H17, ?S0_H24).
+
+some_q(?S0_X3, ?S0_H4, ?S0_H1).
+
+in_p_loc(?S0_E9, ?S0_E8, ?S0_X10).
+live_v_1(?S0_E8, ?S0_X3).
+person(?S0_X3).
+
+kill_v_1(?S0_E2, ?S0_X3, ?S0_X23).
+
+
+% Library predicates
+a_q(?Restr, ?Body) :- true.
+every_q(?Restr, ?Body) :- true.
+some_q(?Restr, ?Body) :- true.
+the_q(?Restr, ?Body) :- true.
+proper_q(?Restr, ?Body) :- true.
+pronoun_q(?Restr, ?Body) :- true.
+udef_q(?Restr, ?Body) :- true.
+def_explicit_q(?Restr, ?Body) :- true.
+no_q(?Restr, ?Body) :- true.
+never_a_1(?X) :- true.
+neg(?E, ?X) :- true.
+colon_p_namely(?E, ?X, ?Y) :- true.
+therein_p_dir(?E1, ?E2) :- true.
+live_v_1(?E, ?X) :- true.
+people_n_of(?X) :- true.
+victim_n_of(?X) :- true.
+only_a_1(?E, ?X) :- true.
+named(?X, ?Name) :- true.
+and_c(?X, ?Y, ?Z) :- true.
+butler_n_1(?X) :- true.
+killer_n_1(?X) :- true.
+implicit_conj(?X, ?Y, ?Z) :- true.
+be_v_id(?E, ?X, ?Y) :- true.
+in_p_loc(?E, ?E2, ?X) :- true.
+compound(?E, ?X, ?Y) :- true.
+person(?X) :- true.
+kill_v_1(?E, ?X, ?Y) :- true.
+hate_v_1(?E, ?X, ?Y) :- true.
+pron(?X) :- true.
+poss(?E, ?X, ?Y) :- true.
+
+event(s1_e30).
+event(s1_e31).
+event(s1_e37).
+event(s1_e45).
+event(s1_e2).
+event(s1_e51).
+event(s1_e53).
+event(s1_e54).
+
+therein_p_dir(?S1_E54, ?S1_E53).
+live_v_1(?S1_E53, ?S1_X46).
+people_n_of(?S1_X46, ?S1_I52).
+only_a_1(?S1_E51, ?S1_X46).
+
+the_q(?S1_X46, ?S1_H50, ?S1_H4).
+
+named(?S1_X38, ""Dreadbury"").
+
+proper_q(?S1_X38, ?S1_H42, ?S1_H36).
+
+named(?S1_X32, ""Mansion"").
+compound(?S1_E37, ?S1_X32, ?S1_X38).
+
+proper_q(?S1_X32, ?S1_H39, ?S1_H13).
+
+named(?S1_X24, ""Charles"").
+
+proper_q(?S1_X24, ?S1_H28, ?S1_H18).
+
+and_c(?S1_X14, ?S1_X19, ?S1_X24).
+
+butler_n_1(?S1_X19).
+
+the_q(?S1_X19, ?S1_H22, ?S1_H23).
+
+implicit_conj(?S1_X3, ?S1_X8, ?S1_X14).
+
+udef_q(?S1_X14, ?S1_H25, ?S1_H47).
+
+named(?S1_X8, ""Agatha"").
+
+proper_q(?S1_X8, ?S1_H11, ?S1_H17).
+
+udef_q(?S1_X3, ?S1_H7, ?S1_H1).
+
+be_v_id(?S1_E45, ?S1_X3, ?S1_X46).
+and_c(?S1_E2, ?S1_E30, ?S1_E45).
+in_p_loc(?S1_E31, ?S1_E30, ?S1_X32).
+live_v_1(?S1_E30, ?S1_X3).
+
+
+% Library predicates
+a_q(?Restr, ?Body) :- true.
+every_q(?Restr, ?Body) :- true.
+some_q(?Restr, ?Body) :- true.
+the_q(?Restr, ?Body) :- true.
+proper_q(?Restr, ?Body) :- true.
+pronoun_q(?Restr, ?Body) :- true.
+udef_q(?Restr, ?Body) :- true.
+def_explicit_q(?Restr, ?Body) :- true.
+no_q(?Restr, ?Body) :- true.
+never_a_1(?X) :- true.
+neg(?E, ?X) :- true.
+colon_p_namely(?E, ?X, ?Y) :- true.
+therein_p_dir(?E1, ?E2) :- true.
+live_v_1(?E, ?X) :- true.
+people_n_of(?X) :- true.
+victim_n_of(?X) :- true.
+only_a_1(?E, ?X) :- true.
+named(?X, ?Name) :- true.
+and_c(?X, ?Y, ?Z) :- true.
+butler_n_1(?X) :- true.
+killer_n_1(?X) :- true.
+implicit_conj(?X, ?Y, ?Z) :- true.
+be_v_id(?E, ?X, ?Y) :- true.
+in_p_loc(?E, ?E2, ?X) :- true.
+compound(?E, ?X, ?Y) :- true.
+person(?X) :- true.
+kill_v_1(?E, ?X, ?Y) :- true.
+hate_v_1(?E, ?X, ?Y) :- true.
+pron(?X) :- true.
+poss(?E, ?X, ?Y) :- true.
+
+event(s2_e9).
+event(s2_e15).
+event(s2_e22).
+event(s2_e2).
+event(s2_e27).
+event(s2_e33).
+
+pron(?S2_X34).
+
+pronoun_q(?S2_X34, ?S2_H38, ?S2_H4).
+
+victim_n_of(?S2_X28, ?S2_I39).
+poss(?S2_E33, ?S2_X28, ?S2_X34).
+
+def_explicit_q(?S2_X28, ?S2_H32, ?S2_H25).
+
+more_comp(?S2_E27, ?S2_E22, ?S2_X28).
+rich_a_in(?S2_E22, ?S2_X3, ?S2_I26).
+
+pron(?S2_X16).
+
+pronoun_q(?S2_X16, ?S2_H20, ?S2_H14).
+
+victim_n_of(?S2_X10, ?S2_I21).
+poss(?S2_E15, ?S2_X10, ?S2_X16).
+
+def_explicit_q(?S2_X10, ?S2_H17, ?S2_H35).
+
+killer_n_1(?S2_X3).
+
+a_q(?S2_X3, ?S2_H7, ?S2_H1).
+
+never_a_1(?S2_I23, ?S2_H29).
+and_c(?S2_E2, ?S2_E9, ?S2_E22).
+hate_v_1(?S2_E9, ?S2_X3, ?S2_X10).
+always_a_1(?S2_I8, ?S2_E9).
+
+
+% Library predicates
+a_q(?Restr, ?Body) :- true.
+every_q(?Restr, ?Body) :- true.
+some_q(?Restr, ?Body) :- true.
+the_q(?Restr, ?Body) :- true.
+proper_q(?Restr, ?Body) :- true.
+pronoun_q(?Restr, ?Body) :- true.
+udef_q(?Restr, ?Body) :- true.
+def_explicit_q(?Restr, ?Body) :- true.
+no_q(?Restr, ?Body) :- true.
+never_a_1(?X) :- true.
+neg(?E, ?X) :- true.
+colon_p_namely(?E, ?X, ?Y) :- true.
+therein_p_dir(?E1, ?E2) :- true.
+live_v_1(?E, ?X) :- true.
+people_n_of(?X) :- true.
+victim_n_of(?X) :- true.
+only_a_1(?E, ?X) :- true.
+named(?X, ?Name) :- true.
+and_c(?X, ?Y, ?Z) :- true.
+butler_n_1(?X) :- true.
+killer_n_1(?X) :- true.
+implicit_conj(?X, ?Y, ?Z) :- true.
+be_v_id(?E, ?X, ?Y) :- true.
+in_p_loc(?E, ?E2, ?X) :- true.
+compound(?E, ?X, ?Y) :- true.
+person(?X) :- true.
+kill_v_1(?E, ?X, ?Y) :- true.
+hate_v_1(?E, ?X, ?Y) :- true.
+pron(?X) :- true.
+poss(?E, ?X, ?Y) :- true.
+
+event(s3_e2).
+event(s3_e19).
+event(s3_e27).
+
+aunt_n_of(?S3_X20, ?S3_I25).
+
+udef_q(?S3_X20, ?S3_H24, ?S3_H11).
+
+named(?S3_X15, ""Agatha"").
+compound(?S3_E19, ?S3_X15, ?S3_X20).
+
+proper_q(?S3_X15, ?S3_H18, ?S3_H10).
+
+no_q(?S3_X9, ?S3_H14, ?S3_H4).
+
+hate_v_1(?S3_E27, ?S3_X15, ?S3_X9).
+person(?S3_X9).
+
+named(?S3_X3, ""Charles"").
+
+proper_q(?S3_X3, ?S3_H7, ?S3_H1).
+
+hate_v_1(?S3_E2, ?S3_X3, ?S3_X9).
+
+
+% Library predicates
+a_q(?Restr, ?Body) :- true.
+every_q(?Restr, ?Body) :- true.
+some_q(?Restr, ?Body) :- true.
+the_q(?Restr, ?Body) :- true.
+proper_q(?Restr, ?Body) :- true.
+pronoun_q(?Restr, ?Body) :- true.
+udef_q(?Restr, ?Body) :- true.
+def_explicit_q(?Restr, ?Body) :- true.
+no_q(?Restr, ?Body) :- true.
+never_a_1(?X) :- true.
+neg(?E, ?X) :- true.
+colon_p_namely(?E, ?X, ?Y) :- true.
+therein_p_dir(?E1, ?E2) :- true.
+live_v_1(?E, ?X) :- true.
+people_n_of(?X) :- true.
+victim_n_of(?X) :- true.
+only_a_1(?E, ?X) :- true.
+named(?X, ?Name) :- true.
+and_c(?X, ?Y, ?Z) :- true.
+butler_n_1(?X) :- true.
+killer_n_1(?X) :- true.
+implicit_conj(?X, ?Y, ?Z) :- true.
+be_v_id(?E, ?X, ?Y) :- true.
+in_p_loc(?E, ?E2, ?X) :- true.
+compound(?E, ?X, ?Y) :- true.
+person(?X) :- true.
+kill_v_1(?E, ?X, ?Y) :- true.
+hate_v_1(?E, ?X, ?Y) :- true.
+pron(?X) :- true.
+poss(?E, ?X, ?Y) :- true.
+
+event(s4_e2).
+event(s4_e14).
+
+butler_n_1(?S4_X15).
+
+the_q(?S4_X15, ?S4_H19, ?S4_H10).
+
+every_q(?S4_X9, ?S4_H16, ?S4_H4).
+
+except_p(?S4_E14, ?S4_X9, ?S4_X15).
+person(?S4_X9).
+
+named(?S4_X3, ""Agatha"").
+
+proper_q(?S4_X3, ?S4_H7, ?S4_H1).
+
+hate_v_1(?S4_E2, ?S4_X3, ?S4_X9).
+
+
+% Library predicates
+a_q(?Restr, ?Body) :- true.
+every_q(?Restr, ?Body) :- true.
+some_q(?Restr, ?Body) :- true.
+the_q(?Restr, ?Body) :- true.
+proper_q(?Restr, ?Body) :- true.
+pronoun_q(?Restr, ?Body) :- true.
+udef_q(?Restr, ?Body) :- true.
+def_explicit_q(?Restr, ?Body) :- true.
+no_q(?Restr, ?Body) :- true.
+never_a_1(?X) :- true.
+neg(?E, ?X) :- true.
+colon_p_namely(?E, ?X, ?Y) :- true.
+therein_p_dir(?E1, ?E2) :- true.
+live_v_1(?E, ?X) :- true.
+people_n_of(?X) :- true.
+victim_n_of(?X) :- true.
+only_a_1(?E, ?X) :- true.
+named(?X, ?Name) :- true.
+and_c(?X, ?Y, ?Z) :- true.
+butler_n_1(?X) :- true.
+killer_n_1(?X) :- true.
+implicit_conj(?X, ?Y, ?Z) :- true.
+be_v_id(?E, ?X, ?Y) :- true.
+in_p_loc(?E, ?E2, ?X) :- true.
+compound(?E, ?X, ?Y) :- true.
+person(?X) :- true.
+kill_v_1(?E, ?X, ?Y) :- true.
+hate_v_1(?E, ?X, ?Y) :- true.
+pron(?X) :- true.
+poss(?E, ?X, ?Y) :- true.
+
+event(s5_e2).
+event(s5_e13).
+event(s5_e16).
+event(s5_e18).
+event(s5_e24).
+
+named(?S5_X25, ""Aunt"").
+
+proper_q(?S5_X25, ?S5_H29, ?S5_H23).
+
+named(?S5_X19, ""Agatha"").
+compound(?S5_E24, ?S5_X19, ?S5_X25).
+
+proper_q(?S5_X19, ?S5_H26, ?S5_H15).
+
+more_comp(?S5_E18, ?S5_E16, ?S5_X19).
+rich_a_in(?S5_E16, ?S5_X8, ?S5_I17).
+
+every_q(?S5_X8, ?S5_H9, ?S5_H4).
+
+neg(?S5_E13, ?S5_H20).
+person(?S5_X8).
+
+butler_n_1(?S5_X3).
+
+the_q(?S5_X3, ?S5_H7, ?S5_H1).
+
+hate_v_1(?S5_E2, ?S5_X3, ?S5_X8).
+
+
+% Library predicates
+a_q(?Restr, ?Body) :- true.
+every_q(?Restr, ?Body) :- true.
+some_q(?Restr, ?Body) :- true.
+the_q(?Restr, ?Body) :- true.
+proper_q(?Restr, ?Body) :- true.
+pronoun_q(?Restr, ?Body) :- true.
+udef_q(?Restr, ?Body) :- true.
+def_explicit_q(?Restr, ?Body) :- true.
+no_q(?Restr, ?Body) :- true.
+never_a_1(?X) :- true.
+neg(?E, ?X) :- true.
+colon_p_namely(?E, ?X, ?Y) :- true.
+therein_p_dir(?E1, ?E2) :- true.
+live_v_1(?E, ?X) :- true.
+people_n_of(?X) :- true.
+victim_n_of(?X) :- true.
+only_a_1(?E, ?X) :- true.
+named(?X, ?Name) :- true.
+and_c(?X, ?Y, ?Z) :- true.
+butler_n_1(?X) :- true.
+killer_n_1(?X) :- true.
+implicit_conj(?X, ?Y, ?Z) :- true.
+be_v_id(?E, ?X, ?Y) :- true.
+in_p_loc(?E, ?E2, ?X) :- true.
+compound(?E, ?X, ?Y) :- true.
+person(?X) :- true.
+kill_v_1(?E, ?X, ?Y) :- true.
+hate_v_1(?E, ?X, ?Y) :- true.
+pron(?X) :- true.
+poss(?E, ?X, ?Y) :- true.
+
+event(s6_e2).
+event(s6_e18).
+event(s6_e26).
+
+aunt_n_of(?S6_X19, ?S6_I24).
+
+udef_q(?S6_X19, ?S6_H23, ?S6_H13).
+
+named(?S6_X14, ""Agatha"").
+compound(?S6_E18, ?S6_X14, ?S6_X19).
+
+proper_q(?S6_X14, ?S6_H17, ?S6_H9).
+
+every_q(?S6_X8, ?S6_H20, ?S6_H4).
+
+hate_v_1(?S6_E26, ?S6_X14, ?S6_X8).
+person(?S6_X8).
+
+butler_n_1(?S6_X3).
+
+the_q(?S6_X3, ?S6_H7, ?S6_H1).
+
+hate_v_1(?S6_E2, ?S6_X3, ?S6_X8).
+
+
+% Library predicates
+a_q(?Restr, ?Body) :- true.
+every_q(?Restr, ?Body) :- true.
+some_q(?Restr, ?Body) :- true.
+the_q(?Restr, ?Body) :- true.
+proper_q(?Restr, ?Body) :- true.
+pronoun_q(?Restr, ?Body) :- true.
+udef_q(?Restr, ?Body) :- true.
+def_explicit_q(?Restr, ?Body) :- true.
+no_q(?Restr, ?Body) :- true.
+never_a_1(?X) :- true.
+neg(?E, ?X) :- true.
+colon_p_namely(?E, ?X, ?Y) :- true.
+therein_p_dir(?E1, ?E2) :- true.
+live_v_1(?E, ?X) :- true.
+people_n_of(?X) :- true.
+victim_n_of(?X) :- true.
+only_a_1(?E, ?X) :- true.
+named(?X, ?Name) :- true.
+and_c(?X, ?Y, ?Z) :- true.
+butler_n_1(?X) :- true.
+killer_n_1(?X) :- true.
+implicit_conj(?X, ?Y, ?Z) :- true.
+be_v_id(?E, ?X, ?Y) :- true.
+in_p_loc(?E, ?E2, ?X) :- true.
+compound(?E, ?X, ?Y) :- true.
+person(?X) :- true.
+kill_v_1(?E, ?X, ?Y) :- true.
+hate_v_1(?E, ?X, ?Y) :- true.
+pron(?X) :- true.
+poss(?E, ?X, ?Y) :- true.
+
+event(s7_e2).
+
+every_q(?S7_X8, ?S7_H9, ?S7_H5).
+
+person(?S7_X8).
+
+no_q(?S7_X3, ?S7_H4, ?S7_H1).
+
+person(?S7_X3).
+
+hate_v_1(?S7_E2, ?S7_X3, ?S7_X8).
+
+
+% Library predicates
+a_q(?Restr, ?Body) :- true.
+every_q(?Restr, ?Body) :- true.
+some_q(?Restr, ?Body) :- true.
+the_q(?Restr, ?Body) :- true.
+proper_q(?Restr, ?Body) :- true.
+pronoun_q(?Restr, ?Body) :- true.
+udef_q(?Restr, ?Body) :- true.
+def_explicit_q(?Restr, ?Body) :- true.
+no_q(?Restr, ?Body) :- true.
+never_a_1(?X) :- true.
+neg(?E, ?X) :- true.
+colon_p_namely(?E, ?X, ?Y) :- true.
+therein_p_dir(?E1, ?E2) :- true.
+live_v_1(?E, ?X) :- true.
+people_n_of(?X) :- true.
+victim_n_of(?X) :- true.
+only_a_1(?E, ?X) :- true.
+named(?X, ?Name) :- true.
+and_c(?X, ?Y, ?Z) :- true.
+butler_n_1(?X) :- true.
+killer_n_1(?X) :- true.
+implicit_conj(?X, ?Y, ?Z) :- true.
+be_v_id(?E, ?X, ?Y) :- true.
+in_p_loc(?E, ?E2, ?X) :- true.
+compound(?E, ?X, ?Y) :- true.
+person(?X) :- true.
+kill_v_1(?E, ?X, ?Y) :- true.
+hate_v_1(?E, ?X, ?Y) :- true.
+pron(?X) :- true.
+poss(?E, ?X, ?Y) :- true.
+
+event(s8_e2).
+event(s8_e11).
+
+butler_n_1(?S8_X10).
+
+the_q(?S8_X10, ?S8_H16, ?S8_H4).
+
+be_v_id(?S8_E2, ?S8_X3, ?S8_X10).
+
+named(?S8_X3, ""Agatha"").
+
+proper_q(?S8_X3, ?S8_H7, ?S8_H9).
+
+neg(?S8_E11, ?S8_H13).
+
+
+% Library predicates
+a_q(?Restr, ?Body) :- true.
+every_q(?Restr, ?Body) :- true.
+some_q(?Restr, ?Body) :- true.
+the_q(?Restr, ?Body) :- true.
+proper_q(?Restr, ?Body) :- true.
+pronoun_q(?Restr, ?Body) :- true.
+udef_q(?Restr, ?Body) :- true.
+def_explicit_q(?Restr, ?Body) :- true.
+no_q(?Restr, ?Body) :- true.
+never_a_1(?X) :- true.
+neg(?E, ?X) :- true.
+colon_p_namely(?E, ?X, ?Y) :- true.
+therein_p_dir(?E1, ?E2) :- true.
+live_v_1(?E, ?X) :- true.
+people_n_of(?X) :- true.
+victim_n_of(?X) :- true.
+only_a_1(?E, ?X) :- true.
+named(?X, ?Name) :- true.
+and_c(?X, ?Y, ?Z) :- true.
+butler_n_1(?X) :- true.
+killer_n_1(?X) :- true.
+implicit_conj(?X, ?Y, ?Z) :- true.
+be_v_id(?E, ?X, ?Y) :- true.
+in_p_loc(?E, ?E2, ?X) :- true.
+compound(?E, ?X, ?Y) :- true.
+person(?X) :- true.
+kill_v_1(?E, ?X, ?Y) :- true.
+hate_v_1(?E, ?X, ?Y) :- true.
+pron(?X) :- true.
+poss(?E, ?X, ?Y) :- true.
+
+event(s9_e2).
+event(s9_e9).
+event(s9_e19).
+
+pronoun_q(?S9_X20, ?S9_H21, ?S9_H18).
+
+pron(?S9_X20).
+
+kill_v_1(?S9_E19, ?S9_X13, ?S9_X20).
+
+named(?S9_X13, ""Agatha"").
+
+proper_q(?S9_X13, ?S9_H16, ?S9_H1).
+
+therefore_a_1(?S9_I7, ?S9_H4).
+
+unknown(?S9_E2, ?S9_U5).
+
+colon_p_namely(?S9_E9, ?S9_H6, ?S9_H22).
+
+
+(assert (and (distinct s0_e2 s0_e8) (distinct s0_e2 s0_e9) (distinct s0_e2 s0_e15) (distinct s0_e2 s0_e28) (distinct s0_e2 s1_e2) (distinct s0_e2 s1_e30) (distinct s0_e2 s1_e31) (distinct s0_e2 s1_e37) (distinct s0_e2 s1_e45) (distinct s0_e2 s1_e51) (distinct s0_e2 s1_e53) (distinct s0_e2 s1_e54) (distinct s0_e2 s2_e2) (distinct s0_e2 s2_e9) (distinct s0_e2 s2_e15) (distinct s0_e2 s2_e22) (distinct s0_e2 s2_e27) (distinct s0_e2 s2_e33) (distinct s0_e2 s3_e2) (distinct s0_e2 s3_e19) (distinct s0_e2 s3_e27) (distinct s0_e2 s4_e2) (distinct s0_e2 s4_e14) (distinct s0_e2 s5_e2) (distinct s0_e2 s5_e13) (distinct s0_e2 s5_e16) (distinct s0_e2 s5_e18) (distinct s0_e2 s5_e24) (distinct s0_e2 s6_e2) (distinct s0_e2 s6_e18) (distinct s0_e2 s6_e26) (distinct s0_e2 s7_e2) (distinct s0_e2 s8_e2) (distinct s0_e2 s8_e11) (distinct s0_e2 s9_e2) (distinct s0_e2 s9_e9) (distinct s0_e2 s9_e19) (distinct s0_e8 s0_e9) (distinct s0_e8 s0_e15) (distinct s0_e8 s0_e28) (distinct s0_e8 s1_e2) (distinct s0_e8 s1_e30) (distinct s0_e8 s1_e31) (distinct s0_e8 s1_e37) (distinct s0_e8 s1_e45) (distinct s0_e8 s1_e51) (distinct s0_e8 s1_e53) (distinct s0_e8 s1_e54) (distinct s0_e8 s2_e2) (distinct s0_e8 s2_e9) (distinct s0_e8 s2_e15) (distinct s0_e8 s2_e22) (distinct s0_e8 s2_e27) (distinct s0_e8 s2_e33) (distinct s0_e8 s3_e2) (distinct s0_e8 s3_e19) (distinct s0_e8 s3_e27) (distinct s0_e8 s4_e2) (distinct s0_e8 s4_e14) (distinct s0_e8 s5_e2) (distinct s0_e8 s5_e13) (distinct s0_e8 s5_e16) (distinct s0_e8 s5_e18) (distinct s0_e8 s5_e24) (distinct s0_e8 s6_e2) (distinct s0_e8 s6_e18) (distinct s0_e8 s6_e26) (distinct s0_e8 s7_e2) (distinct s0_e8 s8_e2) (distinct s0_e8 s8_e11) (distinct s0_e8 s9_e2) (distinct s0_e8 s9_e9) (distinct s0_e8 s9_e19) (distinct s0_e9 s0_e15) (distinct s0_e9 s0_e28) (distinct s0_e9 s1_e2) (distinct s0_e9 s1_e30) (distinct s0_e9 s1_e31) (distinct s0_e9 s1_e37) (distinct s0_e9 s1_e45) (distinct s0_e9 s1_e51) (distinct s0_e9 s1_e53) (distinct s0_e9 s1_e54) (distinct s0_e9 s2_e2) (distinct s0_e9 s2_e9) (distinct s0_e9 s2_e15) (distinct s0_e9 s2_e22) (distinct s0_e9 s2_e27) (distinct s0_e9 s2_e33) (distinct s0_e9 s3_e2) (distinct s0_e9 s3_e19) (distinct s0_e9 s3_e27) (distinct s0_e9 s4_e2) (distinct s0_e9 s4_e14) (distinct s0_e9 s5_e2) (distinct s0_e9 s5_e13) (distinct s0_e9 s5_e16) (distinct s0_e9 s5_e18) (distinct s0_e9 s5_e24) (distinct s0_e9 s6_e2) (distinct s0_e9 s6_e18) (distinct s0_e9 s6_e26) (distinct s0_e9 s7_e2) (distinct s0_e9 s8_e2) (distinct s0_e9 s8_e11) (distinct s0_e9 s9_e2) (distinct s0_e9 s9_e9) (distinct s0_e9 s9_e19) (distinct s0_e15 s0_e28) (distinct s0_e15 s1_e2) (distinct s0_e15 s1_e30) (distinct s0_e15 s1_e31) (distinct s0_e15 s1_e37) (distinct s0_e15 s1_e45) (distinct s0_e15 s1_e51) (distinct s0_e15 s1_e53) (distinct s0_e15 s1_e54) (distinct s0_e15 s2_e2) (distinct s0_e15 s2_e9) (distinct s0_e15 s2_e15) (distinct s0_e15 s2_e22) (distinct s0_e15 s2_e27) (distinct s0_e15 s2_e33) (distinct s0_e15 s3_e2) (distinct s0_e15 s3_e19) (distinct s0_e15 s3_e27) (distinct s0_e15 s4_e2) (distinct s0_e15 s4_e14) (distinct s0_e15 s5_e2) (distinct s0_e15 s5_e13) (distinct s0_e15 s5_e16) (distinct s0_e15 s5_e18) (distinct s0_e15 s5_e24) (distinct s0_e15 s6_e2) (distinct s0_e15 s6_e18) (distinct s0_e15 s6_e26) (distinct s0_e15 s7_e2) (distinct s0_e15 s8_e2) (distinct s0_e15 s8_e11) (distinct s0_e15 s9_e2) (distinct s0_e15 s9_e9) (distinct s0_e15 s9_e19) (distinct s0_e28 s1_e2) (distinct s0_e28 s1_e30) (distinct s0_e28 s1_e31) (distinct s0_e28 s1_e37) (distinct s0_e28 s1_e45) (distinct s0_e28 s1_e51) (distinct s0_e28 s1_e53) (distinct s0_e28 s1_e54) (distinct s0_e28 s2_e2) (distinct s0_e28 s2_e9) (distinct s0_e28 s2_e15) (distinct s0_e28 s2_e22) (distinct s0_e28 s2_e27) (distinct s0_e28 s2_e33) (distinct s0_e28 s3_e2) (distinct s0_e28 s3_e19) (distinct s0_e28 s3_e27) (distinct s0_e28 s4_e2) (distinct s0_e28 s4_e14) (distinct s0_e28 s5_e2) (distinct s0_e28 s5_e13) (distinct s0_e28 s5_e16) (distinct s0_e28 s5_e18) (distinct s0_e28 s5_e24) (distinct s0_e28 s6_e2) (distinct s0_e28 s6_e18) (distinct s0_e28 s6_e26) (distinct s0_e28 s7_e2) (distinct s0_e28 s8_e2) (distinct s0_e28 s8_e11) (distinct s0_e28 s9_e2) (distinct s0_e28 s9_e9) (distinct s0_e28 s9_e19) (distinct s1_e2 s1_e30) (distinct s1_e2 s1_e31) (distinct s1_e2 s1_e37) (distinct s1_e2 s1_e45) (distinct s1_e2 s1_e51) (distinct s1_e2 s1_e53) (distinct s1_e2 s1_e54) (distinct s1_e2 s2_e2) (distinct s1_e2 s2_e9) (distinct s1_e2 s2_e15) (distinct s1_e2 s2_e22) (distinct s1_e2 s2_e27) (distinct s1_e2 s2_e33) (distinct s1_e2 s3_e2) (distinct s1_e2 s3_e19) (distinct s1_e2 s3_e27) (distinct s1_e2 s4_e2) (distinct s1_e2 s4_e14) (distinct s1_e2 s5_e2) (distinct s1_e2 s5_e13) (distinct s1_e2 s5_e16) (distinct s1_e2 s5_e18) (distinct s1_e2 s5_e24) (distinct s1_e2 s6_e2) (distinct s1_e2 s6_e18) (distinct s1_e2 s6_e26) (distinct s1_e2 s7_e2) (distinct s1_e2 s8_e2) (distinct s1_e2 s8_e11) (distinct s1_e2 s9_e2) (distinct s1_e2 s9_e9) (distinct s1_e2 s9_e19) (distinct s1_e30 s1_e31) (distinct s1_e30 s1_e37) (distinct s1_e30 s1_e45) (distinct s1_e30 s1_e51) (distinct s1_e30 s1_e53) (distinct s1_e30 s1_e54) (distinct s1_e30 s2_e2) (distinct s1_e30 s2_e9) (distinct s1_e30 s2_e15) (distinct s1_e30 s2_e22) (distinct s1_e30 s2_e27) (distinct s1_e30 s2_e33) (distinct s1_e30 s3_e2) (distinct s1_e30 s3_e19) (distinct s1_e30 s3_e27) (distinct s1_e30 s4_e2) (distinct s1_e30 s4_e14) (distinct s1_e30 s5_e2) (distinct s1_e30 s5_e13) (distinct s1_e30 s5_e16) (distinct s1_e30 s5_e18) (distinct s1_e30 s5_e24) (distinct s1_e30 s6_e2) (distinct s1_e30 s6_e18) (distinct s1_e30 s6_e26) (distinct s1_e30 s7_e2) (distinct s1_e30 s8_e2) (distinct s1_e30 s8_e11) (distinct s1_e30 s9_e2) (distinct s1_e30 s9_e9) (distinct s1_e30 s9_e19) (distinct s1_e31 s1_e37) (distinct s1_e31 s1_e45) (distinct s1_e31 s1_e51) (distinct s1_e31 s1_e53) (distinct s1_e31 s1_e54) (distinct s1_e31 s2_e2) (distinct s1_e31 s2_e9) (distinct s1_e31 s2_e15) (distinct s1_e31 s2_e22) (distinct s1_e31 s2_e27) (distinct s1_e31 s2_e33) (distinct s1_e31 s3_e2) (distinct s1_e31 s3_e19) (distinct s1_e31 s3_e27) (distinct s1_e31 s4_e2) (distinct s1_e31 s4_e14) (distinct s1_e31 s5_e2) (distinct s1_e31 s5_e13) (distinct s1_e31 s5_e16) (distinct s1_e31 s5_e18) (distinct s1_e31 s5_e24) (distinct s1_e31 s6_e2) (distinct s1_e31 s6_e18) (distinct s1_e31 s6_e26) (distinct s1_e31 s7_e2) (distinct s1_e31 s8_e2) (distinct s1_e31 s8_e11) (distinct s1_e31 s9_e2) (distinct s1_e31 s9_e9) (distinct s1_e31 s9_e19) (distinct s1_e37 s1_e45) (distinct s1_e37 s1_e51) (distinct s1_e37 s1_e53) (distinct s1_e37 s1_e54) (distinct s1_e37 s2_e2) (distinct s1_e37 s2_e9) (distinct s1_e37 s2_e15) (distinct s1_e37 s2_e22) (distinct s1_e37 s2_e27) (distinct s1_e37 s2_e33) (distinct s1_e37 s3_e2) (distinct s1_e37 s3_e19) (distinct s1_e37 s3_e27) (distinct s1_e37 s4_e2) (distinct s1_e37 s4_e14) (distinct s1_e37 s5_e2) (distinct s1_e37 s5_e13) (distinct s1_e37 s5_e16) (distinct s1_e37 s5_e18) (distinct s1_e37 s5_e24) (distinct s1_e37 s6_e2) (distinct s1_e37 s6_e18) (distinct s1_e37 s6_e26) (distinct s1_e37 s7_e2) (distinct s1_e37 s8_e2) (distinct s1_e37 s8_e11) (distinct s1_e37 s9_e2) (distinct s1_e37 s9_e9) (distinct s1_e37 s9_e19) (distinct s1_e45 s1_e51) (distinct s1_e45 s1_e53) (distinct s1_e45 s1_e54) (distinct s1_e45 s2_e2) (distinct s1_e45 s2_e9) (distinct s1_e45 s2_e15) (distinct s1_e45 s2_e22) (distinct s1_e45 s2_e27) (distinct s1_e45 s2_e33) (distinct s1_e45 s3_e2) (distinct s1_e45 s3_e19) (distinct s1_e45 s3_e27) (distinct s1_e45 s4_e2) (distinct s1_e45 s4_e14) (distinct s1_e45 s5_e2) (distinct s1_e45 s5_e13) (distinct s1_e45 s5_e16) (distinct s1_e45 s5_e18) (distinct s1_e45 s5_e24) (distinct s1_e45 s6_e2) (distinct s1_e45 s6_e18) (distinct s1_e45 s6_e26) (distinct s1_e45 s7_e2) (distinct s1_e45 s8_e2) (distinct s1_e45 s8_e11) (distinct s1_e45 s9_e2) (distinct s1_e45 s9_e9) (distinct s1_e45 s9_e19) (distinct s1_e51 s1_e53) (distinct s1_e51 s1_e54) (distinct s1_e51 s2_e2) (distinct s1_e51 s2_e9) (distinct s1_e51 s2_e15) (distinct s1_e51 s2_e22) (distinct s1_e51 s2_e27) (distinct s1_e51 s2_e33) (distinct s1_e51 s3_e2) (distinct s1_e51 s3_e19) (distinct s1_e51 s3_e27) (distinct s1_e51 s4_e2) (distinct s1_e51 s4_e14) (distinct s1_e51 s5_e2) (distinct s1_e51 s5_e13) (distinct s1_e51 s5_e16) (distinct s1_e51 s5_e18) (distinct s1_e51 s5_e24) (distinct s1_e51 s6_e2) (distinct s1_e51 s6_e18) (distinct s1_e51 s6_e26) (distinct s1_e51 s7_e2) (distinct s1_e51 s8_e2) (distinct s1_e51 s8_e11) (distinct s1_e51 s9_e2) (distinct s1_e51 s9_e9) (distinct s1_e51 s9_e19) (distinct s1_e53 s1_e54) (distinct s1_e53 s2_e2) (distinct s1_e53 s2_e9) (distinct s1_e53 s2_e15) (distinct s1_e53 s2_e22) (distinct s1_e53 s2_e27) (distinct s1_e53 s2_e33) (distinct s1_e53 s3_e2) (distinct s1_e53 s3_e19) (distinct s1_e53 s3_e27) (distinct s1_e53 s4_e2) (distinct s1_e53 s4_e14) (distinct s1_e53 s5_e2) (distinct s1_e53 s5_e13) (distinct s1_e53 s5_e16) (distinct s1_e53 s5_e18) (distinct s1_e53 s5_e24) (distinct s1_e53 s6_e2) (distinct s1_e53 s6_e18) (distinct s1_e53 s6_e26) (distinct s1_e53 s7_e2) (distinct s1_e53 s8_e2) (distinct s1_e53 s8_e11) (distinct s1_e53 s9_e2) (distinct s1_e53 s9_e9) (distinct s1_e53 s9_e19) (distinct s1_e54 s2_e2) (distinct s1_e54 s2_e9) (distinct s1_e54 s2_e15) (distinct s1_e54 s2_e22) (distinct s1_e54 s2_e27) (distinct s1_e54 s2_e33) (distinct s1_e54 s3_e2) (distinct s1_e54 s3_e19) (distinct s1_e54 s3_e27) (distinct s1_e54 s4_e2) (distinct s1_e54 s4_e14) (distinct s1_e54 s5_e2) (distinct s1_e54 s5_e13) (distinct s1_e54 s5_e16) (distinct s1_e54 s5_e18) (distinct s1_e54 s5_e24) (distinct s1_e54 s6_e2) (distinct s1_e54 s6_e18) (distinct s1_e54 s6_e26) (distinct s1_e54 s7_e2) (distinct s1_e54 s8_e2) (distinct s1_e54 s8_e11) (distinct s1_e54 s9_e2) (distinct s1_e54 s9_e9) (distinct s1_e54 s9_e19) (distinct s2_e2 s2_e9) (distinct s2_e2 s2_e15) (distinct s2_e2 s2_e22) (distinct s2_e2 s2_e27) (distinct s2_e2 s2_e33) (distinct s2_e2 s3_e2) (distinct s2_e2 s3_e19) (distinct s2_e2 s3_e27) (distinct s2_e2 s4_e2) (distinct s2_e2 s4_e14) (distinct s2_e2 s5_e2) (distinct s2_e2 s5_e13) (distinct s2_e2 s5_e16) (distinct s2_e2 s5_e18) (distinct s2_e2 s5_e24) (distinct s2_e2 s6_e2) (distinct s2_e2 s6_e18) (distinct s2_e2 s6_e26) (distinct s2_e2 s7_e2) (distinct s2_e2 s8_e2) (distinct s2_e2 s8_e11) (distinct s2_e2 s9_e2) (distinct s2_e2 s9_e9) (distinct s2_e2 s9_e19) (distinct s2_e9 s2_e15) (distinct s2_e9 s2_e22) (distinct s2_e9 s2_e27) (distinct s2_e9 s2_e33) (distinct s2_e9 s3_e2) (distinct s2_e9 s3_e19) (distinct s2_e9 s3_e27) (distinct s2_e9 s4_e2) (distinct s2_e9 s4_e14) (distinct s2_e9 s5_e2) (distinct s2_e9 s5_e13) (distinct s2_e9 s5_e16) (distinct s2_e9 s5_e18) (distinct s2_e9 s5_e24) (distinct s2_e9 s6_e2) (distinct s2_e9 s6_e18) (distinct s2_e9 s6_e26) (distinct s2_e9 s7_e2) (distinct s2_e9 s8_e2) (distinct s2_e9 s8_e11) (distinct s2_e9 s9_e2) (distinct s2_e9 s9_e9) (distinct s2_e9 s9_e19) (distinct s2_e15 s2_e22) (distinct s2_e15 s2_e27) (distinct s2_e15 s2_e33) (distinct s2_e15 s3_e2) (distinct s2_e15 s3_e19) (distinct s2_e15 s3_e27) (distinct s2_e15 s4_e2) (distinct s2_e15 s4_e14) (distinct s2_e15 s5_e2) (distinct s2_e15 s5_e13) (distinct s2_e15 s5_e16) (distinct s2_e15 s5_e18) (distinct s2_e15 s5_e24) (distinct s2_e15 s6_e2) (distinct s2_e15 s6_e18) (distinct s2_e15 s6_e26) (distinct s2_e15 s7_e2) (distinct s2_e15 s8_e2) (distinct s2_e15 s8_e11) (distinct s2_e15 s9_e2) (distinct s2_e15 s9_e9) (distinct s2_e15 s9_e19) (distinct s2_e22 s2_e27) (distinct s2_e22 s2_e33) (distinct s2_e22 s3_e2) (distinct s2_e22 s3_e19) (distinct s2_e22 s3_e27) (distinct s2_e22 s4_e2) (distinct s2_e22 s4_e14) (distinct s2_e22 s5_e2) (distinct s2_e22 s5_e13) (distinct s2_e22 s5_e16) (distinct s2_e22 s5_e18) (distinct s2_e22 s5_e24) (distinct s2_e22 s6_e2) (distinct s2_e22 s6_e18) (distinct s2_e22 s6_e26) (distinct s2_e22 s7_e2) (distinct s2_e22 s8_e2) (distinct s2_e22 s8_e11) (distinct s2_e22 s9_e2) (distinct s2_e22 s9_e9) (distinct s2_e22 s9_e19) (distinct s2_e27 s2_e33) (distinct s2_e27 s3_e2) (distinct s2_e27 s3_e19) (distinct s2_e27 s3_e27) (distinct s2_e27 s4_e2) (distinct s2_e27 s4_e14) (distinct s2_e27 s5_e2) (distinct s2_e27 s5_e13) (distinct s2_e27 s5_e16) (distinct s2_e27 s5_e18) (distinct s2_e27 s5_e24) (distinct s2_e27 s6_e2) (distinct s2_e27 s6_e18) (distinct s2_e27 s6_e26) (distinct s2_e27 s7_e2) (distinct s2_e27 s8_e2) (distinct s2_e27 s8_e11) (distinct s2_e27 s9_e2) (distinct s2_e27 s9_e9) (distinct s2_e27 s9_e19) (distinct s2_e33 s3_e2) (distinct s2_e33 s3_e19) (distinct s2_e33 s3_e27) (distinct s2_e33 s4_e2) (distinct s2_e33 s4_e14) (distinct s2_e33 s5_e2) (distinct s2_e33 s5_e13) (distinct s2_e33 s5_e16) (distinct s2_e33 s5_e18) (distinct s2_e33 s5_e24) (distinct s2_e33 s6_e2) (distinct s2_e33 s6_e18) (distinct s2_e33 s6_e26) (distinct s2_e33 s7_e2) (distinct s2_e33 s8_e2) (distinct s2_e33 s8_e11) (distinct s2_e33 s9_e2) (distinct s2_e33 s9_e9) (distinct s2_e33 s9_e19) (distinct s3_e2 s3_e19) (distinct s3_e2 s3_e27) (distinct s3_e2 s4_e2) (distinct s3_e2 s4_e14) (distinct s3_e2 s5_e2) (distinct s3_e2 s5_e13) (distinct s3_e2 s5_e16) (distinct s3_e2 s5_e18) (distinct s3_e2 s5_e24) (distinct s3_e2 s6_e2) (distinct s3_e2 s6_e18) (distinct s3_e2 s6_e26) (distinct s3_e2 s7_e2) (distinct s3_e2 s8_e2) (distinct s3_e2 s8_e11) (distinct s3_e2 s9_e2) (distinct s3_e2 s9_e9) (distinct s3_e2 s9_e19) (distinct s3_e19 s3_e27) (distinct s3_e19 s4_e2) (distinct s3_e19 s4_e14) (distinct s3_e19 s5_e2) (distinct s3_e19 s5_e13) (distinct s3_e19 s5_e16) (distinct s3_e19 s5_e18) (distinct s3_e19 s5_e24) (distinct s3_e19 s6_e2) (distinct s3_e19 s6_e18) (distinct s3_e19 s6_e26) (distinct s3_e19 s7_e2) (distinct s3_e19 s8_e2) (distinct s3_e19 s8_e11) (distinct s3_e19 s9_e2) (distinct s3_e19 s9_e9) (distinct s3_e19 s9_e19) (distinct s3_e27 s4_e2) (distinct s3_e27 s4_e14) (distinct s3_e27 s5_e2) (distinct s3_e27 s5_e13) (distinct s3_e27 s5_e16) (distinct s3_e27 s5_e18) (distinct s3_e27 s5_e24) (distinct s3_e27 s6_e2) (distinct s3_e27 s6_e18) (distinct s3_e27 s6_e26) (distinct s3_e27 s7_e2) (distinct s3_e27 s8_e2) (distinct s3_e27 s8_e11) (distinct s3_e27 s9_e2) (distinct s3_e27 s9_e9) (distinct s3_e27 s9_e19) (distinct s4_e2 s4_e14) (distinct s4_e2 s5_e2) (distinct s4_e2 s5_e13) (distinct s4_e2 s5_e16) (distinct s4_e2 s5_e18) (distinct s4_e2 s5_e24) (distinct s4_e2 s6_e2) (distinct s4_e2 s6_e18) (distinct s4_e2 s6_e26) (distinct s4_e2 s7_e2) (distinct s4_e2 s8_e2) (distinct s4_e2 s8_e11) (distinct s4_e2 s9_e2) (distinct s4_e2 s9_e9) (distinct s4_e2 s9_e19) (distinct s4_e14 s5_e2) (distinct s4_e14 s5_e13) (distinct s4_e14 s5_e16) (distinct s4_e14 s5_e18) (distinct s4_e14 s5_e24) (distinct s4_e14 s6_e2) (distinct s4_e14 s6_e18) (distinct s4_e14 s6_e26) (distinct s4_e14 s7_e2) (distinct s4_e14 s8_e2) (distinct s4_e14 s8_e11) (distinct s4_e14 s9_e2) (distinct s4_e14 s9_e9) (distinct s4_e14 s9_e19) (distinct s5_e2 s5_e13) (distinct s5_e2 s5_e16) (distinct s5_e2 s5_e18) (distinct s5_e2 s5_e24) (distinct s5_e2 s6_e2) (distinct s5_e2 s6_e18) (distinct s5_e2 s6_e26) (distinct s5_e2 s7_e2) (distinct s5_e2 s8_e2) (distinct s5_e2 s8_e11) (distinct s5_e2 s9_e2) (distinct s5_e2 s9_e9) (distinct s5_e2 s9_e19) (distinct s5_e13 s5_e16) (distinct s5_e13 s5_e18) (distinct s5_e13 s5_e24) (distinct s5_e13 s6_e2) (distinct s5_e13 s6_e18) (distinct s5_e13 s6_e26) (distinct s5_e13 s7_e2) (distinct s5_e13 s8_e2) (distinct s5_e13 s8_e11) (distinct s5_e13 s9_e2) (distinct s5_e13 s9_e9) (distinct s5_e13 s9_e19) (distinct s5_e16 s5_e18) (distinct s5_e16 s5_e24) (distinct s5_e16 s6_e2) (distinct s5_e16 s6_e18) (distinct s5_e16 s6_e26) (distinct s5_e16 s7_e2) (distinct s5_e16 s8_e2) (distinct s5_e16 s8_e11) (distinct s5_e16 s9_e2) (distinct s5_e16 s9_e9) (distinct s5_e16 s9_e19) (distinct s5_e18 s5_e24) (distinct s5_e18 s6_e2) (distinct s5_e18 s6_e18) (distinct s5_e18 s6_e26) (distinct s5_e18 s7_e2) (distinct s5_e18 s8_e2) (distinct s5_e18 s8_e11) (distinct s5_e18 s9_e2) (distinct s5_e18 s9_e9) (distinct s5_e18 s9_e19) (distinct s5_e24 s6_e2) (distinct s5_e24 s6_e18) (distinct s5_e24 s6_e26) (distinct s5_e24 s7_e2) (distinct s5_e24 s8_e2) (distinct s5_e24 s8_e11) (distinct s5_e24 s9_e2) (distinct s5_e24 s9_e9) (distinct s5_e24 s9_e19) (distinct s6_e2 s6_e18) (distinct s6_e2 s6_e26) (distinct s6_e2 s7_e2) (distinct s6_e2 s8_e2) (distinct s6_e2 s8_e11) (distinct s6_e2 s9_e2) (distinct s6_e2 s9_e9) (distinct s6_e2 s9_e19) (distinct s6_e18 s6_e26) (distinct s6_e18 s7_e2) (distinct s6_e18 s8_e2) (distinct s6_e18 s8_e11) (distinct s6_e18 s9_e2) (distinct s6_e18 s9_e9) (distinct s6_e18 s9_e19) (distinct s6_e26 s7_e2) (distinct s6_e26 s8_e2) (distinct s6_e26 s8_e11) (distinct s6_e26 s9_e2) (distinct s6_e26 s9_e9) (distinct s6_e26 s9_e19) (distinct s7_e2 s8_e2) (distinct s7_e2 s8_e11) (distinct s7_e2 s9_e2) (distinct s7_e2 s9_e9) (distinct s7_e2 s9_e19) (distinct s8_e2 s8_e11) (distinct s8_e2 s9_e2) (distinct s8_e2 s9_e9) (distinct s8_e2 s9_e19) (distinct s8_e11 s9_e2) (distinct s8_e11 s9_e9) (distinct s8_e11 s9_e19) (distinct s9_e2 s9_e9) (distinct s9_e2 s9_e19) (distinct s9_e9 s9_e19)))
+
