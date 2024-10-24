@@ -1,50 +1,24 @@
-
-% Type declarations
-individual(?X) :- person(?X).
+% Library predicates
+% Base type definitions
 event(?E) :- event_value(?E, _).
-name(?N) :- atom(?N).
+individual(?X) :- person(?X).
+individual(?X) :- place(?X).
+individual(?X) :- other_object(?X).
 
-% Individual declarations
-person('Mansion').
-person('Dreadbury').
-person('Charles').
-person('Aunt').
-person('Agatha').
+% Quantifier rules
+a_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+every_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), \+ apply(?Body, ?X)).
+some_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+the_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X), \+ (apply(?Restr, ?Y), ?Y \= ?X).
+proper_q(?Restr, ?Body) :- apply(?Restr, ?X), \+ (apply(?Restr, ?Y), \+ apply(?Body, ?Y)).
+no_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), apply(?Body, ?X)).
+
+% Domain predicates
+person(?X) :- (butler_n_1(?X); named(?X,'Agatha'); named(?X,'Charles')), \+ place(?X), \+ other_object(?X).
+same_named(?X, ?Y) :- named(?X, ?N), named(?Y, ?N).
+different_named(?X, ?Y) :- named(?X, ?N1), named(?Y, ?N2), ?N1 \= ?N2.
 
 % Event declarations
-event_value(event_9_2, 2).
-event_value(event_9_9, 9).
-event_value(event_9_19, 19).
-event_value(event_8_2, 2).
-event_value(event_8_11, 11).
-event_value(event_7_2, 2).
-event_value(event_6_2, 2).
-event_value(event_6_18, 18).
-event_value(event_6_26, 26).
-event_value(event_5_2, 2).
-event_value(event_5_13, 13).
-event_value(event_5_16, 16).
-event_value(event_5_18, 18).
-event_value(event_5_24, 24).
-event_value(event_4_2, 2).
-event_value(event_4_14, 14).
-event_value(event_3_2, 2).
-event_value(event_3_19, 19).
-event_value(event_3_27, 27).
-event_value(event_2_9, 9).
-event_value(event_2_15, 15).
-event_value(event_2_22, 22).
-event_value(event_2_2, 2).
-event_value(event_2_27, 27).
-event_value(event_2_33, 33).
-event_value(event_1_30, 30).
-event_value(event_1_31, 31).
-event_value(event_1_37, 37).
-event_value(event_1_45, 45).
-event_value(event_1_2, 2).
-event_value(event_1_51, 51).
-event_value(event_1_53, 53).
-event_value(event_1_54, 54).
 event_value(event_0_8, 8).
 event_value(event_0_9, 9).
 event_value(event_0_15, 15).
@@ -52,51 +26,6 @@ event_value(event_0_2, 2).
 event_value(event_0_28, 28).
 
 % Knowledge base
-% Library predicates
-a_q(?Restr, ?Body) :- true.
-every_q(?Restr, ?Body) :- true.
-some_q(?Restr, ?Body) :- true.
-the_q(?Restr, ?Body) :- true.
-proper_q(?Restr, ?Body) :- true.
-pronoun_q(?Restr, ?Body) :- true.
-udef_q(?Restr, ?Body) :- true.
-def_explicit_q(?Restr, ?Body) :- true.
-no_q(?Restr, ?Body) :- true.
-never_a_1(?X) :- true.
-neg(?E, ?X) :- true.
-colon_p_namely(?E, ?X, ?Y) :- true.
-therein_p_dir(?E1, ?E2) :- true.
-live_v_1(?E, ?X) :- true.
-people_n_of(?X) :- true.
-victim_n_of(?X) :- true.
-only_a_1(?E, ?X) :- true.
-named(?X, ?Name) :- true.
-and_c(?X, ?Y, ?Z) :- true.
-butler_n_1(?X) :- true.
-killer_n_1(?X) :- true.
-implicit_conj(?X, ?Y, ?Z) :- true.
-be_v_id(?E, ?X, ?Y) :- true.
-in_p_loc(?E, ?E2, ?X) :- true.
-compound(?E, ?X, ?Y) :- true.
-person(?X) :- true.
-kill_v_1(?E, ?X, ?Y) :- true.
-hate_v_1(?E, ?X, ?Y) :- true.
-pron(?X) :- true.
-poss(?E, ?X, ?Y) :- true.
-
-% Event declarations and distinctness
-event(event_0_8).
-event(event_0_9).
-event(event_0_15).
-event(event_0_2).
-event(event_0_28).
-event_value(event_0_8, 8).
-event_value(event_0_9, 9).
-event_value(event_0_15, 15).
-event_value(event_0_2, 2).
-event_value(event_0_28, 28).
-
-% Facts
 named(?S0_X29, 'Aunt').
 
 proper_q(?S0_X29, ?S0_H33, ?S0_H11).
@@ -125,46 +54,26 @@ kill_v_1(?S0_E2, ?S0_X3, ?S0_X23).
 
 
 % Library predicates
-a_q(?Restr, ?Body) :- true.
-every_q(?Restr, ?Body) :- true.
-some_q(?Restr, ?Body) :- true.
-the_q(?Restr, ?Body) :- true.
-proper_q(?Restr, ?Body) :- true.
-pronoun_q(?Restr, ?Body) :- true.
-udef_q(?Restr, ?Body) :- true.
-def_explicit_q(?Restr, ?Body) :- true.
-no_q(?Restr, ?Body) :- true.
-never_a_1(?X) :- true.
-neg(?E, ?X) :- true.
-colon_p_namely(?E, ?X, ?Y) :- true.
-therein_p_dir(?E1, ?E2) :- true.
-live_v_1(?E, ?X) :- true.
-people_n_of(?X) :- true.
-victim_n_of(?X) :- true.
-only_a_1(?E, ?X) :- true.
-named(?X, ?Name) :- true.
-and_c(?X, ?Y, ?Z) :- true.
-butler_n_1(?X) :- true.
-killer_n_1(?X) :- true.
-implicit_conj(?X, ?Y, ?Z) :- true.
-be_v_id(?E, ?X, ?Y) :- true.
-in_p_loc(?E, ?E2, ?X) :- true.
-compound(?E, ?X, ?Y) :- true.
-person(?X) :- true.
-kill_v_1(?E, ?X, ?Y) :- true.
-hate_v_1(?E, ?X, ?Y) :- true.
-pron(?X) :- true.
-poss(?E, ?X, ?Y) :- true.
+% Base type definitions
+event(?E) :- event_value(?E, _).
+individual(?X) :- person(?X).
+individual(?X) :- place(?X).
+individual(?X) :- other_object(?X).
 
-% Event declarations and distinctness
-event(event_1_30).
-event(event_1_31).
-event(event_1_37).
-event(event_1_45).
-event(event_1_2).
-event(event_1_51).
-event(event_1_53).
-event(event_1_54).
+% Quantifier rules
+a_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+every_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), \+ apply(?Body, ?X)).
+some_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+the_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X), \+ (apply(?Restr, ?Y), ?Y \= ?X).
+proper_q(?Restr, ?Body) :- apply(?Restr, ?X), \+ (apply(?Restr, ?Y), \+ apply(?Body, ?Y)).
+no_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), apply(?Body, ?X)).
+
+% Domain predicates
+person(?X) :- (butler_n_1(?X); named(?X,'Agatha'); named(?X,'Charles')), \+ place(?X), \+ other_object(?X).
+same_named(?X, ?Y) :- named(?X, ?N), named(?Y, ?N).
+different_named(?X, ?Y) :- named(?X, ?N1), named(?Y, ?N2), ?N1 \= ?N2.
+
+% Event declarations
 event_value(event_1_30, 30).
 event_value(event_1_31, 31).
 event_value(event_1_37, 37).
@@ -174,7 +83,7 @@ event_value(event_1_51, 51).
 event_value(event_1_53, 53).
 event_value(event_1_54, 54).
 
-% Facts
+% Knowledge base
 therein_p_dir(?S1_E54, ?S1_E53).
 live_v_1(?S1_E53, ?S1_X46).
 people_n_of(?S1_X46, ?S1_I52).
@@ -218,44 +127,26 @@ live_v_1(?S1_E30, ?S1_X3).
 
 
 % Library predicates
-a_q(?Restr, ?Body) :- true.
-every_q(?Restr, ?Body) :- true.
-some_q(?Restr, ?Body) :- true.
-the_q(?Restr, ?Body) :- true.
-proper_q(?Restr, ?Body) :- true.
-pronoun_q(?Restr, ?Body) :- true.
-udef_q(?Restr, ?Body) :- true.
-def_explicit_q(?Restr, ?Body) :- true.
-no_q(?Restr, ?Body) :- true.
-never_a_1(?X) :- true.
-neg(?E, ?X) :- true.
-colon_p_namely(?E, ?X, ?Y) :- true.
-therein_p_dir(?E1, ?E2) :- true.
-live_v_1(?E, ?X) :- true.
-people_n_of(?X) :- true.
-victim_n_of(?X) :- true.
-only_a_1(?E, ?X) :- true.
-named(?X, ?Name) :- true.
-and_c(?X, ?Y, ?Z) :- true.
-butler_n_1(?X) :- true.
-killer_n_1(?X) :- true.
-implicit_conj(?X, ?Y, ?Z) :- true.
-be_v_id(?E, ?X, ?Y) :- true.
-in_p_loc(?E, ?E2, ?X) :- true.
-compound(?E, ?X, ?Y) :- true.
-person(?X) :- true.
-kill_v_1(?E, ?X, ?Y) :- true.
-hate_v_1(?E, ?X, ?Y) :- true.
-pron(?X) :- true.
-poss(?E, ?X, ?Y) :- true.
+% Base type definitions
+event(?E) :- event_value(?E, _).
+individual(?X) :- person(?X).
+individual(?X) :- place(?X).
+individual(?X) :- other_object(?X).
 
-% Event declarations and distinctness
-event(event_2_9).
-event(event_2_15).
-event(event_2_22).
-event(event_2_2).
-event(event_2_27).
-event(event_2_33).
+% Quantifier rules
+a_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+every_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), \+ apply(?Body, ?X)).
+some_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+the_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X), \+ (apply(?Restr, ?Y), ?Y \= ?X).
+proper_q(?Restr, ?Body) :- apply(?Restr, ?X), \+ (apply(?Restr, ?Y), \+ apply(?Body, ?Y)).
+no_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), apply(?Body, ?X)).
+
+% Domain predicates
+person(?X) :- (butler_n_1(?X); named(?X,'Agatha'); named(?X,'Charles')), \+ place(?X), \+ other_object(?X).
+same_named(?X, ?Y) :- named(?X, ?N), named(?Y, ?N).
+different_named(?X, ?Y) :- named(?X, ?N1), named(?Y, ?N2), ?N1 \= ?N2.
+
+% Event declarations
 event_value(event_2_9, 9).
 event_value(event_2_15, 15).
 event_value(event_2_22, 22).
@@ -263,7 +154,7 @@ event_value(event_2_2, 2).
 event_value(event_2_27, 27).
 event_value(event_2_33, 33).
 
-% Facts
+% Knowledge base
 pron(?S2_X34).
 
 pronoun_q(?S2_X34, ?S2_H38, ?S2_H4).
@@ -296,46 +187,31 @@ always_a_1(?S2_I8, ?S2_E9).
 
 
 % Library predicates
-a_q(?Restr, ?Body) :- true.
-every_q(?Restr, ?Body) :- true.
-some_q(?Restr, ?Body) :- true.
-the_q(?Restr, ?Body) :- true.
-proper_q(?Restr, ?Body) :- true.
-pronoun_q(?Restr, ?Body) :- true.
-udef_q(?Restr, ?Body) :- true.
-def_explicit_q(?Restr, ?Body) :- true.
-no_q(?Restr, ?Body) :- true.
-never_a_1(?X) :- true.
-neg(?E, ?X) :- true.
-colon_p_namely(?E, ?X, ?Y) :- true.
-therein_p_dir(?E1, ?E2) :- true.
-live_v_1(?E, ?X) :- true.
-people_n_of(?X) :- true.
-victim_n_of(?X) :- true.
-only_a_1(?E, ?X) :- true.
-named(?X, ?Name) :- true.
-and_c(?X, ?Y, ?Z) :- true.
-butler_n_1(?X) :- true.
-killer_n_1(?X) :- true.
-implicit_conj(?X, ?Y, ?Z) :- true.
-be_v_id(?E, ?X, ?Y) :- true.
-in_p_loc(?E, ?E2, ?X) :- true.
-compound(?E, ?X, ?Y) :- true.
-person(?X) :- true.
-kill_v_1(?E, ?X, ?Y) :- true.
-hate_v_1(?E, ?X, ?Y) :- true.
-pron(?X) :- true.
-poss(?E, ?X, ?Y) :- true.
+% Base type definitions
+event(?E) :- event_value(?E, _).
+individual(?X) :- person(?X).
+individual(?X) :- place(?X).
+individual(?X) :- other_object(?X).
 
-% Event declarations and distinctness
-event(event_3_2).
-event(event_3_19).
-event(event_3_27).
+% Quantifier rules
+a_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+every_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), \+ apply(?Body, ?X)).
+some_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+the_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X), \+ (apply(?Restr, ?Y), ?Y \= ?X).
+proper_q(?Restr, ?Body) :- apply(?Restr, ?X), \+ (apply(?Restr, ?Y), \+ apply(?Body, ?Y)).
+no_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), apply(?Body, ?X)).
+
+% Domain predicates
+person(?X) :- (butler_n_1(?X); named(?X,'Agatha'); named(?X,'Charles')), \+ place(?X), \+ other_object(?X).
+same_named(?X, ?Y) :- named(?X, ?N), named(?Y, ?N).
+different_named(?X, ?Y) :- named(?X, ?N1), named(?Y, ?N2), ?N1 \= ?N2.
+
+% Event declarations
 event_value(event_3_2, 2).
 event_value(event_3_19, 19).
 event_value(event_3_27, 27).
 
-% Facts
+% Knowledge base
 aunt_n_of(?S3_X20, ?S3_I25).
 
 udef_q(?S3_X20, ?S3_H24, ?S3_H11).
@@ -358,44 +234,30 @@ hate_v_1(?S3_E2, ?S3_X3, ?S3_X9).
 
 
 % Library predicates
-a_q(?Restr, ?Body) :- true.
-every_q(?Restr, ?Body) :- true.
-some_q(?Restr, ?Body) :- true.
-the_q(?Restr, ?Body) :- true.
-proper_q(?Restr, ?Body) :- true.
-pronoun_q(?Restr, ?Body) :- true.
-udef_q(?Restr, ?Body) :- true.
-def_explicit_q(?Restr, ?Body) :- true.
-no_q(?Restr, ?Body) :- true.
-never_a_1(?X) :- true.
-neg(?E, ?X) :- true.
-colon_p_namely(?E, ?X, ?Y) :- true.
-therein_p_dir(?E1, ?E2) :- true.
-live_v_1(?E, ?X) :- true.
-people_n_of(?X) :- true.
-victim_n_of(?X) :- true.
-only_a_1(?E, ?X) :- true.
-named(?X, ?Name) :- true.
-and_c(?X, ?Y, ?Z) :- true.
-butler_n_1(?X) :- true.
-killer_n_1(?X) :- true.
-implicit_conj(?X, ?Y, ?Z) :- true.
-be_v_id(?E, ?X, ?Y) :- true.
-in_p_loc(?E, ?E2, ?X) :- true.
-compound(?E, ?X, ?Y) :- true.
-person(?X) :- true.
-kill_v_1(?E, ?X, ?Y) :- true.
-hate_v_1(?E, ?X, ?Y) :- true.
-pron(?X) :- true.
-poss(?E, ?X, ?Y) :- true.
+% Base type definitions
+event(?E) :- event_value(?E, _).
+individual(?X) :- person(?X).
+individual(?X) :- place(?X).
+individual(?X) :- other_object(?X).
 
-% Event declarations and distinctness
-event(event_4_2).
-event(event_4_14).
+% Quantifier rules
+a_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+every_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), \+ apply(?Body, ?X)).
+some_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+the_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X), \+ (apply(?Restr, ?Y), ?Y \= ?X).
+proper_q(?Restr, ?Body) :- apply(?Restr, ?X), \+ (apply(?Restr, ?Y), \+ apply(?Body, ?Y)).
+no_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), apply(?Body, ?X)).
+
+% Domain predicates
+person(?X) :- (butler_n_1(?X); named(?X,'Agatha'); named(?X,'Charles')), \+ place(?X), \+ other_object(?X).
+same_named(?X, ?Y) :- named(?X, ?N), named(?Y, ?N).
+different_named(?X, ?Y) :- named(?X, ?N1), named(?Y, ?N2), ?N1 \= ?N2.
+
+% Event declarations
 event_value(event_4_2, 2).
 event_value(event_4_14, 14).
 
-% Facts
+% Knowledge base
 butler_n_1(?S4_X15).
 
 the_q(?S4_X15, ?S4_H19, ?S4_H10).
@@ -413,50 +275,33 @@ hate_v_1(?S4_E2, ?S4_X3, ?S4_X9).
 
 
 % Library predicates
-a_q(?Restr, ?Body) :- true.
-every_q(?Restr, ?Body) :- true.
-some_q(?Restr, ?Body) :- true.
-the_q(?Restr, ?Body) :- true.
-proper_q(?Restr, ?Body) :- true.
-pronoun_q(?Restr, ?Body) :- true.
-udef_q(?Restr, ?Body) :- true.
-def_explicit_q(?Restr, ?Body) :- true.
-no_q(?Restr, ?Body) :- true.
-never_a_1(?X) :- true.
-neg(?E, ?X) :- true.
-colon_p_namely(?E, ?X, ?Y) :- true.
-therein_p_dir(?E1, ?E2) :- true.
-live_v_1(?E, ?X) :- true.
-people_n_of(?X) :- true.
-victim_n_of(?X) :- true.
-only_a_1(?E, ?X) :- true.
-named(?X, ?Name) :- true.
-and_c(?X, ?Y, ?Z) :- true.
-butler_n_1(?X) :- true.
-killer_n_1(?X) :- true.
-implicit_conj(?X, ?Y, ?Z) :- true.
-be_v_id(?E, ?X, ?Y) :- true.
-in_p_loc(?E, ?E2, ?X) :- true.
-compound(?E, ?X, ?Y) :- true.
-person(?X) :- true.
-kill_v_1(?E, ?X, ?Y) :- true.
-hate_v_1(?E, ?X, ?Y) :- true.
-pron(?X) :- true.
-poss(?E, ?X, ?Y) :- true.
+% Base type definitions
+event(?E) :- event_value(?E, _).
+individual(?X) :- person(?X).
+individual(?X) :- place(?X).
+individual(?X) :- other_object(?X).
 
-% Event declarations and distinctness
-event(event_5_2).
-event(event_5_13).
-event(event_5_16).
-event(event_5_18).
-event(event_5_24).
+% Quantifier rules
+a_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+every_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), \+ apply(?Body, ?X)).
+some_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+the_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X), \+ (apply(?Restr, ?Y), ?Y \= ?X).
+proper_q(?Restr, ?Body) :- apply(?Restr, ?X), \+ (apply(?Restr, ?Y), \+ apply(?Body, ?Y)).
+no_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), apply(?Body, ?X)).
+
+% Domain predicates
+person(?X) :- (butler_n_1(?X); named(?X,'Agatha'); named(?X,'Charles')), \+ place(?X), \+ other_object(?X).
+same_named(?X, ?Y) :- named(?X, ?N), named(?Y, ?N).
+different_named(?X, ?Y) :- named(?X, ?N1), named(?Y, ?N2), ?N1 \= ?N2.
+
+% Event declarations
 event_value(event_5_2, 2).
 event_value(event_5_13, 13).
 event_value(event_5_16, 16).
 event_value(event_5_18, 18).
 event_value(event_5_24, 24).
 
-% Facts
+% Knowledge base
 named(?S5_X25, 'Aunt').
 
 proper_q(?S5_X25, ?S5_H29, ?S5_H23).
@@ -482,46 +327,31 @@ hate_v_1(?S5_E2, ?S5_X3, ?S5_X8).
 
 
 % Library predicates
-a_q(?Restr, ?Body) :- true.
-every_q(?Restr, ?Body) :- true.
-some_q(?Restr, ?Body) :- true.
-the_q(?Restr, ?Body) :- true.
-proper_q(?Restr, ?Body) :- true.
-pronoun_q(?Restr, ?Body) :- true.
-udef_q(?Restr, ?Body) :- true.
-def_explicit_q(?Restr, ?Body) :- true.
-no_q(?Restr, ?Body) :- true.
-never_a_1(?X) :- true.
-neg(?E, ?X) :- true.
-colon_p_namely(?E, ?X, ?Y) :- true.
-therein_p_dir(?E1, ?E2) :- true.
-live_v_1(?E, ?X) :- true.
-people_n_of(?X) :- true.
-victim_n_of(?X) :- true.
-only_a_1(?E, ?X) :- true.
-named(?X, ?Name) :- true.
-and_c(?X, ?Y, ?Z) :- true.
-butler_n_1(?X) :- true.
-killer_n_1(?X) :- true.
-implicit_conj(?X, ?Y, ?Z) :- true.
-be_v_id(?E, ?X, ?Y) :- true.
-in_p_loc(?E, ?E2, ?X) :- true.
-compound(?E, ?X, ?Y) :- true.
-person(?X) :- true.
-kill_v_1(?E, ?X, ?Y) :- true.
-hate_v_1(?E, ?X, ?Y) :- true.
-pron(?X) :- true.
-poss(?E, ?X, ?Y) :- true.
+% Base type definitions
+event(?E) :- event_value(?E, _).
+individual(?X) :- person(?X).
+individual(?X) :- place(?X).
+individual(?X) :- other_object(?X).
 
-% Event declarations and distinctness
-event(event_6_2).
-event(event_6_18).
-event(event_6_26).
+% Quantifier rules
+a_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+every_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), \+ apply(?Body, ?X)).
+some_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+the_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X), \+ (apply(?Restr, ?Y), ?Y \= ?X).
+proper_q(?Restr, ?Body) :- apply(?Restr, ?X), \+ (apply(?Restr, ?Y), \+ apply(?Body, ?Y)).
+no_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), apply(?Body, ?X)).
+
+% Domain predicates
+person(?X) :- (butler_n_1(?X); named(?X,'Agatha'); named(?X,'Charles')), \+ place(?X), \+ other_object(?X).
+same_named(?X, ?Y) :- named(?X, ?N), named(?Y, ?N).
+different_named(?X, ?Y) :- named(?X, ?N1), named(?Y, ?N2), ?N1 \= ?N2.
+
+% Event declarations
 event_value(event_6_2, 2).
 event_value(event_6_18, 18).
 event_value(event_6_26, 26).
 
-% Facts
+% Knowledge base
 aunt_n_of(?S6_X19, ?S6_I24).
 
 udef_q(?S6_X19, ?S6_H23, ?S6_H13).
@@ -544,42 +374,29 @@ hate_v_1(?S6_E2, ?S6_X3, ?S6_X8).
 
 
 % Library predicates
-a_q(?Restr, ?Body) :- true.
-every_q(?Restr, ?Body) :- true.
-some_q(?Restr, ?Body) :- true.
-the_q(?Restr, ?Body) :- true.
-proper_q(?Restr, ?Body) :- true.
-pronoun_q(?Restr, ?Body) :- true.
-udef_q(?Restr, ?Body) :- true.
-def_explicit_q(?Restr, ?Body) :- true.
-no_q(?Restr, ?Body) :- true.
-never_a_1(?X) :- true.
-neg(?E, ?X) :- true.
-colon_p_namely(?E, ?X, ?Y) :- true.
-therein_p_dir(?E1, ?E2) :- true.
-live_v_1(?E, ?X) :- true.
-people_n_of(?X) :- true.
-victim_n_of(?X) :- true.
-only_a_1(?E, ?X) :- true.
-named(?X, ?Name) :- true.
-and_c(?X, ?Y, ?Z) :- true.
-butler_n_1(?X) :- true.
-killer_n_1(?X) :- true.
-implicit_conj(?X, ?Y, ?Z) :- true.
-be_v_id(?E, ?X, ?Y) :- true.
-in_p_loc(?E, ?E2, ?X) :- true.
-compound(?E, ?X, ?Y) :- true.
-person(?X) :- true.
-kill_v_1(?E, ?X, ?Y) :- true.
-hate_v_1(?E, ?X, ?Y) :- true.
-pron(?X) :- true.
-poss(?E, ?X, ?Y) :- true.
+% Base type definitions
+event(?E) :- event_value(?E, _).
+individual(?X) :- person(?X).
+individual(?X) :- place(?X).
+individual(?X) :- other_object(?X).
 
-% Event declarations and distinctness
-event(event_7_2).
+% Quantifier rules
+a_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+every_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), \+ apply(?Body, ?X)).
+some_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+the_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X), \+ (apply(?Restr, ?Y), ?Y \= ?X).
+proper_q(?Restr, ?Body) :- apply(?Restr, ?X), \+ (apply(?Restr, ?Y), \+ apply(?Body, ?Y)).
+no_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), apply(?Body, ?X)).
+
+% Domain predicates
+person(?X) :- (butler_n_1(?X); named(?X,'Agatha'); named(?X,'Charles')), \+ place(?X), \+ other_object(?X).
+same_named(?X, ?Y) :- named(?X, ?N), named(?Y, ?N).
+different_named(?X, ?Y) :- named(?X, ?N1), named(?Y, ?N2), ?N1 \= ?N2.
+
+% Event declarations
 event_value(event_7_2, 2).
 
-% Facts
+% Knowledge base
 every_q(?S7_X8, ?S7_H9, ?S7_H5).
 
 person(?S7_X8).
@@ -592,44 +409,30 @@ hate_v_1(?S7_E2, ?S7_X3, ?S7_X8).
 
 
 % Library predicates
-a_q(?Restr, ?Body) :- true.
-every_q(?Restr, ?Body) :- true.
-some_q(?Restr, ?Body) :- true.
-the_q(?Restr, ?Body) :- true.
-proper_q(?Restr, ?Body) :- true.
-pronoun_q(?Restr, ?Body) :- true.
-udef_q(?Restr, ?Body) :- true.
-def_explicit_q(?Restr, ?Body) :- true.
-no_q(?Restr, ?Body) :- true.
-never_a_1(?X) :- true.
-neg(?E, ?X) :- true.
-colon_p_namely(?E, ?X, ?Y) :- true.
-therein_p_dir(?E1, ?E2) :- true.
-live_v_1(?E, ?X) :- true.
-people_n_of(?X) :- true.
-victim_n_of(?X) :- true.
-only_a_1(?E, ?X) :- true.
-named(?X, ?Name) :- true.
-and_c(?X, ?Y, ?Z) :- true.
-butler_n_1(?X) :- true.
-killer_n_1(?X) :- true.
-implicit_conj(?X, ?Y, ?Z) :- true.
-be_v_id(?E, ?X, ?Y) :- true.
-in_p_loc(?E, ?E2, ?X) :- true.
-compound(?E, ?X, ?Y) :- true.
-person(?X) :- true.
-kill_v_1(?E, ?X, ?Y) :- true.
-hate_v_1(?E, ?X, ?Y) :- true.
-pron(?X) :- true.
-poss(?E, ?X, ?Y) :- true.
+% Base type definitions
+event(?E) :- event_value(?E, _).
+individual(?X) :- person(?X).
+individual(?X) :- place(?X).
+individual(?X) :- other_object(?X).
 
-% Event declarations and distinctness
-event(event_8_2).
-event(event_8_11).
+% Quantifier rules
+a_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+every_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), \+ apply(?Body, ?X)).
+some_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+the_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X), \+ (apply(?Restr, ?Y), ?Y \= ?X).
+proper_q(?Restr, ?Body) :- apply(?Restr, ?X), \+ (apply(?Restr, ?Y), \+ apply(?Body, ?Y)).
+no_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), apply(?Body, ?X)).
+
+% Domain predicates
+person(?X) :- (butler_n_1(?X); named(?X,'Agatha'); named(?X,'Charles')), \+ place(?X), \+ other_object(?X).
+same_named(?X, ?Y) :- named(?X, ?N), named(?Y, ?N).
+different_named(?X, ?Y) :- named(?X, ?N1), named(?Y, ?N2), ?N1 \= ?N2.
+
+% Event declarations
 event_value(event_8_2, 2).
 event_value(event_8_11, 11).
 
-% Facts
+% Knowledge base
 butler_n_1(?S8_X10).
 
 the_q(?S8_X10, ?S8_H16, ?S8_H4).
@@ -644,46 +447,31 @@ neg(?S8_E11, ?S8_H13).
 
 
 % Library predicates
-a_q(?Restr, ?Body) :- true.
-every_q(?Restr, ?Body) :- true.
-some_q(?Restr, ?Body) :- true.
-the_q(?Restr, ?Body) :- true.
-proper_q(?Restr, ?Body) :- true.
-pronoun_q(?Restr, ?Body) :- true.
-udef_q(?Restr, ?Body) :- true.
-def_explicit_q(?Restr, ?Body) :- true.
-no_q(?Restr, ?Body) :- true.
-never_a_1(?X) :- true.
-neg(?E, ?X) :- true.
-colon_p_namely(?E, ?X, ?Y) :- true.
-therein_p_dir(?E1, ?E2) :- true.
-live_v_1(?E, ?X) :- true.
-people_n_of(?X) :- true.
-victim_n_of(?X) :- true.
-only_a_1(?E, ?X) :- true.
-named(?X, ?Name) :- true.
-and_c(?X, ?Y, ?Z) :- true.
-butler_n_1(?X) :- true.
-killer_n_1(?X) :- true.
-implicit_conj(?X, ?Y, ?Z) :- true.
-be_v_id(?E, ?X, ?Y) :- true.
-in_p_loc(?E, ?E2, ?X) :- true.
-compound(?E, ?X, ?Y) :- true.
-person(?X) :- true.
-kill_v_1(?E, ?X, ?Y) :- true.
-hate_v_1(?E, ?X, ?Y) :- true.
-pron(?X) :- true.
-poss(?E, ?X, ?Y) :- true.
+% Base type definitions
+event(?E) :- event_value(?E, _).
+individual(?X) :- person(?X).
+individual(?X) :- place(?X).
+individual(?X) :- other_object(?X).
 
-% Event declarations and distinctness
-event(event_9_2).
-event(event_9_9).
-event(event_9_19).
+% Quantifier rules
+a_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+every_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), \+ apply(?Body, ?X)).
+some_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+the_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X), \+ (apply(?Restr, ?Y), ?Y \= ?X).
+proper_q(?Restr, ?Body) :- apply(?Restr, ?X), \+ (apply(?Restr, ?Y), \+ apply(?Body, ?Y)).
+no_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), apply(?Body, ?X)).
+
+% Domain predicates
+person(?X) :- (butler_n_1(?X); named(?X,'Agatha'); named(?X,'Charles')), \+ place(?X), \+ other_object(?X).
+same_named(?X, ?Y) :- named(?X, ?N), named(?Y, ?N).
+different_named(?X, ?Y) :- named(?X, ?N1), named(?Y, ?N2), ?N1 \= ?N2.
+
+% Event declarations
 event_value(event_9_2, 2).
 event_value(event_9_9, 9).
 event_value(event_9_19, 19).
 
-% Facts
+% Knowledge base
 pronoun_q(?S9_X20, ?S9_H21, ?S9_H18).
 
 pron(?S9_X20).
