@@ -43,12 +43,17 @@ instance : Ord (Nat × Var) where
 def addSentenceNumber (sentenceNumber : Nat) (l : List Var) : List (Nat × Var) :=
   l.map (fun var => (sentenceNumber,var))
 
-def enumerateUniquePairs [Ord α] (list : List α) : List (α × α) :=
-  let rec aux : List α → List (α × α)
-    | [] => []
-    | x :: xs =>
-      (xs.filter (λ y => compare x y == Ordering.lt)).map (λ y => (x, y)) ++ (aux xs)
-  aux list
+def formatString (s : String) : String :=
+  -- Remove any existing quotes
+  let s' := if s.startsWith "\"" && s.endsWith "\"" then s.extract ⟨1⟩ ⟨s.length - 1⟩ else s
+  s!"'{s'}'"
+
+def generateRulelogHeader : String := "
+% Type declarations
+individual(?X) :- person(?X).
+event(?E) :- event_value(?E, _).
+name(?N) :- atom(?N).
+"
 
 def main : IO Unit := do
  let sentencesText := [
@@ -65,7 +70,8 @@ def main : IO Unit := do
                    ] 
 
  let (sentences : List (Nat × (String × (List String) × (List Var)))) <- mapWithIndexM sentencesText xform
- let header := "(declare-sort Individual 0)\n(declare-sort Event 0)\n(declare-sort Name 0)\n(declare-sort Pred 0)\n\n"
+ 
+ -- Collect all individuals (names) and events
  let (eSet : List (Nat × Var)) := sentences.foldl (fun acc tup => 
                                                     let (trip : (String × (List String) × (List Var))) := tup.snd
                                                     acc ++ (addSentenceNumber tup.fst trip.snd.snd)) []
@@ -73,20 +79,26 @@ def main : IO Unit := do
                                                let (trip : (String × (List String) × (List Var))) := tup.snd
                                                let (strList : (List String)) := trip.snd.fst
                                                acc ++ strList) []
- let itypes := (insertionSort iSet).eraseDups.reverse.map (fun str =>
-                                                            let lab := formatId str
-                                                            s!"(declare-const {lab} Name)")
- let (epairs : List ((Nat × Var) × (Nat × Var)))  := (enumerateUniquePairs $ insertionSort eSet).reverse
- let uids := (insertionSort iSet).eraseDups
- let ipairs := enumerateUniquePairs $ uids
- let ecompares := epairs.map (fun pair => s!"(distinct {Var.format.labelOnlyGround pair.1.1 pair.1.2} {Var.format.labelOnlyGround pair.2.1 pair.2.2})")
- let icompares := ipairs.map (fun pair => s!"(distinct {formatId pair.1} {formatId pair.2})")
- let eaxioms := s!"(assert (and {joinSep ecompares " "}))\n"
- let iaxioms := s!"(assert (and {joinSep icompares " "}))\n"
  
- let headers := header ++ (joinSep itypes "\n") ++ "\n\n" ++ Rulelog.libraryRoutines ++ "\n" ++ iaxioms ++ "\n"
+ -- Generate individual declarations
+ let individualDecls := (insertionSort iSet).eraseDups.map (fun str =>
+   s!"person({formatString str}).")
+
+ -- Generate event value assignments
+ let eventValues := eSet.map (fun pair => 
+   s!"event_value(event_{pair.1}_{pair.2.id}, {pair.2.id}).")
+
+ -- Generate the final Rulelog content
+ let header := generateRulelogHeader
  let sentenceContent := sentences.foldl (fun acc pair => acc ++ pair.snd.fst ++ "\n\n") ""
- let finalContent := headers ++ sentenceContent ++ eaxioms ++ "\n"
+ 
+ let finalContent := header ++ "\n" ++
+                    "% Individual declarations\n" ++
+                    (joinSep individualDecls "\n") ++ "\n\n" ++
+                    "% Event declarations\n" ++
+                    (joinSep eventValues "\n") ++ "\n\n" ++
+                    "% Knowledge base\n" ++
+                    sentenceContent
+
  IO.FS.writeFile "rulelog-outputs/sentences.ergo" finalContent
  return ()
-  
