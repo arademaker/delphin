@@ -11,7 +11,6 @@ open HOF
 open MM
 open InsertionSort
 
-/-- Library predicates in Rulelog syntax -/
 def libraryRoutines : String := "% Library predicates\n" ++
   "a_q(?Restr, ?Body) :- true.\n" ++
   "every_q(?Restr, ?Body) :- true.\n" ++
@@ -44,12 +43,11 @@ def libraryRoutines : String := "% Library predicates\n" ++
   "pron(?X) :- true.\n" ++
   "poss(?E, ?X, ?Y) :- true.\n"
 
+def formatId (s : String) : String :=
+  s!"'{s}'"  -- Use single quotes for Rulelog strings
+
 def removeQuotes (s : String) : String :=
   if s.startsWith "\"" && s.endsWith "\"" then s.extract ⟨1⟩ ⟨s.length - 1⟩ else s
-
-def formatId (s : String) : String :=
-  let str := removeQuotes s
-  s!"id_{str}"
 
 def fixName (ep : EP) : String :=
   let PredName := if ep.predicate == "_and_c" then "and_c" else ep.predicate
@@ -65,16 +63,24 @@ namespace Var
     s!"?S{sentenceNumber}_{var.sort.toUpper}{var.id}"
 
   def formatGround (sentenceNumber : Nat) (var : Var) : String :=
-    s!"s{sentenceNumber}_{var.sort}{var.id}"
+    if var.sort == 'e' then
+      s!"event_{sentenceNumber}_{var.id}"  -- Use numeric IDs for events
+    else
+      s!"s{sentenceNumber}_{var.sort}{var.id}"
 
   def format.labelOnly (sentenceNumber : Nat) (var : Var) : String :=
     if var.sort == 'x' then
       s!"S{sentenceNumber}_{var.sort.toUpper}{var.id}"
+    else if var.sort == 'e' then
+      s!"event_{sentenceNumber}_{var.id}"
     else
       s!"s{sentenceNumber}_{var.sort}{var.id}"
 
   def format.labelOnlyGround (sentenceNumber : Nat) (var : Var) : String :=
-    s!"s{sentenceNumber}_{var.sort}{var.id}"
+    if var.sort == 'e' then
+      s!"event_{sentenceNumber}_{var.id}"
+    else
+      s!"s{sentenceNumber}_{var.sort}{var.id}"
 
   def formatWithDeps (sentenceNumber : Nat) (ep : EP) (var : Var) (qm : HashMap Var Var) (em : Multimap Var Var) : String :=
     let defaultExpr := format sentenceNumber var
@@ -110,7 +116,7 @@ def EP.format (sentenceNumber : Nat) (qm : HashMap Var Var) (em : Multimap Var V
     let joinArgs (ep : EP) := 
       let args := ep.rargs.map fun rarg => Var.formatWithDeps sentenceNumber ep rarg.snd qm em
       match ep.carg with
-      | some str => joinSep args ", " ++ s!", \"{str}\""
+      | some str => joinSep args ", " ++ s!", '{removeQuotes str}'"  -- Use single quotes for strings
       | none => joinSep args ", "
     
     preds.foldl (fun acc ep =>
@@ -118,6 +124,12 @@ def EP.format (sentenceNumber : Nat) (qm : HashMap Var Var) (em : Multimap Var V
     ) ""
 
   printNormal firstEp.label preds
+
+def generateEventDistinctness (mrs : MRS.MRS) (sentenceNumber : Nat) : String :=
+  let events := collectEvents mrs.preds
+  let declarations := events.map fun e => 
+    s!"event_value(event_{sentenceNumber}_{e.id}, {e.id})."
+  joinSep declarations "\n"
 
 def MRS.format (sentenceNumber : Nat) (mrs : MRS.MRS) : (String × List String × List Var) :=
   let strings := mrs.preds.foldl (fun stab pred =>
@@ -142,12 +154,18 @@ def MRS.format (sentenceNumber : Nat) (mrs : MRS.MRS) : (String × List String �
   -- Generate rules
   let rules := hm.keys.map (EP.format sentenceNumber qm em hm mrs.top)
 
+  -- Generate event declarations and distinctness constraints
+  let eventDistinctness := generateEventDistinctness mrs sentenceNumber
+
   -- Generate type declarations  
   let typeDecls := eSet.map (fun var => 
-    s!"event(s{sentenceNumber}_{var.sort}{var.id}).")
+    s!"event(event_{sentenceNumber}_{var.id}).")
 
   let str := libraryRoutines ++ "\n" ++ 
-             (joinSep typeDecls "\n") ++ "\n\n" ++ 
+             "% Event declarations and distinctness\n" ++
+             (joinSep typeDecls "\n") ++ "\n" ++
+             eventDistinctness ++ "\n\n" ++
+             "% Facts\n" ++
              (joinSep rules "\n")
   
   (str, strings.keys, eSet)
