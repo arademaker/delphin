@@ -1,55 +1,27 @@
-% Base type and domain definitions
+% Quantifier rules
+a_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+
+every_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), \+ apply(?Body, ?X)).
+
+some_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).
+
+the_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X), \+ (apply(?Restr, ?Y), ?Y \= ?X).
+
+proper_q(?Restr, ?Body) :- apply(?Restr, ?X), \+ (apply(?Restr, ?Y), \+ apply(?Body, ?Y)).
+
+no_q(?Restr, ?Body) :- \+ (apply(?Restr, ?X), apply(?Body, ?X)).
+
+% Type definitions
 event(?E) :- event_value(?E, _).
 individual(?X) :- person(?X).
 individual(?X) :- place(?X).
 individual(?X) :- other_object(?X).
-
-% Quantifier definitions - using natural rule-based quantification
-% "there exists an X such that P1(X) and P2(X)"
-a_q(?Restr, ?Body) :-
-  apply(?Restr, ?X),
-  apply(?Body, ?X).
-
-% "for all X, if P1(X) then P2(X)"
-every_q(?Restr, ?Body) :-
-  \+ (apply(?Restr, ?X), \+ apply(?Body, ?X)).
-
-% Same as a_q 
-some_q(?Restr, ?Body) :-
-  apply(?Restr, ?X),
-  apply(?Body, ?X).
-
-% "there is one and only one X such that P1(X), and P2(X) holds for it"
-the_q(?Restr, ?Body) :-
-  apply(?Restr, ?X),
-  apply(?Body, ?X),
-  \+ (apply(?Restr, ?Y), ?Y \= ?X).
-
-proper_q(?Restr, ?Body) :-
-  apply(?Restr, ?X),
-  \+ (apply(?Restr, ?Y), \+ apply(?Body, ?Y)).
-
-% "there does not exist an X such that P1(X) and P2(X)"
-no_q(?Restr, ?Body) :-
-  \+ (apply(?Restr, ?X), apply(?Body, ?X)).
 
 % Core domain predicates
 person(?X) :- 
   (butler_n_1(?X); named(?X,'Agatha'); named(?X,'Charles')),
   \+ place(?X),
   \+ other_object(?X).
-
-% Uniqueness constraints using natural Rulelog rules
-% If X and Y have the same name, they are the same entity
-same_named(?X, ?Y) :- 
-  named(?X, ?N),
-  named(?Y, ?N).
-
-% If X and Y have different names, they are different entities
-different_named(?X, ?Y) :-
-  named(?X, ?N1),
-  named(?Y, ?N2),
-  ?N1 \= ?N2.
 
 % Butler uniqueness
 butler_unique(?X) :- 
@@ -106,3 +78,9 @@ agatha_killed_herself :-
 
   % The conclusion
   kill_v_1(?E0_2, ?X0_23, ?X0_23).
+
+% Include the translated sentences
+[@include 'sentences.ergo'].
+
+% Query to solve the puzzle
+?- agatha_killed_herself.

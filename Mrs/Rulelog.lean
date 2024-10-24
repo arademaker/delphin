@@ -11,23 +11,7 @@ open HOF
 open MM
 open InsertionSort
 
-def libraryRoutines : String := "% Library predicates\n" ++
-  "% Base type definitions\n" ++
-  "event(?E) :- event_value(?E, _).\n" ++
-  "individual(?X) :- person(?X).\n" ++
-  "individual(?X) :- place(?X).\n" ++
-  "individual(?X) :- other_object(?X).\n\n" ++
-  "% Quantifier rules\n" ++
-  "a_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).\n" ++
-  "every_q(?Restr, ?Body) :- \\+ (apply(?Restr, ?X), \\+ apply(?Body, ?X)).\n" ++
-  "some_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X).\n" ++
-  "the_q(?Restr, ?Body) :- apply(?Restr, ?X), apply(?Body, ?X), \\+ (apply(?Restr, ?Y), ?Y \\= ?X).\n" ++
-  "proper_q(?Restr, ?Body) :- apply(?Restr, ?X), \\+ (apply(?Restr, ?Y), \\+ apply(?Body, ?Y)).\n" ++
-  "no_q(?Restr, ?Body) :- \\+ (apply(?Restr, ?X), apply(?Body, ?X)).\n\n" ++
-  "% Domain predicates\n" ++
-  "person(?X) :- (butler_n_1(?X); named(?X,'Agatha'); named(?X,'Charles')), \\+ place(?X), \\+ other_object(?X).\n" ++
-  "same_named(?X, ?Y) :- named(?X, ?N), named(?Y, ?N).\n" ++
-  "different_named(?X, ?Y) :- named(?X, ?N1), named(?Y, ?N2), ?N1 \\= ?N2.\n"
+def libraryRoutines : String := ""
 
 def removeQuotes (s : String) : String :=
   if s.startsWith "\"" && s.endsWith "\"" then s.extract ⟨1⟩ ⟨s.length - 1⟩ else s
