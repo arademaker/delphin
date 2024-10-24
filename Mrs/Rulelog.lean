@@ -112,9 +112,9 @@ def MRS.format (sentenceNumber : Nat) (mrs : MRS.MRS) : (String Ã— List String Ã
     s!"event_value(event_{sentenceNumber}_{var.id}, {var.id}).")
 
   let str := libraryRoutines ++ "\n" ++
-             "% Event declarations\n" ++
+             "/* Event declarations */\n" ++
              (joinSep eventValues "\n") ++ "\n\n" ++
-             "% Knowledge base\n" ++
+             "/* Knowledge base */\n" ++
              (joinSep rules "\n")
   
   (str, strings.keys, eSet)
