@@ -4,55 +4,60 @@ individual(?X) :- person(?X).
 individual(?X) :- place(?X).
 individual(?X) :- other_object(?X).
 
-% Basic quantifier definitions using higher-order predicates
-a_q(?P1, ?P2) :- 
-  ?exists(?Y)^(apply(?P1,?Y), apply(?P2,?Y)).
+% Quantifier definitions - using natural rule-based quantification
+% "there exists an X such that P1(X) and P2(X)"
+a_q(?Restr, ?Body) :-
+  apply(?Restr, ?X),
+  apply(?Body, ?X).
 
-every_q(?P1, ?P2) :- 
-  ?forall(?Y)^(apply(?P1,?Y) ==> apply(?P2,?Y)).
+% "for all X, if P1(X) then P2(X)"
+every_q(?Restr, ?Body) :-
+  \+ (apply(?Restr, ?X), \+ apply(?Body, ?X)).
 
-some_q(?P1, ?P2) :-
-  ?exists(?Y)^(apply(?P1,?Y), apply(?P2,?Y)).
+% Same as a_q 
+some_q(?Restr, ?Body) :-
+  apply(?Restr, ?X),
+  apply(?Body, ?X).
 
-the_q(?P1, ?P2) :-
-  ?exists(?Y)^apply(?P1,?Y),
-  ?forall(?Y)^(apply(?P1,?Y) ==> (
-    apply(?P2,?Y),
-    ?forall(?Z)^(apply(?P1,?Z) ==> ?Y = ?Z)
-  )).
+% "there is one and only one X such that P1(X), and P2(X) holds for it"
+the_q(?Restr, ?Body) :-
+  apply(?Restr, ?X),
+  apply(?Body, ?X),
+  \+ (apply(?Restr, ?Y), ?Y \= ?X).
 
-proper_q(?P1, ?P2) :-
-  ?exists(?Y)^apply(?P1,?Y),
-  ?forall(?Y)^(apply(?P1,?Y) ==> apply(?P2,?Y)).
+proper_q(?Restr, ?Body) :-
+  apply(?Restr, ?X),
+  \+ (apply(?Restr, ?Y), \+ apply(?Body, ?Y)).
 
-no_q(?P1, ?P2) :-
-  \+ ?exists(?Y)^(apply(?P1,?Y), apply(?P2,?Y)).
+% "there does not exist an X such that P1(X) and P2(X)"
+no_q(?Restr, ?Body) :-
+  \+ (apply(?Restr, ?X), apply(?Body, ?X)).
 
 % Core domain predicates
 person(?X) :- 
   (butler_n_1(?X); named(?X,'Agatha'); named(?X,'Charles')),
-  \+ (place(?X); other_object(?X)).
+  \+ place(?X),
+  \+ other_object(?X).
 
-% Uniqueness constraints
-% Names are unique identifiers
-unique_names :- 
-  ?forall(?X,?Y,?N)^(
-    (named(?X,?N), named(?Y,?N)) ==> ?X = ?Y
-  ).
+% Uniqueness constraints using natural Rulelog rules
+% If X and Y have the same name, they are the same entity
+same_named(?X, ?Y) :- 
+  named(?X, ?N),
+  named(?Y, ?N).
 
-different_names :-
-  ?forall(?X,?Y,?N1,?N2)^(
-    (named(?X,?N1), named(?Y,?N2), ?N1 \= ?N2) ==> ?X \= ?Y
-  ).
+% If X and Y have different names, they are different entities
+different_named(?X, ?Y) :-
+  named(?X, ?N1),
+  named(?Y, ?N2),
+  ?N1 \= ?N2.
 
 % Butler uniqueness
-butler_unique :-
-  ?exists(?X)^(
-    butler_n_1(?X),
-    ?forall(?Y)^(butler_n_1(?Y) ==> ?X = ?Y),
-    \+ (named(?X,'Agatha'); named(?X,'Charles')),
-    person(?X)
-  ).
+butler_unique(?X) :- 
+  butler_n_1(?X),
+  person(?X),
+  \+ named(?X,'Agatha'),
+  \+ named(?X,'Charles'),
+  \+ (butler_n_1(?Y), ?Y \= ?X).
 
 % Main puzzle logic
 agatha_killed_herself :-
@@ -97,10 +102,7 @@ agatha_killed_herself :-
   \+ hate_v_1(?E4_2, ?X4_15, ?X4_15),
 
   % Additional constraints
-  \+ (?X4_3 = ?X4_15),
+  ?X4_3 \= ?X4_15,
 
   % The conclusion
   kill_v_1(?E0_2, ?X0_23, ?X0_23).
-
-% Query to solve the puzzle
-?- agatha_killed_herself.
