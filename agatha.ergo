@@ -1,0 +1,106 @@
+% Base type and domain definitions
+event(?E) :- event_value(?E, _).
+individual(?X) :- person(?X).
+individual(?X) :- place(?X).
+individual(?X) :- other_object(?X).
+
+% Basic quantifier definitions using higher-order predicates
+a_q(?P1, ?P2) :- 
+  ?exists(?Y)^(apply(?P1,?Y), apply(?P2,?Y)).
+
+every_q(?P1, ?P2) :- 
+  ?forall(?Y)^(apply(?P1,?Y) ==> apply(?P2,?Y)).
+
+some_q(?P1, ?P2) :-
+  ?exists(?Y)^(apply(?P1,?Y), apply(?P2,?Y)).
+
+the_q(?P1, ?P2) :-
+  ?exists(?Y)^apply(?P1,?Y),
+  ?forall(?Y)^(apply(?P1,?Y) ==> (
+    apply(?P2,?Y),
+    ?forall(?Z)^(apply(?P1,?Z) ==> ?Y = ?Z)
+  )).
+
+proper_q(?P1, ?P2) :-
+  ?exists(?Y)^apply(?P1,?Y),
+  ?forall(?Y)^(apply(?P1,?Y) ==> apply(?P2,?Y)).
+
+no_q(?P1, ?P2) :-
+  \+ ?exists(?Y)^(apply(?P1,?Y), apply(?P2,?Y)).
+
+% Core domain predicates
+person(?X) :- 
+  (butler_n_1(?X); named(?X,'Agatha'); named(?X,'Charles')),
+  \+ (place(?X); other_object(?X)).
+
+% Uniqueness constraints
+% Names are unique identifiers
+unique_names :- 
+  ?forall(?X,?Y,?N)^(
+    (named(?X,?N), named(?Y,?N)) ==> ?X = ?Y
+  ).
+
+different_names :-
+  ?forall(?X,?Y,?N1,?N2)^(
+    (named(?X,?N1), named(?Y,?N2), ?N1 \= ?N2) ==> ?X \= ?Y
+  ).
+
+% Butler uniqueness
+butler_unique :-
+  ?exists(?X)^(
+    butler_n_1(?X),
+    ?forall(?Y)^(butler_n_1(?Y) ==> ?X = ?Y),
+    \+ (named(?X,'Agatha'); named(?X,'Charles')),
+    person(?X)
+  ).
+
+% Main puzzle logic
+agatha_killed_herself :-
+  % Entity identifications
+  named(?X4_3,'Agatha'),
+  butler_n_1(?X4_15),
+  named(?X1_24,'Charles'),
+  aunt_n_of(?X3_20),
+  named(?X0_29,'Aunt'),
+  named(?X0_16,'Dreadbury'),
+  named(?X0_10,'Mansion'),
+
+  % Entity equivalences 
+  ?X0_23 = ?X1_8, ?X0_23 = ?X3_15, ?X0_23 = ?X4_3,
+  ?X0_23 = ?X5_19, ?X0_23 = ?X6_14, ?X0_23 = ?X8_3,
+  ?X1_19 = ?X4_15, ?X1_19 = ?X5_3, ?X1_19 = ?X6_3,
+  ?X1_19 = ?X8_10,
+  ?X1_24 = ?X3_3,
+  ?X0_16 = ?X1_38,
+  ?X0_10 = ?X1_32,
+  ?X3_20 = ?X6_19,
+  ?X0_29 = ?X5_25,
+
+  % Living arrangements
+  live_v_1(?E1_30, ?X1_8),
+  live_v_1(?E1_30, ?X1_24),
+  live_v_1(?E1_30, ?X1_19),
+
+  % Hatred relationships
+  \+ hate_v_1(?E4_2, ?X3_3, ?X3_3),
+  \+ hate_v_1(?E4_2, ?X3_3, ?X3_15),
+  
+  hate_v_1(?E4_2, ?X4_3, ?X1_24),
+  hate_v_1(?E4_2, ?X4_3, ?X4_3),
+  \+ hate_v_1(?E4_2, ?X4_3, ?X4_15),
+
+  more_comp(?E5_18, ?E5_16, ?X5_19),
+  rich_a_in(?E5_16, ?X4_15),
+
+  hate_v_1(?E4_2, ?X4_15, ?X1_24),
+  hate_v_1(?E4_2, ?X4_15, ?X4_3),
+  \+ hate_v_1(?E4_2, ?X4_15, ?X4_15),
+
+  % Additional constraints
+  \+ (?X4_3 = ?X4_15),
+
+  % The conclusion
+  kill_v_1(?E0_2, ?X0_23, ?X0_23).
+
+% Query to solve the puzzle
+?- agatha_killed_herself.
