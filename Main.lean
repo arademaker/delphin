@@ -1,10 +1,10 @@
 import Mrs
 import Ace
 import Util.InsertionSort
-import Mrs.Rulelog
+import Mrs.Pwl
 
 open MRS
-open Rulelog
+open PWL 
 open InsertionSort
 
 def solveAndFormat (sentenceNumber : Nat) (mrs : MRS) : IO (String × List String × List Var) := do
@@ -13,7 +13,7 @@ def solveAndFormat (sentenceNumber : Nat) (mrs : MRS) : IO (String × List Strin
   | Except.ok sols => 
     match sols.get? 0 with
     | some sol => 
-      let (formatted, strings, vars) := Rulelog.MRS.format sentenceNumber sol
+      let (formatted, strings, vars) := PWL.MRS.format sentenceNumber sol
       return (formatted, strings, vars)
     | none => unreachable!
   | Except.error _ => unreachable!
@@ -73,5 +73,5 @@ def main : IO Unit := do
  let sentenceContent := sentences.foldl (fun acc pair => acc ++ pair.snd.fst ++ "\n\n") ""
  let finalContent := sentenceContent
  
- IO.FS.writeFile "rulelog-outputs/sentences.ergo" finalContent
+ IO.FS.writeFile "pwl-outputs/sentences.pwl" finalContent
  return ()

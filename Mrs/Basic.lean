@@ -12,6 +12,7 @@ structure Var where
  id    : Nat
  sort  : Char
  props : Array (String × String)
+ deriving Inhabited
 
 instance : ToString Var where
   toString var := s!"{var.sort}{var.id}"
@@ -46,6 +47,7 @@ structure Constraint where
   rel : String
   lhs : Var
   rhs : Var
+  deriving Inhabited
 
 instance : BEq Constraint where
   beq a b := a.lhs == b.lhs && a.rhs == b.rhs
@@ -64,7 +66,7 @@ structure EP where
   label : Var
   rargs : List (String × Var)
   carg  : Option String
- deriving BEq
+ deriving BEq, Inhabited
 
 instance : ToFormat EP where
  format
@@ -91,6 +93,7 @@ structure MRS where
   preds : List EP
   hcons : List Constraint
   icons : List Constraint
+  deriving Inhabited
 
 instance : ToFormat MRS where
  format
