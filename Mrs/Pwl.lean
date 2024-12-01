@@ -11,6 +11,23 @@ open HOF
 open MM
 open InsertionSort
 
+/-- Extract numeric part of ARG label -/
+def getArgNum (label : String) : Option Nat :=
+  let num := label.dropWhile (fun c => c != '0' && c != '1' && c != '2' && c != '3' && c != '4' && c != '5')
+  if num == "" then none
+  else some num.toNat!
+
+/-- Compare ARG labels for ordering -/
+def compareArgs (a b : String × Var) : Ordering :=
+  match getArgNum a.1, getArgNum b.1 with
+  | some n1, some n2 => if n1 ≤ n2 then .lt else .gt
+  | some _, none => .lt
+  | none, some _ => .gt
+  | none, none => .eq
+
+instance : Ord (String × Var) where
+  compare := compareArgs
+
 def joinSep (sep : String) (l : List String) : String := 
   l.foldr (fun s r => (if r == "" then s else r ++ sep ++ s)) ""
 
@@ -34,6 +51,14 @@ def Var.format.pwlVar (var : Var) : String :=
   | 'e' => s!"e{var.id}"
   | 'h' => s!"H{var.id}"
   | _ => s!"{var.sort}{var.id}"
+
+/-- Format be_v_id arguments in standard order -/
+def formatBeVId (args : List (String × Var)) : String :=
+  let orderedArgs := insertionSort args
+  match orderedArgs with
+  | (_,_)::(_, x1)::(_, x2)::_ =>
+    s!"?[b]:(same(b) & arg1(b)={Var.format.pwlVar x1} & arg2(b)={Var.format.pwlVar x2})"
+  | _ => "be_v_id(error: wrong number of arguments)"
 
 def getVarsForScope (preds : List EP) (handle : Var) (em : Multimap Var Var) : List Var :=
   let directVars := preds.foldl (fun acc ep =>
@@ -70,13 +95,10 @@ partial def formatPredicate (
     (replacement : Option (String × String)) : String :=
   let name := fixName ep.predicate
   if name == "be_v_id" then
-    match ep.rargs with
-    | (_,_)::(_, x1)::(_, x2)::_ =>
-      s!"?[b]:(same(b) & arg1(b)={Var.format.pwlVar x1} & arg2(b)={Var.format.pwlVar x2})"
-    | _ => s!"{name}({joinSep ", " (ep.rargs.map (fun arg => Var.format.pwlVar arg.2))})"
+    formatBeVId ep.rargs
   else if name == "neg" then
     match ep.rargs with
-    | (_, h)::(_, e)::_ =>
+    | (_, h)::(_, e)::[] =>
       dbg_trace s!"DEBUG NEG: Handle {Var.format.pwlVar h} Event {Var.format.pwlVar e}"
       match (hm.find? h) with
       | some hPreds =>
@@ -120,7 +142,7 @@ partial def format_definition (
       match preds.find? (fun p => p.predicate == "neg") with
       | some negPred =>
         match negPred.rargs with
-        | (_, h)::(_, e)::_ =>
+        | (_, h)::(_, e)::[] =>
           dbg_trace s!"DEBUG NEG: Handle {Var.format.pwlVar h} Event {Var.format.pwlVar e}"
           match (hm.find? h) with
           | some hPreds =>
