@@ -86,6 +86,11 @@ instance : ToFormat EP where
 instance : Repr EP where
  reprPrec e _ := f!"{e}"
 
+instance : ToString EP where
+  toString e := toString (format e)
+
+instance : ToString (List EP) where
+  toString eps := String.intercalate ", " (eps.map toString)
 
 structure MRS where
   top : Var
