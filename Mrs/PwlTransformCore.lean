@@ -13,16 +13,6 @@ open MM (Multimap)
 open PWL (joinComma joinSep reformQuotedPair getArg)
 open InsertionSort
 
-instance : Ord (String × Var) where
-  compare := fun a b =>
-    if a.1.startsWith "ARG" && b.1.startsWith "ARG" then
-      match (a.1.drop 3).toNat?, (b.1.drop 3).toNat? with
-      | some n1, some n2 => compare n1 n2
-      | some _, none => .lt
-      | none, some _ => .gt
-      | none, none => .eq
-    else .eq
-
 inductive PWLQuantifier where
   | proper_q : Var → String → PWLQuantifier  -- var, name
   | some_q : Var → String → String → PWLQuantifier  -- var, expanded_rstr, expanded_body
@@ -39,9 +29,9 @@ structure CompoundMatch where
   deriving Repr, BEq, Inhabited
 
 structure TransformResult where
-  quants : List PWLQuantifier := []  
-  eqs : List (Var × Var) := []       
-  vars : List Var := []              
+  quants : List PWLQuantifier 
+  eqs : List (Var × Var)      
+  vars : List Var              
   deriving Inhabited
 
 private def matchArg (args : List (String × Var)) (argName : String) (targetVar : Var) : Bool :=
@@ -122,9 +112,8 @@ private def findCompoundMatches (preds : List EP) : List CompoundMatch :=
   findAll preds []
 
 def phase1 (preds : List EP) (hm : Multimap Var EP) : List EP :=
-  dbg_trace "Starting phase1"
+  dbg_trace s!"phase1: Processing {preds.length} predicates"
   let foundMatches := findCompoundMatches preds
-  dbg_trace s!"Found {foundMatches.length} compound matches"
   let processMatch (m : CompoundMatch) : EP :=
     let s1_clean := if m.name1.startsWith "\"" then String.dropRight (String.drop m.name1 1) 1 else m.name1
     let s2_clean := if m.name2.startsWith "\"" then String.dropRight (String.drop m.name2 1) 1 else m.name2
@@ -141,17 +130,13 @@ def phase1 (preds : List EP) (hm : Multimap Var EP) : List EP :=
       (p.predicate == "named" && matchArg p.rargs "ARG0" m.var2) ||
       (p.predicate == "proper_q" && matchArg p.rargs "ARG0" m.var2)))
 
-  dbg_trace "Completed phase1"
   remaining ++ temp_compounds
 
 def phase2 (preds : List EP) (hm : Multimap Var EP) : TransformResult :=
-  dbg_trace "Starting phase2"
   let init : TransformResult := {quants := [], eqs := [], vars := []}
   preds.foldl (fun res ep =>
-    dbg_trace s!"Processing EP: {ep.predicate} with label={ep.label}"
-    dbg_trace s!"  Args: {ep.rargs}"
+    dbg_trace s!"phase2: Processing {ep.predicate}"
     if ep.predicate == "temp_compound_name" then
-      dbg_trace "Found temp_compound_name"
       match (ep.rargs.find? (fun x => x.1 == "ARG1"),
              ep.rargs.find? (fun x => x.1 == "ARG2"),
              ep.rargs.find? (fun x => x.1 == "RSTR"),
@@ -189,23 +174,58 @@ def phase2 (preds : List EP) (hm : Multimap Var EP) : TransformResult :=
       | _ => res
     else res) init
 
+partial def buildNested (remaining : List (List Var × String)) (seenVars : List Var) : String :=
+  match remaining with
+  | [] => ""
+  | exprs =>
+    let foundPair := List.find? (fun pair => 
+      let vars := pair.1
+      let newVars := vars.filter (fun v => !seenVars.contains v)
+      newVars.length ≤ 1) exprs
+
+    match foundPair with
+    | none => ""
+    | some expr =>
+      let vars := expr.1
+      let exprStr := expr.2
+      let newVars := vars.filter (fun v => !seenVars.contains v)
+      let restExprs := exprs.filter (fun x => x != expr)
+      let connector := if restExprs.isEmpty then "" else " &\n  "
+      match newVars with
+      | [] => exprStr ++ connector ++ buildNested restExprs seenVars
+      | [v] => s!"?[{v}]:(" ++ exprStr ++ connector ++ buildNested restExprs (v :: seenVars) ++ ")"
+      | _ => ""
+
 def phase3 (result : TransformResult) : String :=
-  let vars := result.vars.reverse.eraseDups
-  let varList := String.intercalate "," (vars.map toString)
+  -- Set to true for incremental quantifier introduction, false for gathered at top
+  let incremental := true
 
-  let quantStrs := result.quants.map fun quant =>
-    match quant with
-    | PWLQuantifier.proper_q var name => 
-      s!"?[n]:(name(n) & arg1(n)={var} & arg2(n)={name})"
-    | PWLQuantifier.some_q var rstr body =>
-      s!"?[{var}]:({rstr} & {body})"
-    | PWLQuantifier.other_q predname var rstr body =>
-      s!"{predname}({var}, ({rstr}), {body})"
+  if !incremental then
+    -- Original format with top-level declarations
+    let vars := result.vars.reverse.eraseDups
+    let varList := String.intercalate "," (vars.map toString)
+    let quantStrs := result.quants.map fun q => match q with
+      | PWLQuantifier.proper_q var name => 
+          s!"?[n]:(name(n) & arg1(n)={var} & arg2(n)={name})"
+      | PWLQuantifier.some_q var rstr body =>
+          s!"?[{var}]:({rstr} & {body})"
+      | PWLQuantifier.other_q predname var rstr body =>
+          s!"?[{var}]:({rstr} & {body})"
+    let eqStrs := result.eqs.map fun (v1, v2) => s!"{v1}={v2}"
+    let body := String.intercalate " &\n  " (quantStrs ++ eqStrs)
+    s!"?[{varList}]:(\n  {body}\n)"
+  else
+    let allExpressions : List (List Var × String) := 
+      (result.quants.map fun q => match q with
+        | PWLQuantifier.proper_q var name => 
+            ([var], s!"?[n]:(name(n) & arg1(n)={var} & arg2(n)={name})")
+        | PWLQuantifier.some_q var rstr body =>
+            ([var], s!"?[{var}]:({rstr} & {body})")
+        | PWLQuantifier.other_q predname var rstr body =>
+            ([var], s!"?[{var}]:({rstr} & {body})")) ++
+      (result.eqs.map fun (v1, v2) => ([v1, v2], s!"{v1}={v2}"))
 
-  let eqStrs := result.eqs.map fun (v1, v2) => s!"{v1}={v2}"
-  let allParts := quantStrs ++ eqStrs
-  let body := String.intercalate " &\n  " allParts
-  s!"?[{varList}]:(\n  {body}\n)"
+    buildNested allExpressions []
 
 def transform (preds : List EP) (hm : Multimap Var EP) : String := 
   dbg_trace "Starting full transform"
