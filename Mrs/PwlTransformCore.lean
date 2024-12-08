@@ -230,7 +230,7 @@ def phase3 (result : TransformResult) : String :=
       s!"?[{var}]:(({rstr}) & {body})"
 
   -- Set to true for incremental quantifier introduction, false for gathered at top
-  let incremental := false
+  let incremental := true
 
   if !incremental then
     -- Original format with top-level declarations
