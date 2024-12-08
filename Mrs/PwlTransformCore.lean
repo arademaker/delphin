@@ -10,7 +10,7 @@ namespace PWL.Transform
 open Lean (HashMap)
 open MRS (EP Var)
 open MM (Multimap)
-open PWL (joinComma joinSep reformQuotedPair getArg)
+open PWL (joinComma joinSep reformQuotedPair getArg compareArgs)
 open InsertionSort
 
 inductive PWLQuantifier where
@@ -42,45 +42,56 @@ private def matchArg (args : List (String × Var)) (argName : String) (targetVar
 private def handlePredsToString (preds : List EP) : String := 
   String.intercalate ", " (preds.map toString)
 
-private def formatPredicate (var : Var) (ep : EP) : String :=
-  dbg_trace s!"formatPredicate: Processing {ep.predicate} for var {var}"
-  dbg_trace s!"Arguments: {ep.rargs}"
-  
-  let orderedArgs := insertionSort ep.rargs
-  dbg_trace s!"Ordered arguments: {orderedArgs}"
-    
-  let argsStr := String.intercalate ", " (orderedArgs.map fun (_, argVar) => toString argVar)
-  dbg_trace s!"Combined arguments: {argsStr}"
-  
-  let predName := if ep.predicate.startsWith "_" then ep.predicate.drop 1 else ep.predicate
-  let result := s!"{predName}({argsStr})"
-  dbg_trace s!"Final result: {result}"
-  result
+private instance : Ord (String × Var) where
+  compare a b := let toOrder : String → Nat 
+                   | "ARG0" => 0
+                   | "RSTR" => 1
+                   | "BODY" => 2
+                   | _ => 3
+                 match compare (toOrder a.1) (toOrder b.1) with
+                 | .eq => compareArgs a b
+                 | ord => ord
 
-private def expandQuantifier (hm : Multimap Var EP) (mainVar : Var) (rstr : Var) (body : Var) : String × String :=
-  dbg_trace s!"Expanding quantifier for var={mainVar}, rstr={rstr}, body={body}"
+partial def expandQuantifier (hm : Multimap Var EP) (mainVar : Var) (rstr : Var) (body : Var) : String × String :=
+  let formatPredicate (var : Var) (ep : EP) : String :=
+    let argsStr := String.intercalate ", " (ep.rargs.map (fun a => toString a.2))
+    let predName := if ep.predicate.startsWith "_" then ep.predicate.drop 1 else ep.predicate
+    s!"{predName}({argsStr})"
+
+  let processPredicates (preds : List EP) : String := 
+    let nonQuantPreds := preds.filter (fun p => !p.predicate.endsWith "_q")
+    let quantPreds := preds.filter (fun p => p.predicate.endsWith "_q")
+    
+    let nonQuantStr := String.intercalate " & " (nonQuantPreds.map (formatPredicate mainVar))
+    
+    -- Process any nested quantifiers
+    let quantStr := quantPreds.foldl (fun acc ep =>
+      if ep.predicate.endsWith "_q" then
+        match insertionSort ep.rargs with 
+        | (_, var) :: (_, rstr) :: (_, body) :: _ =>
+          let (nestedRstr, nestedBody) := expandQuantifier hm var rstr body
+          let predName := if ep.predicate.startsWith "_" then ep.predicate.drop 1 else ep.predicate
+          let quantStr := s!"?[{var}]:(({nestedRstr}) & {nestedBody})"
+          if acc == "" then quantStr else acc ++ " & " ++ quantStr
+        | _ => acc
+      else acc) ""
+    
+    if quantStr == "" then nonQuantStr 
+    else if nonQuantStr == "" then quantStr
+    else nonQuantStr ++ " & " ++ quantStr
+
   match (hm.find? rstr, hm.find? body) with
   | (some rstrPreds, some bodyPreds) =>
-    dbg_trace s!"Found handle content:"
-    dbg_trace s!"  RSTR preds: {rstrPreds}"
-    dbg_trace s!"  BODY preds: {bodyPreds}"
-    let rstrStr := String.intercalate " & " (rstrPreds.map (formatPredicate mainVar))
-    let bodyStr := String.intercalate " & " (bodyPreds.map (formatPredicate mainVar))
-    dbg_trace s!"Expanded to: ({rstrStr}), {bodyStr}"
-    (rstrStr, bodyStr)
-  | _ => 
-    dbg_trace "Failed to find handle content"
-    ("", "")
+    (processPredicates rstrPreds, processPredicates bodyPreds)
+  | _ => ("", "")
 
 private def findCompoundMatches (preds : List EP) : List CompoundMatch :=
   let rec processOne (ep : EP) : Option CompoundMatch := 
     if ep.predicate == "compound" then
-      dbg_trace "Processing compound predicate"
       let arg1 := ep.rargs.find? (fun p => p.1 == "ARG1")
       let arg2 := ep.rargs.find? (fun p => p.1 == "ARG2")
       match (arg1, arg2) with
       | (some (_, var1), some (_, var2)) =>
-        dbg_trace s!"Found compound args: var1={var1}, var2={var2}"
         let n1 := preds.find? (fun p => 
           p.predicate == "named" && matchArg p.rargs "ARG0" var1 && Option.isSome p.carg)
         let n2 := preds.find? (fun p => 
@@ -93,11 +104,8 @@ private def findCompoundMatches (preds : List EP) : List CompoundMatch :=
                pq1.bind getRstrArg,
                pq1.bind getBodyArg) with
         | (some s1, some s2, some rstr, some body) => 
-          dbg_trace "Found complete compound match"
           some { var1 := var1, var2 := var2, name1 := s1, name2 := s2, rstr := rstr, body := body }
-        | _ => 
-          dbg_trace "Failed to find all compound components"
-          none
+        | _ => none
       | _ => none
     else none
 
@@ -112,7 +120,6 @@ private def findCompoundMatches (preds : List EP) : List CompoundMatch :=
   findAll preds []
 
 def phase1 (preds : List EP) (hm : Multimap Var EP) : List EP :=
-  dbg_trace s!"phase1: Processing {preds.length} predicates"
   let foundMatches := findCompoundMatches preds
   let processMatch (m : CompoundMatch) : EP :=
     let s1_clean := if m.name1.startsWith "\"" then String.dropRight (String.drop m.name1 1) 1 else m.name1
@@ -135,7 +142,6 @@ def phase1 (preds : List EP) (hm : Multimap Var EP) : List EP :=
 def phase2 (preds : List EP) (hm : Multimap Var EP) : TransformResult :=
   let init : TransformResult := {quants := [], eqs := [], vars := []}
   preds.foldl (fun res ep =>
-    dbg_trace s!"phase2: Processing {ep.predicate}"
     if ep.predicate == "temp_compound_name" then
       match (ep.rargs.find? (fun x => x.1 == "ARG1"),
              ep.rargs.find? (fun x => x.1 == "ARG2"),
@@ -149,17 +155,24 @@ def phase2 (preds : List EP) (hm : Multimap Var EP) : TransformResult :=
           vars := var1 :: var2 :: res.vars }
       | _ => res
     else if ep.predicate == "proper_q" then
-      match (ep.rargs.find? (fun x => x.1 == "ARG0"), ep.carg) with
-      | (some (_, var), some name) =>
+      match (getArg ep "ARG0", getArg ep "RSTR", getArg ep "BODY", ep.carg) with
+      | (some var, some rstr, some body, some name) =>
         { res with
           quants := PWLQuantifier.proper_q var name :: res.quants,
           vars := var :: res.vars }
+      | (some var, some rstr, some body, none) =>
+        match hm.find? rstr with
+        | some [namedEP] =>
+          if namedEP.predicate == "named" && Option.isSome namedEP.carg then
+            { res with
+              quants := PWLQuantifier.proper_q var (Option.get! namedEP.carg) :: res.quants,
+              vars := var :: res.vars }
+          else res
+        | _ => res
       | _ => res
     else if ep.predicate.endsWith "_q" then
-      match (ep.rargs.find? (fun x => x.1 == "ARG0"),
-             ep.rargs.find? (fun x => x.1 == "RSTR"),
-             ep.rargs.find? (fun x => x.1 == "BODY")) with
-      | (some (_, var), some (_, rstr), some (_, body)) =>
+      match insertionSort ep.rargs with
+      | (_, var) :: (_, rstr) :: (_, body) :: _ =>
         let (rstrExpanded, bodyExpanded) := expandQuantifier hm var rstr body
         let predName := if ep.predicate.startsWith "_" then ep.predicate.drop 1 else ep.predicate
         match predName with
@@ -167,9 +180,9 @@ def phase2 (preds : List EP) (hm : Multimap Var EP) : TransformResult :=
           { res with
             quants := PWLQuantifier.some_q var rstrExpanded bodyExpanded :: res.quants,
             vars := var :: res.vars }
-        | _ =>
+        | pname =>
           { res with
-            quants := PWLQuantifier.other_q predName var rstrExpanded bodyExpanded :: res.quants,
+            quants := PWLQuantifier.other_q pname var rstrExpanded bodyExpanded :: res.quants,
             vars := var :: res.vars }
       | _ => res
     else res) init
@@ -197,20 +210,23 @@ partial def buildNested (remaining : List (List Var × String)) (seenVars : List
       | _ => ""
 
 def phase3 (result : TransformResult) : String :=
+  let formatQuantifier (quantifier : PWLQuantifier) : String := 
+    match quantifier with
+    | PWLQuantifier.proper_q var name =>
+      s!"?[n]:(name(n) & arg1(n)={var} & arg2(n)={name})"
+    | PWLQuantifier.some_q var rstr body =>
+      s!"({rstr}) & {body}"
+    | PWLQuantifier.other_q pname var rstr body =>
+      s!"?[{var}]:(({rstr}) & {body})"
+
   -- Set to true for incremental quantifier introduction, false for gathered at top
-  let incremental := true
+  let incremental := false
 
   if !incremental then
     -- Original format with top-level declarations
     let vars := result.vars.reverse.eraseDups
     let varList := String.intercalate "," (vars.map toString)
-    let quantStrs := result.quants.map fun q => match q with
-      | PWLQuantifier.proper_q var name => 
-          s!"?[n]:(name(n) & arg1(n)={var} & arg2(n)={name})"
-      | PWLQuantifier.some_q var rstr body =>
-          s!"?[{var}]:({rstr} & {body})"
-      | PWLQuantifier.other_q predname var rstr body =>
-          s!"?[{var}]:({rstr} & {body})"
+    let quantStrs := result.quants.map formatQuantifier
     let eqStrs := result.eqs.map fun (v1, v2) => s!"{v1}={v2}"
     let body := String.intercalate " &\n  " (quantStrs ++ eqStrs)
     s!"?[{varList}]:(\n  {body}\n)"
@@ -220,20 +236,16 @@ def phase3 (result : TransformResult) : String :=
         | PWLQuantifier.proper_q var name => 
             ([var], s!"?[n]:(name(n) & arg1(n)={var} & arg2(n)={name})")
         | PWLQuantifier.some_q var rstr body =>
-            ([var], s!"?[{var}]:({rstr} & {body})")
-        | PWLQuantifier.other_q predname var rstr body =>
-            ([var], s!"?[{var}]:({rstr} & {body})")) ++
+            ([var], s!"({rstr}) & {body}")
+        | PWLQuantifier.other_q pname var rstr body =>
+            ([var], s!"?[{var}]:(({rstr}) & {body})")) ++
       (result.eqs.map fun (v1, v2) => ([v1, v2], s!"{v1}={v2}"))
 
     buildNested allExpressions []
 
 def transform (preds : List EP) (hm : Multimap Var EP) : String := 
-  dbg_trace "Starting full transform"
-  dbg_trace s!"Handle map contains: {hm.keys}"
   let phase1Result := phase1 preds hm
-  dbg_trace "Phase 1 complete"
   let phase2Result := phase2 phase1Result hm
-  dbg_trace "Phase 2 complete"
   phase3 phase2Result
 
 end PWL.Transform
