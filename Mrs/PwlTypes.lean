@@ -28,6 +28,10 @@ def compareArgs (a b : String × Var) : Ordering :=
 instance : Ord (String × Var) where
   compare := compareArgs
 
+def getArg (ep: EP) (name: String) : Option Var :=
+  ep.rargs.find? (fun r => r.1 == name)
+  |>.map (fun r => r.2)
+
 def joinSep (sep : String) (l : List String) : String := 
   l.foldr (fun s r => (if r == "" then s else r ++ sep ++ s)) ""
 
