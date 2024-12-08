@@ -42,27 +42,37 @@ private def matchArg (args : List (String × Var)) (argName : String) (targetVar
 private def handlePredsToString (preds : List EP) : String := 
   String.intercalate ", " (preds.map toString)
 
-private instance : Ord (String × Var) where
-  compare a b := let toOrder : String → Nat 
-                   | "ARG0" => 0
-                   | "RSTR" => 1
-                   | "BODY" => 2
-                   | _ => 3
-                 match compare (toOrder a.1) (toOrder b.1) with
-                 | .eq => compareArgs a b
-                 | ord => ord
+structure NonQuantArg where
+  pair : String × Var
+  deriving Inhabited
 
-partial def expandQuantifier (hm : Multimap Var EP) (mainVar : Var) (rstr : Var) (body : Var) : String × String :=
-  let formatPredicate (var : Var) (ep : EP) : String :=
-    let argsStr := String.intercalate ", " (ep.rargs.map (fun a => toString a.2))
-    let predName := if ep.predicate.startsWith "_" then ep.predicate.drop 1 else ep.predicate
-    s!"{predName}({argsStr})"
+private instance : Ord NonQuantArg where
+  compare a b := let getNum (s : String) : Option Nat :=
+                   if s.startsWith "ARG" then
+                     let numStr := s.drop 3
+                     numStr.toNat?
+                   else none
+                 match (getNum a.pair.1, getNum b.pair.1) with
+                 | (some n1, some n2) => compare n1 n2  
+                 | (some _, none) => .lt
+                 | (none, some _) => .gt
+                 | (none, none) => compareArgs a.pair b.pair
 
-  let processPredicates (preds : List EP) : String := 
+private def nonQuantSort (args : List (String × Var)) : List (String × Var) :=
+  let asNonQuant : List NonQuantArg := args.map (λ p => ⟨p⟩)
+  let sorted := insertionSort asNonQuant
+  sorted.map NonQuantArg.pair
+
+partial def expandQuantifier (hm : Multimap Var EP) (_mainVar : Var) (rstr : Var) (body : Var) : String × String :=
+  let rec processPredicates (preds : List EP) : String := 
     let nonQuantPreds := preds.filter (fun p => !p.predicate.endsWith "_q")
     let quantPreds := preds.filter (fun p => p.predicate.endsWith "_q")
     
-    let nonQuantStr := String.intercalate " & " (nonQuantPreds.map (formatPredicate mainVar))
+    let nonQuantStr := String.intercalate " & " (nonQuantPreds.map (fun ep => 
+      let sortedArgs := nonQuantSort ep.rargs
+      let argsStr := String.intercalate ", " (sortedArgs.map (fun a => toString a.2))
+      let predName := if ep.predicate.startsWith "_" then ep.predicate.drop 1 else ep.predicate
+      s!"{predName}({argsStr})"))
     
     -- Process any nested quantifiers
     let quantStr := quantPreds.foldl (fun acc ep =>
@@ -119,7 +129,7 @@ private def findCompoundMatches (preds : List EP) : List CompoundMatch :=
 
   findAll preds []
 
-def phase1 (preds : List EP) (hm : Multimap Var EP) : List EP :=
+def phase1 (preds : List EP) (_hm : Multimap Var EP) : List EP :=
   let foundMatches := findCompoundMatches preds
   let processMatch (m : CompoundMatch) : EP :=
     let s1_clean := if m.name1.startsWith "\"" then String.dropRight (String.drop m.name1 1) 1 else m.name1
@@ -180,9 +190,9 @@ def phase2 (preds : List EP) (hm : Multimap Var EP) : TransformResult :=
           { res with
             quants := PWLQuantifier.some_q var rstrExpanded bodyExpanded :: res.quants,
             vars := var :: res.vars }
-        | pname =>
+        | _ =>
           { res with
-            quants := PWLQuantifier.other_q pname var rstrExpanded bodyExpanded :: res.quants,
+            quants := PWLQuantifier.other_q predName var rstrExpanded bodyExpanded :: res.quants,
             vars := var :: res.vars }
       | _ => res
     else res) init
@@ -216,7 +226,7 @@ def phase3 (result : TransformResult) : String :=
       s!"?[n]:(name(n) & arg1(n)={var} & arg2(n)={name})"
     | PWLQuantifier.some_q var rstr body =>
       s!"({rstr}) & {body}"
-    | PWLQuantifier.other_q pname var rstr body =>
+    | PWLQuantifier.other_q _ var rstr body =>
       s!"?[{var}]:(({rstr}) & {body})"
 
   -- Set to true for incremental quantifier introduction, false for gathered at top
@@ -237,7 +247,7 @@ def phase3 (result : TransformResult) : String :=
             ([var], s!"?[n]:(name(n) & arg1(n)={var} & arg2(n)={name})")
         | PWLQuantifier.some_q var rstr body =>
             ([var], s!"({rstr}) & {body}")
-        | PWLQuantifier.other_q pname var rstr body =>
+        | PWLQuantifier.other_q _ var rstr body =>
             ([var], s!"?[{var}]:(({rstr}) & {body})")) ++
       (result.eqs.map fun (v1, v2) => ([v1, v2], s!"{v1}={v2}"))
 
