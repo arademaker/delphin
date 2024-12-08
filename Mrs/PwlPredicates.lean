@@ -1,5 +1,4 @@
 import Mrs.Basic
-import Mrs.PwlArguments
 import Mrs.Hof
 import Lean.Data.RBMap
 

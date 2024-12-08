@@ -1,6 +1,5 @@
 import Mrs.Basic
 import Mrs.PwlVarFormat
-import Mrs.PwlArguments
 import Mrs.PwlTypes
 import Mrs.Hof
 import Lean.Data.HashMap
@@ -10,8 +9,7 @@ namespace PWL.Expression
 open Lean (HashMap)
 open MRS (EP Var)
 open MM (Multimap)
-open PWL (joinComma joinSep reformQuotedPair)
-open PWL.Arguments (getArg)
+open PWL (joinComma joinSep reformQuotedPair getArg)
 
 inductive LogicalForm where 
   | pred : EP → LogicalForm                            -- kill_v_1(e2,x3,x23)
