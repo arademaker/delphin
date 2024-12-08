@@ -1,6 +1,5 @@
 import Mrs.Basic
 import Mrs.PwlVarFormat
-import Mrs.PwlArguments
 import Mrs.PwlTypes
 import Mrs.Hof
 import Mrs.PwlTransformCore
@@ -12,8 +11,7 @@ namespace PWL.Transform
 open Lean (HashMap)
 open MRS (EP Var)
 open MM (Multimap)
-open PWL (joinComma joinSep reformQuotedPair)
-open PWL.Arguments (getArg)
+open PWL (joinComma joinSep reformQuotedPair getArg)
 open PWL.Expression (LogicalForm transformTopLevel)
 
 def collectScopeVars (ep : EP) (hm : Multimap Var EP) : List Var :=

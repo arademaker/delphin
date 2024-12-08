@@ -1,12 +1,33 @@
 import Mrs.Basic
+import Mrs.PwlVarFormat
+import Mrs.PwlTypes
 import Mrs.Hof
 import Lean.Data.HashMap
+import Util.InsertionSort
 
-namespace PWL.Transform 
+namespace PWL.Transform
 
+open Lean (HashMap)
 open MRS (EP Var)
 open MM (Multimap)
-open Lean (HashMap)
+open PWL (joinComma joinSep reformQuotedPair getArg)
+open InsertionSort
+
+instance : Ord (String × Var) where
+  compare := fun a b =>
+    if a.1.startsWith "ARG" && b.1.startsWith "ARG" then
+      match (a.1.drop 3).toNat?, (b.1.drop 3).toNat? with
+      | some n1, some n2 => compare n1 n2
+      | some _, none => .lt
+      | none, some _ => .gt
+      | none, none => .eq
+    else .eq
+
+inductive PWLQuantifier where
+  | proper_q : Var → String → PWLQuantifier  -- var, name
+  | some_q : Var → String → String → PWLQuantifier  -- var, expanded_rstr, expanded_body
+  | other_q : String → Var → String → String → PWLQuantifier  -- predname, var, expanded_rstr, expanded_body
+  deriving BEq, Inhabited
 
 structure CompoundMatch where
   var1 : Var
@@ -15,14 +36,13 @@ structure CompoundMatch where
   name2 : String
   rstr : Var
   body : Var
-deriving Repr, BEq, Inhabited
+  deriving Repr, BEq, Inhabited
 
 structure TransformResult where
-  names : List (Var × String) := []  
-  quants : List String := []        
+  quants : List PWLQuantifier := []  
   eqs : List (Var × Var) := []       
   vars : List Var := []              
-deriving Inhabited
+  deriving Inhabited
 
 private def matchArg (args : List (String × Var)) (argName : String) (targetVar : Var) : Bool :=
   match args.find? (fun x => x.1 == argName && x.2 == targetVar) with
@@ -33,15 +53,19 @@ private def handlePredsToString (preds : List EP) : String :=
   String.intercalate ", " (preds.map toString)
 
 private def formatPredicate (var : Var) (ep : EP) : String :=
-  dbg_trace s!"Formatting predicate {ep.predicate} for var {var}"
-  if ep.predicate.startsWith "_" then
-    match ep.rargs.find? (fun x => x.1 == "ARG1") with
-    | some (_, arg1) => s!"{ep.predicate.drop 1}({arg1})"
-    | none => s!"{ep.predicate.drop 1}({var})"
-  else
-    match ep.rargs.find? (fun x => x.1 == "ARG1") with
-    | some (_, arg1) => s!"{ep.predicate}({arg1})"
-    | none => s!"{ep.predicate}({var})"
+  dbg_trace s!"formatPredicate: Processing {ep.predicate} for var {var}"
+  dbg_trace s!"Arguments: {ep.rargs}"
+  
+  let orderedArgs := insertionSort ep.rargs
+  dbg_trace s!"Ordered arguments: {orderedArgs}"
+    
+  let argsStr := String.intercalate ", " (orderedArgs.map fun (_, argVar) => toString argVar)
+  dbg_trace s!"Combined arguments: {argsStr}"
+  
+  let predName := if ep.predicate.startsWith "_" then ep.predicate.drop 1 else ep.predicate
+  let result := s!"{predName}({argsStr})"
+  dbg_trace s!"Final result: {result}"
+  result
 
 private def expandQuantifier (hm : Multimap Var EP) (mainVar : Var) (rstr : Var) (body : Var) : String × String :=
   dbg_trace s!"Expanding quantifier for var={mainVar}, rstr={rstr}, body={body}"
@@ -73,9 +97,11 @@ private def findCompoundMatches (preds : List EP) : List CompoundMatch :=
           p.predicate == "named" && matchArg p.rargs "ARG0" var2 && Option.isSome p.carg)
         let pq1 := preds.find? (fun p => 
           p.predicate == "proper_q" && matchArg p.rargs "ARG0" var1)
-        match (n1.bind (·.carg), n2.bind (·.carg),
-               pq1.bind (fun p => p.rargs.find? (fun x => x.1 == "RSTR") |>.map (·.2)),
-               pq1.bind (fun p => p.rargs.find? (fun x => x.1 == "BODY") |>.map (·.2))) with
+        let getRstrArg p := p.rargs.find? (fun pair => pair.1 == "RSTR") |>.bind (fun r => some r.2)
+        let getBodyArg p := p.rargs.find? (fun pair => pair.1 == "BODY") |>.bind (fun r => some r.2)
+        match (n1.bind (fun x => x.carg), n2.bind (fun x => x.carg),
+               pq1.bind getRstrArg,
+               pq1.bind getBodyArg) with
         | (some s1, some s2, some rstr, some body) => 
           dbg_trace "Found complete compound match"
           some { var1 := var1, var2 := var2, name1 := s1, name2 := s2, rstr := rstr, body := body }
@@ -95,7 +121,7 @@ private def findCompoundMatches (preds : List EP) : List CompoundMatch :=
 
   findAll preds []
 
-def phase1 (preds : List EP) (_ : Multimap Var EP) : List EP :=
+def phase1 (preds : List EP) (hm : Multimap Var EP) : List EP :=
   dbg_trace "Starting phase1"
   let foundMatches := findCompoundMatches preds
   dbg_trace s!"Found {foundMatches.length} compound matches"
@@ -120,7 +146,7 @@ def phase1 (preds : List EP) (_ : Multimap Var EP) : List EP :=
 
 def phase2 (preds : List EP) (hm : Multimap Var EP) : TransformResult :=
   dbg_trace "Starting phase2"
-  let init : TransformResult := {names := [], quants := [], eqs := [], vars := []}
+  let init : TransformResult := {quants := [], eqs := [], vars := []}
   preds.foldl (fun res ep =>
     dbg_trace s!"Processing EP: {ep.predicate} with label={ep.label}"
     dbg_trace s!"  Args: {ep.rargs}"
@@ -128,19 +154,20 @@ def phase2 (preds : List EP) (hm : Multimap Var EP) : TransformResult :=
       dbg_trace "Found temp_compound_name"
       match (ep.rargs.find? (fun x => x.1 == "ARG1"),
              ep.rargs.find? (fun x => x.1 == "ARG2"),
+             ep.rargs.find? (fun x => x.1 == "RSTR"),
+             ep.rargs.find? (fun x => x.1 == "BODY"),
              ep.carg) with
-      | (some (_, var1), some (_, var2), some name) =>
+      | (some (_, var1), some (_, var2), some (_, rstr), some (_, body), some name) =>
         { res with 
-          names := (var1, name) :: res.names,
+          quants := PWLQuantifier.proper_q var1 name :: res.quants,
           eqs := (var1, var2) :: res.eqs,
           vars := var1 :: var2 :: res.vars }
       | _ => res
     else if ep.predicate == "proper_q" then
       match (ep.rargs.find? (fun x => x.1 == "ARG0"), ep.carg) with
       | (some (_, var), some name) =>
-        dbg_trace s!"Found proper_q with name: {name} for var {var}"
         { res with
-          names := (var, name) :: res.names,
+          quants := PWLQuantifier.proper_q var name :: res.quants,
           vars := var :: res.vars }
       | _ => res
     else if ep.predicate.endsWith "_q" then
@@ -150,20 +177,33 @@ def phase2 (preds : List EP) (hm : Multimap Var EP) : TransformResult :=
       | (some (_, var), some (_, rstr), some (_, body)) =>
         let (rstrExpanded, bodyExpanded) := expandQuantifier hm var rstr body
         let predName := if ep.predicate.startsWith "_" then ep.predicate.drop 1 else ep.predicate
-        { res with
-          quants := s!"{predName}({var}, ({rstrExpanded}), {bodyExpanded})" :: res.quants,
-          vars := var :: res.vars }
+        match predName with
+        | "some_q" =>
+          { res with
+            quants := PWLQuantifier.some_q var rstrExpanded bodyExpanded :: res.quants,
+            vars := var :: res.vars }
+        | _ =>
+          { res with
+            quants := PWLQuantifier.other_q predName var rstrExpanded bodyExpanded :: res.quants,
+            vars := var :: res.vars }
       | _ => res
     else res) init
 
 def phase3 (result : TransformResult) : String :=
-  dbg_trace "Starting phase3"
   let vars := result.vars.reverse.eraseDups
   let varList := String.intercalate "," (vars.map toString)
-  let nameStrs := result.names.reverse.map fun (var, name) => 
-    s!"?[n]:(name(n) & arg1(n)={var} & arg2(n)={name})"
+
+  let quantStrs := result.quants.map fun quant =>
+    match quant with
+    | PWLQuantifier.proper_q var name => 
+      s!"?[n]:(name(n) & arg1(n)={var} & arg2(n)={name})"
+    | PWLQuantifier.some_q var rstr body =>
+      s!"?[{var}]:({rstr} & {body})"
+    | PWLQuantifier.other_q predname var rstr body =>
+      s!"{predname}({var}, ({rstr}), {body})"
+
   let eqStrs := result.eqs.map fun (v1, v2) => s!"{v1}={v2}"
-  let allParts := nameStrs ++ result.quants ++ eqStrs
+  let allParts := quantStrs ++ eqStrs
   let body := String.intercalate " &\n  " allParts
   s!"?[{varList}]:(\n  {body}\n)"
 
@@ -177,5 +217,3 @@ def transform (preds : List EP) (hm : Multimap Var EP) : String :=
   phase3 phase2Result
 
 end PWL.Transform
-
-export PWL.Transform (transform)
