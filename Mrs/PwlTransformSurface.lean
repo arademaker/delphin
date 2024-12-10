@@ -43,6 +43,11 @@ def formatToSurface (result : TransformResult) : String :=
       let output := s!"![{var}]:({rstr} => {body})"
       logRewrite input output
 
+    | PWLQuantifier.other_q "udef_q" var rstr body =>
+      let input := "udef_q" 
+      let output := s!"({rstr}) & {body}"
+      logRewrite input output
+
     | PWLQuantifier.other_q name var rstr body =>
       let input := name
       let output := s!"{name}({var}, ({rstr}), {body})"
@@ -63,6 +68,8 @@ def formatToSurface (result : TransformResult) : String :=
         match q with
         | PWLQuantifier.proper_q var _ => ([var], formatQuantifier q)
         | PWLQuantifier.some_q var _ _ => ([var], formatQuantifier q)
+        | PWLQuantifier.other_q "udef_q" var _ _ => ([var], formatQuantifier q)
+        | PWLQuantifier.other_q "every_q" var _ _ => ([], formatQuantifier q)  -- Remove var from scoping for every_q
         | PWLQuantifier.other_q _ var _ _ => ([var], formatQuantifier q)) ++
       (result.eqs.map fun (v1, v2) => ([v1, v2], s!"{v1}={v2}"))
 
