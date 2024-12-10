@@ -1,9 +1,22 @@
 import Mrs.Basic
 import Mrs.PwlVarFormat
 import Mrs.PwlTypes
+import Mrs.PwlTransformShared
+import Mrs.PwlTransformSurface
 import Mrs.Hof
 import Lean.Data.HashMap
 import Util.InsertionSort
+
+/- We transform an MRS into a flatter representation by
+   1. identifying compound names
+   2. setting up the quantifiers and equality constraints
+   3. connecting everything with & operations
+
+   We do this in two phases
+   1. identify compound name constructions and convert them to 
+      temporary predicates holding the combined strings
+   2. traverse all quantified EPs and build up a PWL formula
+-/
 
 namespace PWL.Transform
 
@@ -13,12 +26,7 @@ open MM (Multimap)
 open PWL (joinComma joinSep reformQuotedPair getArg compareArgs)
 open InsertionSort
 
-inductive PWLQuantifier where
-  | proper_q : Var → String → PWLQuantifier  -- var, name
-  | some_q : Var → String → String → PWLQuantifier  -- var, expanded_rstr, expanded_body
-  | other_q : String → Var → String → String → PWLQuantifier  -- predname, var, expanded_rstr, expanded_body
-  deriving BEq, Inhabited
-
+/-- A compound match consists of variables with names and handles -/
 structure CompoundMatch where
   var1 : Var
   var2 : Var
@@ -28,12 +36,6 @@ structure CompoundMatch where
   body : Var
   deriving Repr, BEq, Inhabited
 
-structure TransformResult where
-  quants : List PWLQuantifier 
-  eqs : List (Var × Var)      
-  vars : List Var              
-  deriving Inhabited
-
 private def matchArg (args : List (String × Var)) (argName : String) (targetVar : Var) : Bool :=
   match args.find? (fun x => x.1 == argName && x.2 == targetVar) with
   | some _ => true 
@@ -42,6 +44,7 @@ private def matchArg (args : List (String × Var)) (argName : String) (targetVar
 private def handlePredsToString (preds : List EP) : String := 
   String.intercalate ", " (preds.map toString)
 
+/-- A non-quantifier argument pair of string and variable -/
 structure NonQuantArg where
   pair : String × Var
   deriving Inhabited
@@ -58,11 +61,13 @@ private instance : Ord NonQuantArg where
                  | (none, some _) => .gt
                  | (none, none) => compareArgs a.pair b.pair
 
+/-- Sort non-quantifier arguments for consistent ordering -/
 private def nonQuantSort (args : List (String × Var)) : List (String × Var) :=
   let asNonQuant : List NonQuantArg := args.map (λ p => ⟨p⟩)
   let sorted := insertionSort asNonQuant
   sorted.map NonQuantArg.pair
 
+/-- Expand a quantifier into its restriction and body components -/
 partial def expandQuantifier (hm : Multimap Var EP) (_mainVar : Var) (rstr : Var) (body : Var) : String × String :=
   let rec processPredicates (preds : List EP) : String := 
     let nonQuantPreds := preds.filter (fun p => !p.predicate.endsWith "_q")
@@ -72,7 +77,10 @@ partial def expandQuantifier (hm : Multimap Var EP) (_mainVar : Var) (rstr : Var
       let sortedArgs := nonQuantSort ep.rargs
       let argsStr := String.intercalate ", " (sortedArgs.map (fun a => toString a.2))
       let predName := if ep.predicate.startsWith "_" then ep.predicate.drop 1 else ep.predicate
-      s!"{predName}({argsStr})"))
+      let nameArg := if ep.predicate == "named" && Option.isSome ep.carg
+                     then s!", {Option.get! ep.carg}"
+                     else ""
+      s!"{predName}({argsStr}{nameArg})"))
     
     -- Process any nested quantifiers
     let quantStr := quantPreds.foldl (fun acc ep =>
@@ -95,6 +103,7 @@ partial def expandQuantifier (hm : Multimap Var EP) (_mainVar : Var) (rstr : Var
     (processPredicates rstrPreds, processPredicates bodyPreds)
   | _ => ("", "")
 
+/-- Find all compound matches in the predicates -/
 private def findCompoundMatches (preds : List EP) : List CompoundMatch :=
   let rec processOne (ep : EP) : Option CompoundMatch := 
     if ep.predicate == "compound" then
@@ -129,6 +138,7 @@ private def findCompoundMatches (preds : List EP) : List CompoundMatch :=
 
   findAll preds []
 
+/-- Phase 1: Convert compound names to temporary predicates -/
 def phase1 (preds : List EP) (_hm : Multimap Var EP) : List EP :=
   let foundMatches := findCompoundMatches preds
   let processMatch (m : CompoundMatch) : EP :=
@@ -149,6 +159,7 @@ def phase1 (preds : List EP) (_hm : Multimap Var EP) : List EP :=
 
   remaining ++ temp_compounds
 
+/-- Phase 2: Build the PWL formula from predicates -/
 def phase2 (preds : List EP) (hm : Multimap Var EP) : TransformResult :=
   let init : TransformResult := {quants := [], eqs := [], vars := []}
   preds.foldl (fun res ep =>
@@ -197,65 +208,10 @@ def phase2 (preds : List EP) (hm : Multimap Var EP) : TransformResult :=
       | _ => res
     else res) init
 
-partial def buildNested (remaining : List (List Var × String)) (seenVars : List Var) : String :=
-  match remaining with
-  | [] => ""
-  | exprs =>
-    let foundPair := List.find? (fun pair => 
-      let vars := pair.1
-      let newVars := vars.filter (fun v => !seenVars.contains v)
-      newVars.length ≤ 1) exprs
-
-    match foundPair with
-    | none => ""
-    | some expr =>
-      let vars := expr.1
-      let exprStr := expr.2
-      let newVars := vars.filter (fun v => !seenVars.contains v)
-      let restExprs := exprs.filter (fun x => x != expr)
-      let connector := if restExprs.isEmpty then "" else " &\n  "
-      match newVars with
-      | [] => exprStr ++ connector ++ buildNested restExprs seenVars
-      | [v] => s!"?[{v}]:(" ++ exprStr ++ connector ++ buildNested restExprs (v :: seenVars) ++ ")"
-      | _ => ""
-
-def phase3 (result : TransformResult) : String :=
-  let formatQuantifier (quantifier : PWLQuantifier) : String := 
-    match quantifier with
-    | PWLQuantifier.proper_q var name =>
-      s!"?[n]:(name(n) & arg1(n)={var} & arg2(n)={name})"
-    | PWLQuantifier.some_q var rstr body =>
-      s!"({rstr}) & {body}"
-    | PWLQuantifier.other_q _ var rstr body =>
-      s!"?[{var}]:(({rstr}) & {body})"
-
-  -- Set to true for incremental quantifier introduction, false for gathered at top
-  let incremental := true
-
-  if !incremental then
-    -- Original format with top-level declarations
-    let vars := result.vars.reverse.eraseDups
-    let varList := String.intercalate "," (vars.map toString)
-    let quantStrs := result.quants.map formatQuantifier
-    let eqStrs := result.eqs.map fun (v1, v2) => s!"{v1}={v2}"
-    let body := String.intercalate " &\n  " (quantStrs ++ eqStrs)
-    s!"?[{varList}]:(\n  {body}\n)"
-  else
-    let allExpressions : List (List Var × String) := 
-      (result.quants.map fun q => match q with
-        | PWLQuantifier.proper_q var name => 
-            ([var], s!"?[n]:(name(n) & arg1(n)={var} & arg2(n)={name})")
-        | PWLQuantifier.some_q var rstr body =>
-            ([var], s!"({rstr}) & {body}")
-        | PWLQuantifier.other_q _ var rstr body =>
-            ([var], s!"?[{var}]:(({rstr}) & {body})")) ++
-      (result.eqs.map fun (v1, v2) => ([v1, v2], s!"{v1}={v2}"))
-
-    buildNested allExpressions []
-
+/-- Main transform function that applies phase1 and phase2 and formats the result -/
 def transform (preds : List EP) (hm : Multimap Var EP) : String := 
   let phase1Result := phase1 preds hm
-  let phase2Result := phase2 phase1Result hm
-  phase3 phase2Result
+  let transformResult := phase2 phase1Result hm
+  PWL.TransformSurface.formatToSurface transformResult
 
 end PWL.Transform
