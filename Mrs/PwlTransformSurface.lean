@@ -38,6 +38,11 @@ def formatToSurface (result : TransformResult) : String :=
       let output := s!"?[S]:(S=^[s]:({rstr}) & size(S)=1 & S({var}) & ({body}))"
       logRewrite input output
 
+    | PWLQuantifier.other_q "def_explicit_q" var rstr body =>
+      let input := "def_explicit_q"
+      let output := s!"?[S]:(S=^[s]:({rstr}) & size(S)=1 & S({var}) & ({body}))"
+      logRewrite input output
+
     | PWLQuantifier.other_q "every_q" var rstr body =>
       let input := "every_q"
       let output := s!"![{var}]:({rstr} => {body})"
@@ -45,6 +50,16 @@ def formatToSurface (result : TransformResult) : String :=
 
     | PWLQuantifier.other_q "udef_q" var rstr body =>
       let input := "udef_q" 
+      let output := s!"({rstr}) & {body}"
+      logRewrite input output
+
+    | PWLQuantifier.other_q "pronoun_q" var rstr body =>
+      let input := "pronoun_q"
+      let output := s!"({rstr}) & {body}"
+      logRewrite input output
+
+    | PWLQuantifier.other_q "a_q" var rstr body =>
+      let input := "a_q"
       let output := s!"({rstr}) & {body}"
       logRewrite input output
 
@@ -69,8 +84,10 @@ def formatToSurface (result : TransformResult) : String :=
         | PWLQuantifier.proper_q var _ => ([var], formatQuantifier q)
         | PWLQuantifier.some_q var _ _ => ([var], formatQuantifier q)
         | PWLQuantifier.other_q "udef_q" var _ _ => ([var], formatQuantifier q)
-        | PWLQuantifier.other_q "every_q" var _ _ => ([], formatQuantifier q)  -- Remove var from scoping for every_q
-        | PWLQuantifier.other_q _ var _ _ => ([var], formatQuantifier q)) ++
+        | PWLQuantifier.other_q "pronoun_q" var _ _ => ([var], formatQuantifier q)
+        | PWLQuantifier.other_q "a_q" var _ _ => ([var], formatQuantifier q)
+        | PWLQuantifier.other_q "every_q" var _ _ => ([], formatQuantifier q)
+        | PWLQuantifier.other_q name var _ _ => ([var], formatQuantifier q)) ++
       (result.eqs.map fun (v1, v2) => ([v1, v2], s!"{v1}={v2}"))
 
     buildNested allExpressions []
