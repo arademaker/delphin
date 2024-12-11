@@ -7,17 +7,6 @@ import Mrs.Hof
 import Lean.Data.HashMap
 import Util.InsertionSort
 
-/- We transform an MRS into a flatter representation by
-   1. identifying compound names
-   2. setting up the quantifiers and equality constraints
-   3. connecting everything with & operations
-
-   We do this in two phases
-   1. identify compound name constructions and convert them to 
-      temporary predicates holding the combined strings
-   2. traverse all quantified EPs and build up a PWL formula
--/
-
 namespace PWL.Transform
 
 open Lean (HashMap)
@@ -36,14 +25,6 @@ structure CompoundMatch where
   body : Var
   deriving Repr, BEq, Inhabited
 
-private def matchArg (args : List (String × Var)) (argName : String) (targetVar : Var) : Bool :=
-  match args.find? (fun x => x.1 == argName && x.2 == targetVar) with
-  | some _ => true 
-  | none => false
-
-private def handlePredsToString (preds : List EP) : String := 
-  String.intercalate ", " (preds.map toString)
-
 /-- A non-quantifier argument pair of string and variable -/
 structure NonQuantArg where
   pair : String × Var
@@ -61,47 +42,16 @@ private instance : Ord NonQuantArg where
                  | (none, some _) => .gt
                  | (none, none) => compareArgs a.pair b.pair
 
-/-- Sort non-quantifier arguments for consistent ordering -/
-private def nonQuantSort (args : List (String × Var)) : List (String × Var) :=
-  let asNonQuant : List NonQuantArg := args.map (λ p => ⟨p⟩)
-  let sorted := insertionSort asNonQuant
-  sorted.map NonQuantArg.pair
+private def matchArg (args : List (String × Var)) (argName : String) (targetVar : Var) : Bool :=
+  match args.find? (fun x => x.1 == argName && x.2 == targetVar) with
+  | some _ => true 
+  | none => false
 
-/-- Expand a quantifier into its restriction and body components -/
-partial def expandQuantifier (hm : Multimap Var EP) (_mainVar : Var) (rstr : Var) (body : Var) : String × String :=
-  let rec processPredicates (preds : List EP) : String := 
-    let nonQuantPreds := preds.filter (fun p => !p.predicate.endsWith "_q")
-    let quantPreds := preds.filter (fun p => p.predicate.endsWith "_q")
-    
-    let nonQuantStr := String.intercalate " & " (nonQuantPreds.map (fun ep => 
-      let sortedArgs := nonQuantSort ep.rargs
-      let argsStr := String.intercalate ", " (sortedArgs.map (fun a => toString a.2))
-      let predName := if ep.predicate.startsWith "_" then ep.predicate.drop 1 else ep.predicate
-      let nameArg := if ep.predicate == "named" && Option.isSome ep.carg
-                     then s!", {Option.get! ep.carg}"
-                     else ""
-      s!"{predName}({argsStr}{nameArg})"))
-    
-    -- Process any nested quantifiers
-    let quantStr := quantPreds.foldl (fun acc ep =>
-      if ep.predicate.endsWith "_q" then
-        match insertionSort ep.rargs with 
-        | (_, var) :: (_, rstr) :: (_, body) :: _ =>
-          let (nestedRstr, nestedBody) := expandQuantifier hm var rstr body
-          let predName := if ep.predicate.startsWith "_" then ep.predicate.drop 1 else ep.predicate
-          let quantStr := s!"?[{var}]:(({nestedRstr}) & {nestedBody})"
-          if acc == "" then quantStr else acc ++ " & " ++ quantStr
-        | _ => acc
-      else acc) ""
-    
-    if quantStr == "" then nonQuantStr 
-    else if nonQuantStr == "" then quantStr
-    else nonQuantStr ++ " & " ++ quantStr
+private def handlePredsToString (preds : List EP) : String := 
+  String.intercalate ", " (preds.map toString)
 
-  match (hm.find? rstr, hm.find? body) with
-  | (some rstrPreds, some bodyPreds) =>
-    (processPredicates rstrPreds, processPredicates bodyPreds)
-  | _ => ("", "")
+private def normalizedPredName (predicate : String) : String :=
+  if predicate.startsWith "_" then predicate.drop 1 else predicate
 
 /-- Find all compound matches in the predicates -/
 private def findCompoundMatches (preds : List EP) : List CompoundMatch :=
@@ -138,9 +88,58 @@ private def findCompoundMatches (preds : List EP) : List CompoundMatch :=
 
   findAll preds []
 
+/-- Sort non-quantifier arguments for consistent ordering -/
+private def nonQuantSort (args : List (String × Var)) : List (String × Var) :=
+  let asNonQuant : List NonQuantArg := args.map (λ p => ⟨p⟩)
+  let sorted := insertionSort asNonQuant
+  sorted.map NonQuantArg.pair
+
+partial def expandQuantifier (hm : Multimap Var EP) (_mainVar : Var) (rstr : Var) (body : Var) : String × String :=
+  let rec processPredicates (preds : List EP) : String := 
+    let normalized := fun (p : EP) => normalizedPredName p.predicate
+    let nonQuantPreds := preds.filter (fun p => !p.predicate.endsWith "_q" && normalized p != "neg" && normalized p != "never_a_1")
+    let quantPreds := preds.filter (fun p => p.predicate.endsWith "_q" || normalized p == "neg" || normalized p == "never_a_1")
+    
+    let nonQuantStr := String.intercalate " & " (nonQuantPreds.map (fun ep => 
+      let sortedArgs := nonQuantSort ep.rargs
+      let argsStr := String.intercalate ", " (sortedArgs.map (fun a => toString a.2))
+      let predName := normalizedPredName ep.predicate
+      let nameArg := if ep.predicate == "named" && Option.isSome ep.carg
+                     then s!", {Option.get! ep.carg}"
+                     else ""
+      s!"{predName}({argsStr}{nameArg})"))
+    
+    let quantStr := quantPreds.foldl (fun acc ep =>
+      if ep.predicate.endsWith "_q" then
+        match insertionSort ep.rargs with 
+        | (_, var) :: (_, rstr) :: (_, body) :: _ =>
+          let (nestedRstr, nestedBody) := expandQuantifier hm var rstr body
+          let predName := normalizedPredName ep.predicate
+          let quantStr := s!"?[{var}]:(({nestedRstr}) & {nestedBody})"
+          if acc == "" then quantStr else acc ++ " & " ++ quantStr
+        | _ => acc
+      else if normalized ep == "neg" || normalized ep == "never_a_1" then
+        match ep.rargs.find? (fun arg => arg.2.sort == 'h') with
+        | some (_, handleArg) =>
+          let (rstrExpanded, _) := expandQuantifier hm ep.label handleArg handleArg
+          let negStr := s!"~({rstrExpanded})"
+          if acc == "" then negStr else acc ++ " & " ++ negStr
+        | _ => acc
+      else acc) ""
+    
+    if quantStr == "" then nonQuantStr 
+    else if nonQuantStr == "" then quantStr
+    else nonQuantStr ++ " & " ++ quantStr
+
+  match (hm.find? rstr, hm.find? body) with
+  | (some rstrPreds, some bodyPreds) =>
+    (processPredicates rstrPreds, processPredicates bodyPreds)
+  | _ => ("", "")
+
 /-- Phase 1: Convert compound names to temporary predicates -/
-def phase1 (preds : List EP) (_hm : Multimap Var EP) : List EP :=
+def phase1 (preds : List EP) (hm : Multimap Var EP) : List EP :=
   let foundMatches := findCompoundMatches preds
+
   let processMatch (m : CompoundMatch) : EP :=
     let s1_clean := if m.name1.startsWith "\"" then String.dropRight (String.drop m.name1 1) 1 else m.name1
     let s2_clean := if m.name2.startsWith "\"" then String.dropRight (String.drop m.name2 1) 1 else m.name2
@@ -195,13 +194,16 @@ def phase2 (preds : List EP) (hm : Multimap Var EP) : TransformResult :=
       match insertionSort ep.rargs with
       | (_, var) :: (_, rstr) :: (_, body) :: _ =>
         let (rstrExpanded, bodyExpanded) := expandQuantifier hm var rstr body
-        let predName := if ep.predicate.startsWith "_" then ep.predicate.drop 1 else ep.predicate
-        match predName with
-        | "some_q" =>
+        let predName := normalizedPredName ep.predicate
+        if ["some_q", "a_q", "udef_q", "pronoun_q"].contains predName then
           { res with
-            quants := PWLQuantifier.some_q var rstrExpanded bodyExpanded :: res.quants,
+            quants := PWLQuantifier.indefinite_q predName var rstrExpanded bodyExpanded :: res.quants,
             vars := var :: res.vars }
-        | _ =>
+        else if ["the_q", "def_explicit_q"].contains predName then
+          { res with
+            quants := PWLQuantifier.definite_q predName var rstrExpanded bodyExpanded :: res.quants,
+            vars := var :: res.vars }
+        else
           { res with
             quants := PWLQuantifier.other_q predName var rstrExpanded bodyExpanded :: res.quants,
             vars := var :: res.vars }
@@ -212,6 +214,6 @@ def phase2 (preds : List EP) (hm : Multimap Var EP) : TransformResult :=
 def transform (preds : List EP) (hm : Multimap Var EP) : String := 
   let phase1Result := phase1 preds hm
   let transformResult := phase2 phase1Result hm
-  PWL.TransformSurface.formatToSurface transformResult
+  formatToSurface transformResult
 
 end PWL.Transform

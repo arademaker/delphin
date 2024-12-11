@@ -2,20 +2,25 @@ import Mrs.Basic
 
 namespace PWL.Transform
 
-open MRS (EP Var)
+open MRS (Var EP Constraint MRS)
 
+/-- Represents the different types of logical quantifiers and operators in the PWL format -/
 inductive PWLQuantifier where
-  | proper_q : Var → String → PWLQuantifier  -- var, name
-  | some_q : Var → String → String → PWLQuantifier  -- var, expanded_rstr, expanded_body
-  | other_q : String → Var → String → String → PWLQuantifier  -- predname, var, expanded_rstr, expanded_body
+  | proper_q : Var → String → PWLQuantifier            -- var, name
+  | indefinite_q : String → Var → String → String → PWLQuantifier  -- predname (some_q/a_q/udef_q/pronoun_q), var, expanded_rstr, expanded_body
+  | definite_q : String → Var → String → String → PWLQuantifier   -- predname (the_q/def_explicit_q), var, expanded_rstr, expanded_body
+  | other_q : String → Var → String → String → PWLQuantifier  -- predname (no_q/every_q), var, expanded_rstr, expanded_body
+  | negation : String → String → PWLQuantifier  -- predname (neg/never_a_1), expanded_body
   deriving BEq, Inhabited
 
+/-- Collects the results of transforming predicates into PWL format -/
 structure TransformResult where
-  quants : List PWLQuantifier 
-  eqs : List (Var × Var)      
-  vars : List Var              
+  quants : List PWLQuantifier    -- List of transformed quantifiers
+  eqs : List (Var × Var)        -- List of variable equalities
+  vars : List Var               -- List of variables in scope
   deriving Inhabited
 
+/-- Builds nested quantifier expressions with proper variable scoping -/
 partial def buildNested (remaining : List (List Var × String)) (seenVars : List Var) : String :=
   match remaining with
   | [] => ""

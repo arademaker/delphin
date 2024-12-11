@@ -23,44 +23,29 @@ def formatToSurface (result : TransformResult) : String :=
       let output := s!"?[n]:(name(n) & arg1(n)={var} & arg2(n)={name})"
       logRewrite input output
 
-    | PWLQuantifier.some_q var rstr body =>
-      let input := "some_q"
+    | PWLQuantifier.indefinite_q predName var rstr body =>
+      let input := predName
       let output := s!"({rstr}) & {body}"
-      logRewrite input output 
+      logRewrite input output
+
+    | PWLQuantifier.definite_q predName var rstr body =>
+      let input := predName
+      let output := s!"?[S]:(S=^[s]:({rstr}) & size(S)=1 & S({var}) & ({body}))"
+      logRewrite input output
+
+    | PWLQuantifier.negation predName body =>
+      let input := predName
+      let output := s!"~({body})"
+      logRewrite input output
 
     | PWLQuantifier.other_q "no_q" var rstr body =>
       let input := "no_q"
       let output := s!"![{var}]:({rstr} => ~({body}))"
       logRewrite input output
 
-    | PWLQuantifier.other_q "the_q" var rstr body =>
-      let input := "the_q"
-      let output := s!"?[S]:(S=^[s]:({rstr}) & size(S)=1 & S({var}) & ({body}))"
-      logRewrite input output
-
-    | PWLQuantifier.other_q "def_explicit_q" var rstr body =>
-      let input := "def_explicit_q"
-      let output := s!"?[S]:(S=^[s]:({rstr}) & size(S)=1 & S({var}) & ({body}))"
-      logRewrite input output
-
     | PWLQuantifier.other_q "every_q" var rstr body =>
       let input := "every_q"
       let output := s!"![{var}]:({rstr} => {body})"
-      logRewrite input output
-
-    | PWLQuantifier.other_q "udef_q" var rstr body =>
-      let input := "udef_q" 
-      let output := s!"({rstr}) & {body}"
-      logRewrite input output
-
-    | PWLQuantifier.other_q "pronoun_q" var rstr body =>
-      let input := "pronoun_q"
-      let output := s!"({rstr}) & {body}"
-      logRewrite input output
-
-    | PWLQuantifier.other_q "a_q" var rstr body =>
-      let input := "a_q"
-      let output := s!"({rstr}) & {body}"
       logRewrite input output
 
     | PWLQuantifier.other_q name var rstr body =>
@@ -82,10 +67,9 @@ def formatToSurface (result : TransformResult) : String :=
       (result.quants.map fun q => 
         match q with
         | PWLQuantifier.proper_q var _ => ([var], formatQuantifier q)
-        | PWLQuantifier.some_q var _ _ => ([var], formatQuantifier q)
-        | PWLQuantifier.other_q "udef_q" var _ _ => ([var], formatQuantifier q)
-        | PWLQuantifier.other_q "pronoun_q" var _ _ => ([var], formatQuantifier q)
-        | PWLQuantifier.other_q "a_q" var _ _ => ([var], formatQuantifier q)
+        | PWLQuantifier.indefinite_q _ var _ _ => ([var], formatQuantifier q)
+        | PWLQuantifier.definite_q _ var _ _ => ([var], formatQuantifier q)
+        | PWLQuantifier.negation _ _ => ([], formatQuantifier q)
         | PWLQuantifier.other_q "every_q" var _ _ => ([], formatQuantifier q)
         | PWLQuantifier.other_q name var _ _ => ([var], formatQuantifier q)) ++
       (result.eqs.map fun (v1, v2) => ([v1, v2], s!"{v1}={v2}"))
