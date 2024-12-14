@@ -1,7 +1,6 @@
 import Mrs.Basic
 import Mrs.PwlVarFormat 
 import Mrs.PwlTransformCore
-import Mrs.PwlTransformFormat
 import Mrs.Hof
 import Mrs.PwlTypes
 import Lean.Data.HashMap
