@@ -1,5 +1,4 @@
 import Mrs.Basic
-import Mrs.PwlVarFormat 
 import Mrs.PwlTransformCore
 import Mrs.PwlTypes
 import Mrs.PwlTransformShared

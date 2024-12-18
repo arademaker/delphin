@@ -1,6 +1,5 @@
 import Mrs.Basic
 import Mrs.PwlTypes
-import Mrs.PwlVarFormat
 import Mrs.PwlTransformShared
 import Util.InsertionSort
 

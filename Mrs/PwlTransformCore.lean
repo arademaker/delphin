@@ -1,12 +1,10 @@
 import Mrs.Basic
 import Mrs.PwlTypes 
-import Mrs.PwlVarFormat
 import Mrs.PwlTransformScoping
 import Mrs.PwlTransformShared 
 import Mrs.PwlTransformMinScoping
 import Mrs.PwlTransformSerialize
 import Mrs.Hof
-import Mrs.PwlPredicates
 import Util.InsertionSort
 
 namespace PWL.Transform
