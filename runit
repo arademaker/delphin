@@ -1,0 +1,2 @@
+#!/bin/sh
+LEAN_PATH=.lake/build/lib lean --run Main.lean
