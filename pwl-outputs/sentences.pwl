@@ -1,18 +1,18 @@
-?[x29,x16,x3]:(/* proper_q */ (named(x16, "Dreadbury Mansion") & _kill_v_1(e2, x3, x29) & person(x3) & _live_v_1(e8, x3) & _in_p_loc(e9, e8, x16) & named(x29, "Aunt Agatha")))
+?[x29,x16,x3]:(/* proper_q */ (named(x16, "Dreadbury Mansion") & _kill_v_1(x3, arg1(x3) = e2) & person(x3) & _live_v_1(x3, arg1(x3) = e8) & _in_p_loc(x16, arg1(x16) = e9, arg2(x16) = e8) & named(x29, "Aunt Agatha")))
 /* --- */
-?[x38,x24,x19,x14,x46,x8,x3]:(/* proper_q */ (_live_v_1(e30, x3) & _in_p_loc(e31, e30, x38) & _and_c(e2, e30, e45) & _be_v_id(e45, x3, x46) & implicit_conj(x3, x8, x14) & named(x8, "Agatha") & _only_a_1(e51, x46) & _people_n_of(x46, i52) & _live_v_1(e53, x46) & _therein_p_dir(e54, e53) & _and_c(x14, x19, x24) & _butler_n_1(x19) & named(x24, "Charles") & named(x38, "Dreadbury Mansion")))
+?[x38,x24,x19,x14,x46,x8,x3]:(/* proper_q */ (_live_v_1(x3, arg1(x3) = e30) & _in_p_loc(x38, arg1(x38) = e31, arg2(x38) = e30) & _and_c(e2, arg1(e2) = e30, arg2(e2) = e45) & _be_v_id(x3, arg1(x3) = e45) & implicit_conj(x3) & named(x8, "Agatha") & _only_a_1(x46, arg1(x46) = e51) & _people_n_of(x46, arg1(x46) = i52) & _live_v_1(x46, arg1(x46) = e53) & _therein_p_dir(e54, arg1(e54) = e53) & _and_c(x14) & _butler_n_1(x19) & named(x24, "Charles") & named(x38, "Dreadbury Mansion")))
 /* --- */
-?[x16,x10,x34,x3]:(/* pronoun_q */ (_always_a_1(i8, e9) & _hate_v_1(e9, x3, x10) & _and_c(e2, e9, e22) & _never_a_1(i23) & _killer_n_1(x3) & pron(x34) & poss(e15, x10, x16) & _victim_n_of(x10, i21) & pron(x16)))
+?[x16,x10,x34,x3]:(/* pronoun_q */ (_always_a_1(i8, arg1(i8) = e9) & _hate_v_1(x3, arg1(x3) = e9) & _and_c(e2, arg1(e2) = e9, arg2(e2) = e22) & _never_a_1(i23) & _killer_n_1(x3) & pron(x34) & poss(x10, arg1(x10) = e15) & _victim_n_of(x10, arg1(x10) = i21) & pron(x16)))
 /* --- */
-?[x20,x15,x9,x3]:(/* udef_q */ (_hate_v_1(e2, x3, x9) & named(x3, "Charles") & person(x9) & _hate_v_1(e27, x15, x9) & compound(e19, x15, x20) & named(x15, "Agatha") & _aunt_n_of(x20, i25)))
+?[x20,x15,x9,x3]:(/* udef_q */ (_hate_v_1(x3, arg1(x3) = e2) & named(x3, "Charles") & person(x9) & _hate_v_1(x15, arg1(x15) = e27) & compound(x15, arg1(x15) = e19) & named(x15, "Agatha") & _aunt_n_of(x20, arg1(x20) = i25)))
 /* --- */
-?[x15,x3]:(/* _the_q */ ![x9]:(/* every_q */ (_hate_v_1(e2, x3, x9) & named(x3, "Agatha") & person(x9) & _except_p(e14, x9, x15) & _butler_n_1(x15))))
+?[x15,x3]:(/* _the_q */ ![x9]:(/* every_q */ (_hate_v_1(x3, arg1(x3) = e2) & named(x3, "Agatha") & person(x9) & _except_p(x9, arg1(x9) = e14) & _butler_n_1(x15))))
 /* --- */
-?[x25,x3]:(/* proper_q */ ![x8]:(/* every_q */ (_hate_v_1(e2, x3, x8) & _butler_n_1(x3) & person(x8) & neg(e13) & _rich_a_in(e16, x8, i17) & more_comp(e18, e16, x25) & named(x25, "Aunt Agatha"))))
+?[x25,x3]:(/* proper_q */ ![x8]:(/* every_q */ (_hate_v_1(x3, arg1(x3) = e2) & _butler_n_1(x3) & person(x8) & neg(e13) & _rich_a_in(x8, arg1(x8) = e16, arg2(x8) = i17) & more_comp(x25, arg1(x25) = e18, arg2(x25) = e16) & named(x25, "Aunt Agatha"))))
 /* --- */
-?[x19,x14,x3]:(/* udef_q */ ![x8]:(/* every_q */ (_hate_v_1(e2, x3, x8) & _butler_n_1(x3) & person(x8) & _hate_v_1(e26, x14, x8) & compound(e18, x14, x19) & named(x14, "Agatha") & _aunt_n_of(x19, i24))))
+?[x19,x14,x3]:(/* udef_q */ ![x8]:(/* every_q */ (_hate_v_1(x3, arg1(x3) = e2) & _butler_n_1(x3) & person(x8) & _hate_v_1(x14, arg1(x14) = e26) & compound(x14, arg1(x14) = e18) & named(x14, "Agatha") & _aunt_n_of(x19, arg1(x19) = i24))))
 /* --- */
-?[x3]:(/* _no_q */ ![x8]:(/* every_q */ (_hate_v_1(e2, x3, x8) & person(x3) & person(x8))))
+?[x3]:(/* _no_q */ ![x8]:(/* every_q */ (_hate_v_1(x3, arg1(x3) = e2) & person(x3) & person(x8))))
 /* --- */
 neg(e11)
 /* --- */
