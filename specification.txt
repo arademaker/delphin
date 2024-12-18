@@ -45,20 +45,29 @@ can serialize results in the format described in phase 3.  In the concrete synta
 Example transformations for quantifiers:
 
 ### Phase 3
-Phase 3 should serialize the Formula to string output, adding variable scoping according to the rules defined above.
+Phase 3 converts X2 to X1, eliminating it from all predicates.
 
-A quantifier predicate like:
+### Phase 4
+Phase 4 performs minimum scoping, described below.
+
+There are two types of PWL syntax for scope.  The first, and typical case is existential
+quantification and it uses the syntax "?[X]:".  The other is universal quantification
+and it uses the syntax "![X]:".  X may be a single variable name or a comma delimited set of variable names.
+It is important that the scope for universal quantification be tight, and that no other
+variables mistakely get included in a universal quantification variable list. 
+PWL universal quantification is connected with the every_q quantifier.   Other MRS/ERG _q quantifiers like
+the_q or udef_q should have their variables be denoted with PWL existential quantifers.
+Only if a universal and an existential MRS/ERG quantifier both reference the same variable may
+there be both PWL existential and universal quantifier.  In these cases, the existential must be on the outside, wrapping the universal quanitifer.
+The default, however, should be that there is either an existential or a universal quantifier but not both.
+
+For example, this would be illegal:
+
 ```
-proper_q(X1,named(X1,s1),A & B, carg=s1 + " " + s2)
+?[x3]:(?[x8]:(/* every_q */ ![x8]:((_hate_v_1(e2, x3, x8) & person(x3) & person(x8)))))
 ```
 
-will be serialized into:
-
-```
-/* proper_q */ (?[n]:(name(n) & arg1(n)=X1 & arg2(n)=(s1 + " " + s2) & AA))
-```
-
-## Example Final Output Format
+## Example Final Output Format (after phase 5)
 The serialized output should match this format and follow all scoping rules:
 
 ```
@@ -88,18 +97,17 @@ The serialized output should match this format and follow all scoping rules:
 )
 ```
 
-There are two types of PWL syntax for scope.  The first, and typical case is existential
-quantification and it uses the syntax "?[X]:".  The other is universal quantification
-and it uses the syntax "![X]:".  X may be a single variable name or a comma delimited set of variable names.
-It is important that the scope for universal quantification be tight, and that no other
-variables mistakely get included in a universal quantification variable list. 
-PWL universal quantification is connected with the every_q quantifier.   Other MRS/ERG _q quantifiers like
-the_q or udef_q should have their variables be denoted with PWL existential quantifers.
-Only if a universal and an existential MRS/ERG quantifier both reference the same variable may
-there be both PWL existential and universal quantifier.  In these cases, the existential must be on the outside, wrapping the universal quanitifer.
-The default, however, should be that there is either an existential or a universal quantifier but not both.
-For example, this would be illegal:
+### Phase 5
+Phase 5 serializes as below.
+
+A quantifier predicate like:
+```
+proper_q(X1,named(X1,s1),A & B, carg=s1 + " " + s2)
+```
+
+will be serialized into:
 
 ```
-?[x3]:(?[x8]:(/* every_q */ ![x8]:((_hate_v_1(e2, x3, x8) & person(x3) & person(x8)))))
+/* proper_q */ (?[n]:(name(n) & arg1(n)=X1 & arg2(n)=(s1 + " " + s2) & AA))
 ```
+
