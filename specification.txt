@@ -1,0 +1,105 @@
+# PWL Transformation and Scoping Specification
+
+## Variable Scoping Rules
+
+### Core Principles
+1. Only variables of type 'x' (entities) should be introduced with ?[var]
+2. Events ('e'), individuals ('i') and handles ('h') should NOT be scoped with ?[var]
+3. An 'x' variable can only be referenced within an enclosing scope that introduces it 
+4. Each entity variable's scope must be minimal while preserving access
+5. Independent entity variables can have parallel scopes
+6. Variables in inner scopes automatically have access to all variables from lexically enclosing scopes
+
+## Transformation Pipeline
+
+### Phase 1
+Should look for:
+1. proper_q(X1,..,A) 
+2. proper_q(X2,..,B)
+3. named(X1,s1)
+4. named(X2,s2)
+5. compound(e,X1,X2)
+
+And rewrite this into:
+```
+temp_compound_name(X1,X2,A,B,s)
+```
+
+### Phase 2
+Should rewrite:
+```
+temp_compound_name(X1,X2,A,B,s)
+```
+into a Formula structure that represents an equivalent logical form to:
+```
+proper_q(X1,named(X1,s1),A & B, carg=s1 + " " + s2)
+```
+The Formula structure must capture the variable bindings, argument dependencies, and combined name string in a form that phase 3 can serialize appropriately.
+
+The data structure that represents predicates (EP) has a slot called CARG for named's string.
+Use this slot for storing the combined string. In this way, no new predicates need to be generated and the handle map can 
+remain fixed. 
+
+Phase 2 will produce a hierarchical Formula that wraps an EP. It needs to store the first "x" variable in the quantifiers so that phase 3
+can serialize results in the format described in phase 3.  In the concrete syntax "?[x]:" will preface the serialization of Formula EPs.
+Example transformations for quantifiers:
+
+### Phase 3
+Phase 3 should serialize the Formula to string output, adding variable scoping according to the rules defined above.
+
+A quantifier predicate like:
+```
+proper_q(X1,named(X1,s1),A & B, carg=s1 + " " + s2)
+```
+
+will be serialized into:
+
+```
+/* proper_q */ (?[n]:(name(n) & arg1(n)=X1 & arg2(n)=(s1 + " " + s2) & AA))
+```
+
+## Example Final Output Format
+The serialized output should match this format and follow all scoping rules:
+
+```
+?[x3]:(
+  ?[x46]:(
+    live_v_1(x46, e53) &
+    people_n_of(i52, x46) &
+    only_a_1(x46, e51) &
+    be_v_id(x46, x3, e45) &
+    ?[x32]:(
+      /* proper_q */ ?[n]:(name(n) & arg1(n)=x32 & arg2(n)="Dreadbury Mansion") &
+      in_p_loc(x32, e30, e31)
+    ) &
+    ?[x8]:(
+      /* proper_q */ ?[n]:(name(n) & arg1(n)=x8 & arg2(n)="Agatha") &
+      ?[x14]:(
+        ?[x19,x24]:(
+          /* proper_q */ ?[n]:(name(n) & arg1(n)=x24 & arg2(n)="Charles") &
+          butler_n_1(x19) &
+          and_c(x24, x19, x14)
+        ) &
+        implicit_conj(x14, x8, x3)
+      )
+    )
+  ) &
+  live_v_1(x3, e30)
+)
+```
+
+There are two types of PWL syntax for scope.  The first, and typical case is existential
+quantification and it uses the syntax "?[X]:".  The other is universal quantification
+and it uses the syntax "![X]:".  X may be a single variable name or a comma delimited set of variable names.
+It is important that the scope for universal quantification be tight, and that no other
+variables mistakely get included in a universal quantification variable list. 
+PWL universal quantification is connected with the every_q quantifier.   Other MRS/ERG _q quantifiers like
+the_q or udef_q should have their variables be denoted with PWL existential quantifers.
+Only if a universal and an existential MRS/ERG quantifier both reference the same variable may
+there be both PWL existential and universal quantifier.  In these cases, the existential must be on the outside, wrapping the universal quanitifer.
+The default, however, should be that there is either an existential or a universal quantifier but not both.
+For example, this would be illegal:
+
+```
+?[x3]:(?[x8]:(/* every_q */ ![x8]:((_hate_v_1(e2, x3, x8) & person(x3) & person(x8)))))
+```

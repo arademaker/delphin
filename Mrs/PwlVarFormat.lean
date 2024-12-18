@@ -10,9 +10,9 @@ open MM (Multimap)
 
 def pwlVar (var : Var) : String :=
   match var.sort with
-  | 'x' => s!"X{var.id}"
+  | 'x' => s!"x{var.id}"  -- keep x lowercase
   | 'e' => s!"e{var.id}"
-  | 'h' => s!"H{var.id}"
+  | 'h' => s!"h{var.id}"
   | _ => s!"{var.sort}{var.id}"
 
 def findArg (args : List (String × Var)) (name : String) : Option Var :=

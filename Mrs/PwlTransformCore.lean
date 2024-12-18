@@ -1,219 +1,172 @@
 import Mrs.Basic
+import Mrs.PwlTypes 
 import Mrs.PwlVarFormat
-import Mrs.PwlTypes
-import Mrs.PwlTransformShared
-import Mrs.PwlTransformSurface
+import Mrs.PwlTransformScoping
+import Mrs.PwlTransformShared 
+import Mrs.PwlTransformMinScoping
+import Mrs.PwlTransformSerialize
 import Mrs.Hof
-import Lean.Data.HashMap
+import Mrs.PwlPredicates
 import Util.InsertionSort
 
 namespace PWL.Transform
 
-open Lean (HashMap)
-open MRS (EP Var)
+open MRS (Var EP Constraint MRS)
 open MM (Multimap)
-open PWL (joinComma joinSep reformQuotedPair getArg compareArgs)
+open Lean (Format)
 open InsertionSort
+open PWL.Transform.Scoping (processPredicates processEP EliminatedVars isVarEliminated collectEliminatedVars)
+open PWL.Transform.MinScoping (minimizeScoping)
+open PWL.Transform.Serialize (formatAsPWL)
 
-/-- A compound match consists of variables with names and handles -/
 structure CompoundMatch where
-  var1 : Var
-  var2 : Var
-  name1 : String
-  name2 : String
-  rstr : Var
-  body : Var
-  deriving Repr, BEq, Inhabited
+  compound : EP
+  properQ1 : EP
+  properQ2 : EP
+  named1   : EP
+  named2   : EP
+  deriving Repr, Inhabited, BEq
 
-/-- A non-quantifier argument pair of string and variable -/
-structure NonQuantArg where
-  pair : String × Var
-  deriving Inhabited
+instance : ToString CompoundMatch where
+  toString m := s!"CompoundMatch(compound.label: {m.compound.label}, properQ1.label: {m.properQ1.label}, compound: {m.compound})"
 
-private instance : Ord NonQuantArg where
-  compare a b := let getNum (s : String) : Option Nat :=
-                   if s.startsWith "ARG" then
-                     let numStr := s.drop 3
-                     numStr.toNat?
-                   else none
-                 match (getNum a.pair.1, getNum b.pair.1) with
-                 | (some n1, some n2) => compare n1 n2  
-                 | (some _, none) => .lt
-                 | (none, some _) => .gt
-                 | (none, none) => compareArgs a.pair b.pair
+instance : ToString (List CompoundMatch) where
+  toString xs := String.intercalate ", " (xs.map toString)
 
-private def matchArg (args : List (String × Var)) (argName : String) (targetVar : Var) : Bool :=
-  match args.find? (fun x => x.1 == argName && x.2 == targetVar) with
-  | some _ => true 
-  | none => false
+def shouldRemove (p : EP) (pat : CompoundMatch) : Bool :=
+  p == pat.compound || p == pat.properQ1 || p == pat.properQ2 || 
+  p == pat.named1 || p == pat.named2
 
-private def handlePredsToString (preds : List EP) : String := 
-  String.intercalate ", " (preds.map toString)
+def getCompoundPattern (preds : List EP) (c : EP) (handleMap : Multimap Var EP) : Option CompoundMatch :=
+  if c.predicate != "compound" && c.predicate != "_compound" then none else
+  (match c.rargs with
+  | (_, x1) :: (_, x2) :: _ =>
+    dbg_trace ("Found compound args: " ++ toString x1 ++ ", " ++ toString x2)
+    if x1.sort == 'x' && x2.sort == 'x' then
+      let handlePreds := handleMap.keys.foldl (fun acc k =>
+        match handleMap.find? k with
+        | some preds => acc ++ preds
+        | none => acc) []
 
-private def normalizedPredName (predicate : String) : String :=
-  if predicate.startsWith "_" then predicate.drop 1 else predicate
+      let preds1 := handlePreds.filter fun p => p.rargs.any fun (_, v2) => v2 == x1
+      let preds2 := handlePreds.filter fun p => p.rargs.any fun (_, v2) => v2 == x2
 
-/-- Find all compound matches in the predicates -/
-private def findCompoundMatches (preds : List EP) : List CompoundMatch :=
-  let rec processOne (ep : EP) : Option CompoundMatch := 
-    if ep.predicate == "compound" then
-      let arg1 := ep.rargs.find? (fun p => p.1 == "ARG1")
-      let arg2 := ep.rargs.find? (fun p => p.1 == "ARG2")
-      match (arg1, arg2) with
-      | (some (_, var1), some (_, var2)) =>
-        let n1 := preds.find? (fun p => 
-          p.predicate == "named" && matchArg p.rargs "ARG0" var1 && Option.isSome p.carg)
-        let n2 := preds.find? (fun p => 
-          p.predicate == "named" && matchArg p.rargs "ARG0" var2 && Option.isSome p.carg)
-        let pq1 := preds.find? (fun p => 
-          p.predicate == "proper_q" && matchArg p.rargs "ARG0" var1)
-        let getRstrArg p := p.rargs.find? (fun pair => pair.1 == "RSTR") |>.bind (fun r => some r.2)
-        let getBodyArg p := p.rargs.find? (fun pair => pair.1 == "BODY") |>.bind (fun r => some r.2)
-        match (n1.bind (fun x => x.carg), n2.bind (fun x => x.carg),
-               pq1.bind getRstrArg,
-               pq1.bind getBodyArg) with
-        | (some s1, some s2, some rstr, some body) => 
-          some { var1 := var1, var2 := var2, name1 := s1, name2 := s2, rstr := rstr, body := body }
-        | _ => none
-      | _ => none
+      let properQ1 := preds1.find? fun p => p.predicate.endsWith "_q"
+      let properQ2 := preds2.find? fun p => p.predicate.endsWith "_q"
+      let named1 := preds1.find? fun p => p.predicate == "named"
+      let named2 := preds2.find? fun p => p.predicate == "named"
+
+      match properQ1, properQ2, named1, named2 with
+      | some q1, some q2, some n1, some n2 =>
+        match n1.carg, n2.carg with
+        | some s1, some s2 => some ⟨c, q1, q2, n1, n2⟩
+        | _, _ => none
+      | _, _, _, _ => none
     else none
+  | _ => none)
 
-  let rec findAll (remaining : List EP) (acc : List CompoundMatch) : List CompoundMatch :=
-    match remaining with
-    | [] => acc
-    | ep :: rest =>
-      match processOne ep with
-      | some m => findAll rest (m :: acc)
-      | none => findAll rest acc
+def makeTemp (parent : Var) (ev : EliminatedVars) (pat : CompoundMatch) : Option EP :=
+  dbg_trace ("Making temp_compound_name with: " ++
+             "pat.properQ1=" ++ toString pat.properQ1 ++
+             " pat.properQ2=" ++ toString pat.properQ2 ++
+             " pat.named1=" ++ toString pat.named1 ++
+             " pat.named2=" ++ toString pat.named2)
 
-  findAll preds []
-
-/-- Sort non-quantifier arguments for consistent ordering -/
-private def nonQuantSort (args : List (String × Var)) : List (String × Var) :=
-  let asNonQuant : List NonQuantArg := args.map (λ p => ⟨p⟩)
-  let sorted := insertionSort asNonQuant
-  sorted.map NonQuantArg.pair
-
-partial def expandQuantifier (hm : Multimap Var EP) (_mainVar : Var) (rstr : Var) (body : Var) : String × String :=
-  let rec processPredicates (preds : List EP) : String := 
-    let normalized := fun (p : EP) => normalizedPredName p.predicate
-    let nonQuantPreds := preds.filter (fun p => !p.predicate.endsWith "_q" && normalized p != "neg" && normalized p != "never_a_1")
-    let quantPreds := preds.filter (fun p => p.predicate.endsWith "_q" || normalized p == "neg" || normalized p == "never_a_1")
+  (match pat.named1.carg, pat.named2.carg with
+  | some s1, some s2 =>
+    let x1 := pat.properQ1.rargs.find? (fun arg => arg.1 == "ARG0")
+    let x2 := pat.properQ2.rargs.find? (fun arg => arg.1 == "ARG0")
+    let b1 := pat.properQ1.rargs.find? (fun arg => arg.1 == "BODY")
+    let b2 := pat.properQ2.rargs.find? (fun arg => arg.1 == "BODY") 
     
-    let nonQuantStr := String.intercalate " & " (nonQuantPreds.map (fun ep => 
-      let sortedArgs := nonQuantSort ep.rargs
-      let argsStr := String.intercalate ", " (sortedArgs.map (fun a => toString a.2))
-      let predName := normalizedPredName ep.predicate
-      let nameArg := if ep.predicate == "named" && Option.isSome ep.carg
-                     then s!", {Option.get! ep.carg}"
-                     else ""
-      s!"{predName}({argsStr}{nameArg})"))
+    dbg_trace ("properQ1 args: " ++ toString pat.properQ1.rargs)
+    dbg_trace ("properQ2 args: " ++ toString pat.properQ2.rargs)
+    dbg_trace ("Found ARG0s: " ++ toString x1 ++ ", " ++ toString x2)
+    dbg_trace ("Found BODYs: " ++ toString b1 ++ ", " ++ toString b2)
     
-    let quantStr := quantPreds.foldl (fun acc ep =>
-      if ep.predicate.endsWith "_q" then
-        match insertionSort ep.rargs with 
-        | (_, var) :: (_, rstr) :: (_, body) :: _ =>
-          let (nestedRstr, nestedBody) := expandQuantifier hm var rstr body
-          let predName := normalizedPredName ep.predicate
-          let quantStr := s!"?[{var}]:(({nestedRstr}) & {nestedBody})"
-          if acc == "" then quantStr else acc ++ " & " ++ quantStr
+    match x1, x2, b1, b2 with
+    | some (_, var1), some (_, var2), some (_, body1), some (_, body2) =>
+      some (EP.mk "temp_compound_name" none parent
+        [("X1", var1), ("X2", var2), ("A", body1), ("B", body2)]
+        (some ("\"" ++ removeExtraQuotes s1 ++ " " ++ removeExtraQuotes s2 ++ "\"")))
+    | _, _, _, _ => none
+  | _, _ => none)
+
+def phase1 (parent : Var) (preds : List EP) (hm : Multimap Var EP) : (List EP × EliminatedVars) :=
+  let compounds := preds.filter fun p => 
+    p.predicate == "compound" || p.predicate == "_compound"
+  dbg_trace ("Found compounds: " ++ toString compounds)
+  
+  let patterns := compounds.filterMap (fun c => getCompoundPattern preds c hm)
+  dbg_trace ("Found patterns: " ++ toString patterns)
+  dbg_trace ("Found pattern handles: " ++ toString (patterns.map (fun p => p.compound.label)))
+
+  -- First create temps with no variables eliminated  
+  let temps := patterns.filterMap (makeTemp parent EliminatedVars.empty)
+  dbg_trace ("Created temp compounds: " ++ toString temps)
+
+  -- Then track variables eliminated by successful transformations
+  let eliminatedVars := collectEliminatedVars $
+    patterns.filter (fun p => temps.any (fun t => t.predicate == "temp_compound_name"))
+    |>.map (fun p => p.compound)
+  
+  let remaining := preds.filter fun p =>
+    not (patterns.any (shouldRemove p))
+  
+  dbg_trace ("Remaining predicates: " ++ toString remaining)
+  
+  (remaining ++ temps, eliminatedVars)
+
+def phase2 (parent : Var) (handle : Var) (preds : List EP) (ev : EliminatedVars) (hm : Multimap Var EP) : Option Formula := 
+  match hm.find? handle with 
+  | none => unreachable!
+  | some rootPreds => 
+    dbg_trace ("phase2 starting at handle " ++ toString handle)
+    dbg_trace ("  root predicates: " ++ toString rootPreds)
+    -- First collect all substitutions from temp_compound_name predicates
+    let substitutions := preds.foldl (fun acc ep =>
+      if ep.predicate == "temp_compound_name" then
+        match (getArg ep "X1", getArg ep "X2") with
+        | (some x1, some x2) => (x2, x1) :: acc
         | _ => acc
-      else if normalized ep == "neg" || normalized ep == "never_a_1" then
-        match ep.rargs.find? (fun arg => arg.2.sort == 'h') with
-        | some (_, handleArg) =>
-          let (rstrExpanded, _) := expandQuantifier hm ep.label handleArg handleArg
-          let negStr := s!"~({rstrExpanded})"
-          if acc == "" then negStr else acc ++ " & " ++ negStr
-        | _ => acc
-      else acc) ""
-    
-    if quantStr == "" then nonQuantStr 
-    else if nonQuantStr == "" then quantStr
-    else nonQuantStr ++ " & " ++ quantStr
+      else acc) []
+    dbg_trace s!"Collected substitutions: {substitutions}"
+    -- Then process predicates normally
+    let emptyStats : Stats := default
+    let (result, _) := processPredicates parent rootPreds [] hm emptyStats ev
+    -- Finally apply all substitutions to the result
+    match result with
+    | none => none
+    | some formula =>
+      some (substitutions.foldl (fun f (old, new) => f.substitute old new) formula)
+      |>.map Formula.removeEmptyConj
 
-  match (hm.find? rstr, hm.find? body) with
-  | (some rstrPreds, some bodyPreds) =>
-    (processPredicates rstrPreds, processPredicates bodyPreds)
-  | _ => ("", "")
+def phase3 (f : Formula) : Formula := 
+  minimizeScoping f
 
-/-- Phase 1: Convert compound names to temporary predicates -/
-def phase1 (preds : List EP) (hm : Multimap Var EP) : List EP :=
-  let foundMatches := findCompoundMatches preds
+def phase4 (f : Formula) : String :=
+  formatAsPWL f
 
-  let processMatch (m : CompoundMatch) : EP :=
-    let s1_clean := if m.name1.startsWith "\"" then String.dropRight (String.drop m.name1 1) 1 else m.name1
-    let s2_clean := if m.name2.startsWith "\"" then String.dropRight (String.drop m.name2 1) 1 else m.name2
-    EP.mk "temp_compound_name" none m.var1
-      [("ARG1", m.var1), ("ARG2", m.var2), ("RSTR", m.rstr), ("BODY", m.body)]
-      (some s!"\"{s2_clean} {s1_clean}\"")
+def updateHandleMap (preds : List EP) : Multimap Var EP :=
+  preds.foldl (fun hm ep => hm.insert ep.label ep) Multimap.empty
 
-  let temp_compounds := foundMatches.map processMatch
-  let remaining := preds.filter (fun p => 
-    p.predicate != "compound" &&
-    not (foundMatches.any fun m =>
-      (p.predicate == "named" && matchArg p.rargs "ARG0" m.var1) ||
-      (p.predicate == "proper_q" && matchArg p.rargs "ARG0" m.var1) ||
-      (p.predicate == "named" && matchArg p.rargs "ARG0" m.var2) ||
-      (p.predicate == "proper_q" && matchArg p.rargs "ARG0" m.var2)))
+def transform (handle : Var) (preds : List EP) (hm : Multimap Var EP) : String :=
+  let msg := "Transform - Starting with handle " ++ toString handle ++
+             "\nPreds count: " ++ toString preds.length ++
+             "\nHandle map size: " ++ toString hm.keys.length
+  dbg_trace msg
+  
+  let (p1preds, ev) := phase1 handle preds hm
+  dbg_trace ("After phase1, updating handle map with temp compounds")
+  let newHm := updateHandleMap p1preds 
+  dbg_trace ("  new handle map size: " ++ toString newHm.keys.length)
+  
+  match phase2 handle handle p1preds ev newHm with
+  | none => "!!! NO FORMULA GENERATED !!!"
+  | some formula => 
+      let minScoped := phase3 formula
+      phase4 minScoped
 
-  remaining ++ temp_compounds
+end PWL.Transform 
 
-/-- Phase 2: Build the PWL formula from predicates -/
-def phase2 (preds : List EP) (hm : Multimap Var EP) : TransformResult :=
-  let init : TransformResult := {quants := [], eqs := [], vars := []}
-  preds.foldl (fun res ep =>
-    if ep.predicate == "temp_compound_name" then
-      match (ep.rargs.find? (fun x => x.1 == "ARG1"),
-             ep.rargs.find? (fun x => x.1 == "ARG2"),
-             ep.rargs.find? (fun x => x.1 == "RSTR"),
-             ep.rargs.find? (fun x => x.1 == "BODY"),
-             ep.carg) with
-      | (some (_, var1), some (_, var2), some (_, rstr), some (_, body), some name) =>
-        { res with 
-          quants := PWLQuantifier.proper_q var1 name :: res.quants,
-          eqs := (var1, var2) :: res.eqs,
-          vars := var1 :: var2 :: res.vars }
-      | _ => res
-    else if ep.predicate == "proper_q" then
-      match (getArg ep "ARG0", getArg ep "RSTR", getArg ep "BODY", ep.carg) with
-      | (some var, some rstr, some body, some name) =>
-        { res with
-          quants := PWLQuantifier.proper_q var name :: res.quants,
-          vars := var :: res.vars }
-      | (some var, some rstr, some body, none) =>
-        match hm.find? rstr with
-        | some [namedEP] =>
-          if namedEP.predicate == "named" && Option.isSome namedEP.carg then
-            { res with
-              quants := PWLQuantifier.proper_q var (Option.get! namedEP.carg) :: res.quants,
-              vars := var :: res.vars }
-          else res
-        | _ => res
-      | _ => res
-    else if ep.predicate.endsWith "_q" then
-      match insertionSort ep.rargs with
-      | (_, var) :: (_, rstr) :: (_, body) :: _ =>
-        let (rstrExpanded, bodyExpanded) := expandQuantifier hm var rstr body
-        let predName := normalizedPredName ep.predicate
-        if ["some_q", "a_q", "udef_q", "pronoun_q"].contains predName then
-          { res with
-            quants := PWLQuantifier.indefinite_q predName var rstrExpanded bodyExpanded :: res.quants,
-            vars := var :: res.vars }
-        else if ["the_q", "def_explicit_q"].contains predName then
-          { res with
-            quants := PWLQuantifier.definite_q predName var rstrExpanded bodyExpanded :: res.quants,
-            vars := var :: res.vars }
-        else
-          { res with
-            quants := PWLQuantifier.other_q predName var rstrExpanded bodyExpanded :: res.quants,
-            vars := var :: res.vars }
-      | _ => res
-    else res) init
-
-/-- Main transform function that applies phase1 and phase2 and formats the result -/
-def transform (preds : List EP) (hm : Multimap Var EP) : String := 
-  let phase1Result := phase1 preds hm
-  let transformResult := phase2 phase1Result hm
-  formatToSurface transformResult
-
-end PWL.Transform
+export PWL.Transform (transform)

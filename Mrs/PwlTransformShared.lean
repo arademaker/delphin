@@ -1,48 +1,130 @@
 import Mrs.Basic
+import Mrs.PwlTypes
+import Mrs.PwlVarFormat
+import Util.InsertionSort
 
 namespace PWL.Transform
 
-open MRS (Var EP Constraint MRS)
+open MRS (EP Var)
+open InsertionSort
 
-/-- Represents the different types of logical quantifiers and operators in the PWL format -/
-inductive PWLQuantifier where
-  | proper_q : Var → String → PWLQuantifier            -- var, name
-  | indefinite_q : String → Var → String → String → PWLQuantifier  -- predname (some_q/a_q/udef_q/pronoun_q), var, expanded_rstr, expanded_body
-  | definite_q : String → Var → String → String → PWLQuantifier   -- predname (the_q/def_explicit_q), var, expanded_rstr, expanded_body
-  | other_q : String → Var → String → String → PWLQuantifier  -- predname (no_q/every_q), var, expanded_rstr, expanded_body
-  | negation : String → String → PWLQuantifier  -- predname (neg/never_a_1), expanded_body
-  deriving BEq, Inhabited
-
-/-- Collects the results of transforming predicates into PWL format -/
-structure TransformResult where
-  quants : List PWLQuantifier    -- List of transformed quantifiers
-  eqs : List (Var × Var)        -- List of variable equalities
-  vars : List Var               -- List of variables in scope
+inductive Formula : Type where
+  | atom : EP → Formula
+  | conj : List Formula → Formula 
+  | scope : List Var → Option String → Formula → Formula
   deriving Inhabited
 
-/-- Builds nested quantifier expressions with proper variable scoping -/
-partial def buildNested (remaining : List (List Var × String)) (seenVars : List Var) : String :=
-  match remaining with
-  | [] => ""
-  | exprs =>
-    let foundPair := List.find? (fun pair => 
-      let vars := pair.1
-      let newVars := vars.filter (fun v => !seenVars.contains v)
-      newVars.length ≤ 1) exprs
+mutual
+  partial def formulaToString : Formula → String
+    | Formula.atom ep => toString ep
+    | Formula.conj fs => "(" ++ listFormulaToString fs ++ ")"
+    | Formula.scope vars none inner => s!"?[{vars}]: {formulaToString inner}"
+    | Formula.scope vars (some q) inner => s!"?[{vars}]: /* {q} */ {formulaToString inner}"
 
-    match foundPair with
-    | none => ""
-    | some expr =>
-      let vars := expr.1
-      let exprStr := expr.2
-      let newVars := vars.filter (fun v => !seenVars.contains v)
-      let restExprs := exprs.filter (fun x => x != expr)
-      let connector := if restExprs.isEmpty then "" else " &\n  "
-      match newVars with
-      | [] => exprStr ++ connector ++ buildNested restExprs seenVars
-      | [v] => s!"?[{v}]:(" ++ exprStr ++ connector ++ buildNested restExprs (v :: seenVars) ++ ")"
-      | _ => ""
+  partial def listFormulaToString : List Formula → String
+    | [] => ""
+    | [f] => formulaToString f 
+    | f :: fs => formulaToString f ++ " & " ++ listFormulaToString fs
+end
+
+instance : ToString Formula where
+  toString := formulaToString
+
+instance : ToString (List Formula) where
+  toString fs := "[" ++ String.intercalate ", " (fs.map formulaToString) ++ "]"
+
+def Formula.isAtom : Formula → Bool
+  | atom _ => true 
+  | _ => false
+
+def Formula.isConj : Formula → Bool 
+  | conj _ => true
+  | _ => false
+
+def Formula.hasScope : Formula → Bool
+  | scope _ _ _ => true
+  | _ => false
+
+def Formula.getScopedFormula : Formula → Option Formula
+  | scope _ _ f => some f
+  | _ => none
+
+def Formula.getScopeVars : Formula → Option (List Var)
+  | scope vs _ _ => some vs
+  | _ => none
+
+def Formula.isEmptyConj : Formula → Bool
+  | conj [] => true
+  | conj [f] => f.isEmptyConj
+  | _ => false
+
+partial def Formula.removeEmptyConj : Formula → Formula
+  | atom ep => atom ep
+  | conj [] => conj []  
+  | conj [f] => f.removeEmptyConj
+  | conj fs =>
+    let nonEmpty := fs.filter (fun f => !f.isEmptyConj)
+    match nonEmpty with
+    | [] => conj []
+    | [f] => f.removeEmptyConj
+    | fs => conj (fs.map Formula.removeEmptyConj)
+  | scope vars quant inner => 
+    scope vars quant (inner.removeEmptyConj)
+
+private def substituteVar (old new : Var) (args : List (String × Var)) : List (String × Var) :=
+  dbg_trace s!"substituteVar old:{old} new:{new} args:{args}"
+  args.map fun (name, var) => 
+    let res := if var == old then (name, new) else (name, var)
+    dbg_trace s!"  {name}: {var} => {res.2}"
+    res
+
+partial def Formula.substitute (old new : Var) : Formula → Formula
+  | atom ep => 
+    dbg_trace s!"substitute in atom EP {ep.predicate}, args: {ep.rargs}"
+    let newArgs := substituteVar old new ep.rargs
+    dbg_trace s!"  after substitution: {newArgs}"
+    atom { ep with rargs := newArgs }
+  | conj fs => 
+    dbg_trace "substitute in conj"
+    conj (fs.map (Formula.substitute old new))
+  | scope vars quant inner => 
+    dbg_trace s!"substitute in scope: vars {vars}"
+    let newVars := vars.map fun v => if v == old then new else v
+    dbg_trace s!"  after var substitution: {newVars}"
+    scope newVars quant (inner.substitute old new)
+
+def removeExtraQuotes (s : String) : String :=
+  if s.startsWith "\"" && s.endsWith "\"" then s.extract ⟨1⟩ ⟨s.length - 1⟩ else s
+
+def normalizedPredName (predicate : String) : String :=
+  if predicate.startsWith "_" then predicate.drop 1 else predicate
+
+def joinSep (l : List String) (sep : String) : String := 
+  l.foldr (fun s r => (if r == "" then s else r ++ sep ++ s)) ""
+
+def joinComma (l : List String) : String := 
+  joinSep l ","
+
+def reformQuotedPair (s : String) : String :=
+  let parts := String.split s (· == ' ')
+  let unquoted := parts.map removeExtraQuotes
+  "\"" ++ " ".intercalate unquoted ++ "\""
+
+def getArg (ep : EP) (name : String) : Option Var :=
+  ep.rargs.find? (fun r => r.1 == name)
+  |>.map (fun r => r.2)
+
+def orderArgs (args : List (String × Var)) : List (String × Var) :=
+  args.filter (fun a => a.1.startsWith "ARG") |> insertionSort
+
+def getOrderedQuantArgs (args : List (String × Var)) : Option (Var × Var × Var) :=
+  let arg0 := args.find? (fun p => p.1 == "ARG0")
+  let rstr := args.find? (fun p => p.1 == "RSTR")
+  let body := args.find? (fun p => p.1 == "BODY") 
+  match arg0, rstr, body with 
+  | some (_, a), some (_, r), some (_, b) => some (a, r, b)
+  | _, _, _ => none
 
 end PWL.Transform
 
-export PWL.Transform (PWLQuantifier TransformResult buildNested)
+export PWL.Transform (normalizedPredName joinSep joinComma reformQuotedPair getArg orderArgs getOrderedQuantArgs)
