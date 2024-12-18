@@ -8,6 +8,17 @@ https://github.com/delph-in/docs/wiki. The short-term goal is to port
 enough of PyDelphin to allow the port of
 http://github.com/ibm/MRS-Logic to Lean.
 
+Build with 
+
+```
+lake build
+```
+
+Run with
+```
+./runit
+```
+
 ## Team
 
 - Alexandre Rademaker
