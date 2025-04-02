@@ -12,6 +12,8 @@ open Lean
 namespace MRS
 open Std.Format
 
+/- variables -/
+
 structure Var where
  id    : Nat
  sort  : Char
@@ -29,13 +31,15 @@ def Var.toSimple (v : Var) : Std.Format :=
   let c := [f!"{v.sort}"]
   if a.isEmpty then p
   else
-   group (p ++ text " " ++ (bracket "[ " (joinSep (c ++ a) .line) " ]"))
+   group (p ++ " " ++ (bracket "[ " (joinSep (c ++ a) .line) " ]"))
 
 instance : Repr Var where
  reprPrec v _ := v.toSimple
 
 instance : ToFormat Var where
  format v := v.toSimple
+
+/- constraints: hcons and icons -/
 
 structure Constraint where
   rel : String
@@ -53,6 +57,8 @@ instance : Repr Constraint where
  reprPrec c _ := f!"{c}"
 
 
+/- Elementary Predications -/
+
 structure EP where
   predicate : String
   link  : Option (Int × Int)
@@ -61,7 +67,6 @@ structure EP where
   carg  : Option String
  deriving BEq
 
-/- pretty printer -/
 
 def priority (s : String) : Nat :=
  (priorities.find? s).getD 50
@@ -81,8 +86,7 @@ def EP.toSimple' (e : EP) : Format :=
 
 #eval Var.mk 0 'h' #[("PERS","3"),("NUM","sg"),("IND","+")]
 #eval Var.mk 0 'h' #[]
-
-#eval (EP.mk "teste" (some (1,2)) (Var.mk 0 'h' #[]) [] none).toSimple'
+#eval (EP.mk "teste" (some (1,2)) (Var.mk 0 'h' #[("PERS", "3")]) [] none).toSimple'
 
 def EP.toSimple : EP → Format
   | {predicate := p, link := some (n,m), label := l, rargs := rs, carg := some c} =>
